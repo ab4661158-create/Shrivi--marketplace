@@ -36,7 +36,9 @@ app.use(
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
-
+app.get("/shop", (req, res) => {
+  res.sendFile(path.join(__dirname, "customer.html"));
+});
 // Login
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body || {};
