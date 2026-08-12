@@ -1,145 +1,299 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shrivi Marketplace - Admin</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-    }
+    <title>Shrivi Marketplace - Admin</title>
 
-    header {
-      background: #111;
-      color: white;
-      text-align: center;
-      padding: 20px;
-    }
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
 
-    .container {
-      max-width: 900px;
-      margin: 30px auto;
-      padding: 20px;
-    }
+        header {
+            background: #111;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
 
-    .card {
-      background: white;
-      padding: 25px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px #ddd;
-    }
+        header h1 {
+            margin: 0;
+        }
 
-    input,
-    button {
-      width: 100%;
-      padding: 13px;
-      margin-top: 10px;
-      box-sizing: border-box;
-    }
+        header p {
+            margin: 8px 0 0;
+        }
 
-    button {
-      background: #111;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
+        .container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
 
-    button:hover {
-      background: #333;
-    }
+        .card {
+            background: white;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px #ddd;
+        }
 
-    #dashboard {
-      display: none;
-    }
+        input,
+        button {
+            width: 100%;
+            padding: 13px;
+            margin-top: 10px;
+            box-sizing: border-box;
+        }
 
-    #message {
-      font-weight: bold;
-    }
-  </style>
+        button {
+            background: #111;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #333;
+        }
+
+        #dashboard {
+            display: none;
+        }
+
+        #message {
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat {
+            background: #f5f5f5;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .stat h3 {
+            margin: 0 0 10px;
+        }
+
+        .stat p {
+            font-size: 25px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 12px;
+                margin: 15px auto;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
 <header>
-  <h1>SHRIVI</h1>
-  <p>Marketplace Admin Panel</p>
+    <h1>SHRIVI</h1>
+    <p>Marketplace Admin Panel</p>
 </header>
 
 <div class="container">
 
-  <div class="card">
-    <h2>Admin Login</h2>
+    <!-- LOGIN -->
+    <div class="card" id="loginCard">
+        <h2>Admin Login</h2>
 
-    <input
-      type="text"
-      id="username"
-      placeholder="Username"
-    >
+        <input
+            type="text"
+            id="username"
+            placeholder="Username"
+            autocomplete="username"
+        >
 
-    <input
-      type="password"
-      id="password"
-      placeholder="Password"
-    >
+        <input
+            type="password"
+            id="password"
+            placeholder="Password"
+            autocomplete="current-password"
+        >
 
-    <button onclick="login()">Login</button>
+        <button onclick="login()">Login</button>
 
-    <p id="message"></p>
-  </div>
+        <p id="message"></p>
+    </div>
 
-  <div class="card" id="dashboard">
 
-    <h2>Dashboard</h2>
+    <!-- DASHBOARD -->
+    <div class="card" id="dashboard">
 
-    <p>Welcome to Shrivi Marketplace Admin.</p>
+        <h2>Dashboard</h2>
 
-    <button onclick="logout()">Logout</button>
+        <p>
+            Welcome to Shrivi Marketplace Admin Panel.
+        </p>
 
-  </div>
+        <div class="stats">
+
+            <div class="stat">
+                <h3>Products</h3>
+                <p id="products">-</p>
+            </div>
+
+            <div class="stat">
+                <h3>Orders</h3>
+                <p id="orders">-</p>
+            </div>
+
+            <div class="stat">
+                <h3>Sellers</h3>
+                <p id="sellers">-</p>
+            </div>
+
+        </div>
+
+        <button onclick="logout()">Logout</button>
+
+    </div>
 
 </div>
 
+
 <script>
 
-function login() {
+async function login() {
 
-  const username =
-    document.getElementById("username").value;
+    const username =
+        document.getElementById("username").value.trim();
 
-  const password =
-    document.getElementById("password").value;
+    const password =
+        document.getElementById("password").value;
 
-  if (
-    username === "admin" &&
-    password === "Shrivi@123"
-  ) {
+    const message =
+        document.getElementById("message");
 
-    document.getElementById("message").innerText =
-      "Login successful!";
+    if (!username || !password) {
+        message.innerText = "Username and password required.";
+        return;
+    }
 
-    document.getElementById("dashboard").style.display =
-      "block";
+    try {
 
-  } else {
+        const response = await fetch("/api/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                username: username,
+                password: password
+            })
+        });
 
-    document.getElementById("message").innerText =
-      "Wrong username or password.";
+        const data = await response.json();
 
-  }
+        if (response.ok && data.ok) {
+
+            message.innerText = "Login successful!";
+
+            document.getElementById("loginCard").style.display =
+                "none";
+
+            document.getElementById("dashboard").style.display =
+                "block";
+
+            loadDashboard();
+
+        } else {
+
+            message.innerText =
+                data.error || "Wrong username or password.";
+
+        }
+
+    } catch (error) {
+
+        message.innerText =
+            "Server connection failed.";
+
+    }
 }
 
-function logout() {
 
-  document.getElementById("dashboard").style.display =
-    "none";
+async function loadDashboard() {
 
-  document.getElementById("message").innerText = "";
+    try {
+
+        const response =
+            await fetch("/api/dashboard");
+
+        if (!response.ok) {
+            return;
+        }
+
+        const data =
+            await response.json();
+
+        document.getElementById("products").innerText =
+            data.products ?? 0;
+
+        document.getElementById("orders").innerText =
+            data.orders ?? 0;
+
+        document.getElementById("sellers").innerText =
+            data.sellers ?? 0;
+
+    } catch (error) {
+
+        console.log("Dashboard error:", error);
+
+    }
+}
+
+
+async function logout() {
+
+    try {
+
+        await fetch("/api/logout", {
+            method: "POST"
+        });
+
+    } catch (error) {
+
+        console.log("Logout error:", error);
+
+    }
+
+    document.getElementById("dashboard").style.display =
+        "none";
+
+    document.getElementById("loginCard").style.display =
+        "block";
+
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+
+    document.getElementById("message").innerText =
+        "Logged out.";
 
 }
 
