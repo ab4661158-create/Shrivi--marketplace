@@ -4,54 +4,50 @@ const bcrypt = require("bcryptjs");
 const path = require("path");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_HASH =
-  process.env.ADMIN_HASH || bcrypt.hashSync("CHANGE_ME", 12);
+// FIXED LOGIN
+const ADMIN_USER = "admin";
+const ADMIN_PASSWORD = "Shrivi@2026";
 
-const SESSION_SECRET =
-  process.env.SESSION_SECRET || "CHANGE_THIS_SECRET";
+let ADMIN_HASH;
+
+(async () => {
+  ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
+})();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 app.use(
   session({
-    secret: SESSION_SECRET,
+    secret: process.env.SESSION_SECRET || "shrivi-session-secret-2026",
     resave: false,
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
       secure: process.env.NODE_ENV === "production",
-      maxAge: 8 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000
     }
   })
 );
 
-app.use(express.static(path.join(__dirname, "public")));
+// Admin page
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
-function auth(req, res, next) {
-  if (req.session.admin) {
-    return next();
-  }
 
-  res.status(401).json({
-    error: "Unauthorized"
-  });
-}
-
+// Login
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body || {};
 
   if (
     username === ADMIN_USER &&
-    await bcrypt.compare(password, ADMIN_HASH)
+    ADMIN_HASH &&
+    (await bcrypt.compare(password || "", ADMIN_HASH))
   ) {
     req.session.admin = {
-      username
+      username: ADMIN_USER
     };
 
     return res.json({
@@ -59,11 +55,12 @@ app.post("/api/login", async (req, res) => {
     });
   }
 
-  res.status(401).json({
+  return res.status(401).json({
     error: "Invalid username or password"
   });
 });
 
+// Logout
 app.post("/api/logout", (req, res) => {
   req.session.destroy(() => {
     res.json({
@@ -72,21 +69,21 @@ app.post("/api/logout", (req, res) => {
   });
 });
 
+// Check login
 app.get("/api/me", (req, res) => {
-  res.json({
-    loggedIn: !!req.session.admin,
-    username: req.session.admin?.username || null
+  if (req.session.admin) {
+    return res.json({
+      loggedIn: true,
+      username: req.session.admin.username
+    });
+  }
+
+  res.status(401).json({
+    loggedIn: false
   });
 });
 
-app.get("/api/dashboard", auth, (req, res) => {
-  res.json({
-    products: 4,
-    orders: 0,
-    sellers: 0
-  });
-});
-
+// Start server
 app.listen(PORT, () => {
-  console.log("Shrivi running on port " + PORT);
+  console.log(`SHRIVI server running on port ${PORT}`);
 });
