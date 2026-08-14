@@ -7,7 +7,6 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -15,13 +14,11 @@ const pool = new Pool({
   }
 });
 
-// Admin credentials
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 let ADMIN_HASH = null;
 
-// Create admin password hash
 (async () => {
   if (!ADMIN_PASSWORD) {
     console.error("ADMIN_PASSWORD environment variable is missing");
@@ -35,7 +32,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
 
-// Session
 app.use(
   session({
     secret:
@@ -104,9 +100,10 @@ app.post("/api/login", async (req, res) => {
       });
     }
 
-    return res.status(401).json({
+    res.status(401).json({
       error: "Invalid username or password"
     });
+
   } catch (error) {
     console.error("Login error:", error);
 
@@ -166,10 +163,9 @@ function requireAdmin(req, res, next) {
 }
 
 // =========================
-// PRODUCT API
+// PRODUCTS
 // =========================
 
-// Get all products
 app.get("/api/products", async (req, res) => {
   try {
     const result = await pool.query(
@@ -177,6 +173,7 @@ app.get("/api/products", async (req, res) => {
     );
 
     res.json(result.rows);
+
   } catch (error) {
     console.error("Products fetch error:", error);
 
@@ -186,7 +183,6 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
-// Add product - Admin only
 app.post("/api/products", requireAdmin, async (req, res) => {
   try {
     const {
@@ -221,6 +217,7 @@ app.post("/api/products", requireAdmin, async (req, res) => {
       ok: true,
       product: result.rows[0]
     });
+
   } catch (error) {
     console.error("Product add error:", error);
 
@@ -231,10 +228,86 @@ app.post("/api/products", requireAdmin, async (req, res) => {
 });
 
 // =========================
+// CREATE ORDER
+// =========================
+
+app.post("/api/orders", async (req, res) => {
+  try {
+    const {
+      customer_name,
+      customer_phone,
+      customer_address,
+      items,
+      total
+    } = req.body || {};
+
+    if (
+      !customer_name ||
+      !customer_phone ||
+      !customer_address ||
+      !Array.isArray(items) ||
+      items.length === 0
+    ) {
+      return res.status(400).json({
+        error: "Customer details and cart items are required"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO orders
+       (customer_name, customer_phone, customer_address, items, total)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        customer_name,
+        customer_phone,
+        customer_address,
+        JSON.stringify(items),
+        Number(total) || 0
+      ]
+    );
+
+    res.status(201).json({
+      ok: true,
+      order: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("Order create error:", error);
+
+    res.status(500).json({
+      error: "Failed to create order"
+    });
+  }
+});
+
+// =========================
+// ADMIN ORDERS
+// =========================
+
+app.get("/api/orders", requireAdmin, async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM orders ORDER BY id DESC"
+    );
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error("Orders fetch error:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch orders"
+    });
+  }
+});
+
+// =========================
 // DATABASE TABLES
 // =========================
 
 async function initializeDatabase() {
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
       id SERIAL PRIMARY KEY,
@@ -256,6 +329,28 @@ async function initializeDatabase() {
     )
   `);
 
+  // Safe updates for existing orders table
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS customer_name TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS customer_phone TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS customer_address TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS items JSONB
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS sellers (
       id SERIAL PRIMARY KEY,
@@ -274,6 +369,7 @@ async function initializeDatabase() {
 
 app.get("/api/dashboard", requireAdmin, async (req, res) => {
   try {
+
     const products = await pool.query(
       "SELECT COUNT(*) AS count FROM products"
     );
@@ -286,16 +382,14 @@ app.get("/api/dashboard", requireAdmin, async (req, res) => {
       "SELECT COUNT(*) AS count FROM sellers"
     );
 
-    const result = {
+    res.json({
       products: Number(products.rows[0].count),
       orders: Number(orders.rows[0].count),
       sellers: Number(sellers.rows[0].count)
-    };
+    });
 
-    console.log("Dashboard data:", result);
-
-    res.json(result);
   } catch (error) {
+
     console.error("Dashboard error:", error);
 
     res.status(500).json({
@@ -309,7 +403,9 @@ app.get("/api/dashboard", requireAdmin, async (req, res) => {
 // =========================
 
 async function startDatabase() {
+
   try {
+
     await pool.query("SELECT NOW()");
 
     console.log(
@@ -317,7 +413,9 @@ async function startDatabase() {
     );
 
     await initializeDatabase();
+
   } catch (error) {
+
     console.error(
       "PostgreSQL connection error:",
       error.message
