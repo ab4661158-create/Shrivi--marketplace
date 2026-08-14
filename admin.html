@@ -43,11 +43,18 @@
         }
 
         input,
+        textarea,
         button {
             width: 100%;
             padding: 13px;
             margin-top: 10px;
             box-sizing: border-box;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: Arial, sans-serif;
         }
 
         button {
@@ -67,7 +74,8 @@
             display: none;
         }
 
-        #message {
+        #message,
+        #productMessage {
             font-weight: bold;
             margin-top: 15px;
         }
@@ -96,6 +104,12 @@
             font-weight: bold;
         }
 
+        .product-card {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 12px;
@@ -120,6 +134,7 @@
 
     <!-- LOGIN -->
     <div class="card" id="loginCard">
+
         <h2>Admin Login</h2>
 
         <input
@@ -139,6 +154,7 @@
         <button onclick="login()">Login</button>
 
         <p id="message"></p>
+
     </div>
 
 
@@ -170,6 +186,52 @@
 
         </div>
 
+
+        <!-- ADD PRODUCT -->
+        <div class="product-card">
+
+            <h2>Add Product</h2>
+
+            <input
+                type="text"
+                id="productName"
+                placeholder="Product Name"
+            >
+
+            <input
+                type="number"
+                id="productPrice"
+                placeholder="Price"
+                min="0"
+                step="0.01"
+            >
+
+            <input
+                type="text"
+                id="productCategory"
+                placeholder="Category"
+            >
+
+            <input
+                type="url"
+                id="productImage"
+                placeholder="Product Image URL"
+            >
+
+            <textarea
+                id="productDescription"
+                placeholder="Product Description"
+            ></textarea>
+
+            <button onclick="addProduct()">
+                Add Product
+            </button>
+
+            <p id="productMessage"></p>
+
+        </div>
+
+
         <button onclick="logout()">Logout</button>
 
     </div>
@@ -191,7 +253,8 @@ async function login() {
         document.getElementById("message");
 
     if (!username || !password) {
-        message.innerText = "Username and password required.";
+        message.innerText =
+            "Username and password required.";
         return;
     }
 
@@ -212,7 +275,8 @@ async function login() {
 
         if (response.ok && data.ok) {
 
-            message.innerText = "Login successful!";
+            message.innerText =
+                "Login successful!";
 
             document.getElementById("loginCard").style.display =
                 "none";
@@ -230,6 +294,8 @@ async function login() {
         }
 
     } catch (error) {
+
+        console.error("Login error:", error);
 
         message.innerText =
             "Server connection failed.";
@@ -269,6 +335,113 @@ async function loadDashboard() {
 }
 
 
+// =========================
+// ADD PRODUCT
+// =========================
+
+async function addProduct() {
+
+    const productMessage =
+        document.getElementById("productMessage");
+
+    const name =
+        document.getElementById("productName").value.trim();
+
+    const price =
+        document.getElementById("productPrice").value;
+
+    const category =
+        document.getElementById("productCategory").value.trim();
+
+    const image =
+        document.getElementById("productImage").value.trim();
+
+    const description =
+        document.getElementById("productDescription").value.trim();
+
+
+    if (!name || price === "") {
+
+        productMessage.innerText =
+            "Product name and price are required.";
+
+        return;
+    }
+
+
+    productMessage.innerText =
+        "Adding product...";
+
+
+    try {
+
+        const response = await fetch("/api/products", {
+
+            method: "POST",
+
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+                name: name,
+                price: Number(price),
+                category: category,
+                image: image,
+                description: description
+
+            })
+
+        });
+
+
+        const data =
+            await response.json();
+
+
+        if (response.ok && data.ok) {
+
+            productMessage.innerText =
+                "Product added successfully!";
+
+
+            document.getElementById("productName").value =
+                "";
+
+            document.getElementById("productPrice").value =
+                "";
+
+            document.getElementById("productCategory").value =
+                "";
+
+            document.getElementById("productImage").value =
+                "";
+
+            document.getElementById("productDescription").value =
+                "";
+
+
+            loadDashboard();
+
+        } else {
+
+            productMessage.innerText =
+                data.error || "Failed to add product.";
+
+        }
+
+    } catch (error) {
+
+        console.error("Add product error:", error);
+
+        productMessage.innerText =
+            "Server connection failed.";
+
+    }
+}
+
+
 async function logout() {
 
     try {
@@ -289,8 +462,11 @@ async function logout() {
     document.getElementById("loginCard").style.display =
         "block";
 
-    document.getElementById("username").value = "";
-    document.getElementById("password").value = "";
+    document.getElementById("username").value =
+        "";
+
+    document.getElementById("password").value =
+        "";
 
     document.getElementById("message").innerText =
         "Logged out.";
