@@ -15,7 +15,7 @@ const pool = new Pool({
   }
 });
 
-// FIXED LOGIN
+// Admin login
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
@@ -32,9 +32,11 @@ let ADMIN_HASH;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Session
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "shrivi-session-secret-2026",
+    secret:
+      process.env.SESSION_SECRET || "shrivi-session-secret-2026",
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -45,12 +47,11 @@ app.use(
   })
 );
 
-// Admin page
+// Pages
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
 
-// Customer shop
 app.get("/shop", (req, res) => {
   res.sendFile(path.join(__dirname, "customer.html"));
 });
@@ -101,14 +102,93 @@ app.get("/api/me", (req, res) => {
   });
 });
 
-// PostgreSQL connection test
+// Admin authentication middleware
+function requireAdmin(req, res, next) {
+  if (!req.session.admin) {
+    return res.status(401).json({
+      error: "Admin login required"
+    });
+  }
+
+  next();
+}
+
+// Create database tables
+async function initializeDatabase() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      price NUMERIC(10,2) NOT NULL DEFAULT 0,
+      category TEXT,
+      image TEXT,
+      description TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      status TEXT DEFAULT 'pending',
+      total NUMERIC(10,2) DEFAULT 0,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sellers (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  console.log("SHRIVI database tables ready");
+}
+
+// Dashboard statistics
+app.get("/api/dashboard", requireAdmin, async (req, res) => {
+  try {
+    const productsResult = await pool.query(
+      "SELECT COUNT(*) FROM products"
+    );
+
+    const ordersResult = await pool.query(
+      "SELECT COUNT(*) FROM orders"
+    );
+
+    const sellersResult = await pool.query(
+      "SELECT COUNT(*) FROM sellers"
+    );
+
+    res.json({
+      products: Number(productsResult.rows[0].count),
+      orders: Number(ordersResult.rows[0].count),
+      sellers: Number(sellersResult.rows[0].count)
+    });
+  } catch (error) {
+    console.error("Dashboard error:", error);
+
+    res.status(500).json({
+      error: "Database error"
+    });
+  }
+});
+
+// Test PostgreSQL connection
 pool
   .query("SELECT NOW()")
   .then(() => {
     console.log("SHRIVI PostgreSQL connected successfully");
+    return initializeDatabase();
   })
-  .catch((err) => {
-    console.error("PostgreSQL connection error:", err.message);
+  .catch((error) => {
+    console.error(
+      "PostgreSQL connection error:",
+      error.message
+    );
   });
 
 // Start server
