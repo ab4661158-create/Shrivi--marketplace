@@ -2,9 +2,18 @@ const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
 const path = require("path");
+const { Pool } = require("pg");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
+
+// PostgreSQL
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
 
 // FIXED LOGIN
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
@@ -13,11 +22,11 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 let ADMIN_HASH;
 
 (async () => {
-    if (!ADMIN_PASSWORD) {
-        throw new Error("ADMIN_PASSWORD environment variable is missing");
-    }
+  if (!ADMIN_PASSWORD) {
+    throw new Error("ADMIN_PASSWORD environment variable is missing");
+  }
 
-    ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
+  ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
 })();
 
 app.use(express.json());
@@ -40,9 +49,12 @@ app.use(
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
+
+// Customer shop
 app.get("/shop", (req, res) => {
   res.sendFile(path.join(__dirname, "customer.html"));
 });
+
 // Login
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body || {};
@@ -88,6 +100,16 @@ app.get("/api/me", (req, res) => {
     loggedIn: false
   });
 });
+
+// PostgreSQL connection test
+pool
+  .query("SELECT NOW()")
+  .then(() => {
+    console.log("SHRIVI PostgreSQL connected successfully");
+  })
+  .catch((err) => {
+    console.error("PostgreSQL connection error:", err.message);
+  });
 
 // Start server
 app.listen(PORT, () => {
