@@ -1,4 +1,4 @@
-      <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -103,6 +103,7 @@
       border-radius: 10px;
       white-space: nowrap;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      cursor: pointer;
     }
 
     .products {
@@ -132,6 +133,13 @@
       justify-content: center;
       color: #888;
       font-size: 18px;
+      overflow: hidden;
+    }
+
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .product-info {
@@ -140,6 +148,18 @@
 
     .product-info h3 {
       margin-bottom: 8px;
+    }
+
+    .category-name {
+      color: #777;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .description {
+      color: #555;
+      font-size: 14px;
+      margin-bottom: 10px;
     }
 
     .price {
@@ -161,6 +181,19 @@
 
     .add:hover {
       opacity: 0.85;
+    }
+
+    #loading,
+    #noProducts,
+    #errorMessage {
+      text-align: center;
+      padding: 25px;
+      font-weight: bold;
+    }
+
+    #noProducts,
+    #errorMessage {
+      display: none;
     }
 
     footer {
@@ -236,7 +269,12 @@
     </div>
 
     <div class="search">
-      <input type="text" placeholder="Search products...">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="Search products..."
+        oninput="filterProducts()"
+      >
     </div>
   </header>
 
@@ -249,71 +287,268 @@
     <h2>Categories</h2>
 
     <div class="category-list">
-      <div class="category">All</div>
-      <div class="category">Fashion</div>
-      <div class="category">Electronics</div>
-      <div class="category">Home</div>
-      <div class="category">Beauty</div>
-      <div class="category">Grocery</div>
+      <div class="category" onclick="filterCategory('All')">All</div>
+      <div class="category" onclick="filterCategory('Fashion')">Fashion</div>
+      <div class="category" onclick="filterCategory('Electronics')">Electronics</div>
+      <div class="category" onclick="filterCategory('Home')">Home</div>
+      <div class="category" onclick="filterCategory('Beauty')">Beauty</div>
+      <div class="category" onclick="filterCategory('Grocery')">Grocery</div>
     </div>
   </section>
 
   <section class="products">
     <h2>Products</h2>
 
-    <div class="product-grid">
-
-      <div class="product">
-        <div class="product-image">Product Image</div>
-        <div class="product-info">
-          <h3>Product 1</h3>
-          <div class="price">₹499</div>
-          <button class="add" onclick="addToCart()">Add to Cart</button>
-        </div>
-      </div>
-
-      <div class="product">
-        <div class="product-image">Product Image</div>
-        <div class="product-info">
-          <h3>Product 2</h3>
-          <div class="price">₹799</div>
-          <button class="add" onclick="addToCart()">Add to Cart</button>
-        </div>
-      </div>
-
-      <div class="product">
-        <div class="product-image">Product Image</div>
-        <div class="product-info">
-          <h3>Product 3</h3>
-          <div class="price">₹999</div>
-          <button class="add" onclick="addToCart()">Add to Cart</button>
-        </div>
-      </div>
-
-      <div class="product">
-        <div class="product-image">Product Image</div>
-        <div class="product-info">
-          <h3>Product 4</h3>
-          <div class="price">₹1,299</div>
-          <button class="add" onclick="addToCart()">Add to Cart</button>
-        </div>
-      </div>
-
+    <div id="loading">
+      Loading products...
     </div>
+
+    <div id="errorMessage">
+      Unable to load products.
+    </div>
+
+    <div id="noProducts">
+      No products available.
+    </div>
+
+    <div class="product-grid" id="productGrid"></div>
+
   </section>
 
   <footer>
     <p>© 2026 Shrivi Marketplace</p>
   </footer>
 
+
   <script>
+
     let cartCount = 0;
+    let allProducts = [];
+    let selectedCategory = "All";
+
+
+    // =========================
+    // LOAD PRODUCTS
+    // =========================
+
+    async function loadProducts() {
+
+      const loading =
+        document.getElementById("loading");
+
+      const errorMessage =
+        document.getElementById("errorMessage");
+
+      const noProducts =
+        document.getElementById("noProducts");
+
+      try {
+
+        const response =
+          await fetch("/api/products");
+
+        if (!response.ok) {
+          throw new Error("Failed to load products");
+        }
+
+        allProducts =
+          await response.json();
+
+        loading.style.display = "none";
+
+        renderProducts(allProducts);
+
+      } catch (error) {
+
+        console.error("Products error:", error);
+
+        loading.style.display = "none";
+
+        errorMessage.style.display = "block";
+      }
+    }
+
+
+    // =========================
+    // RENDER PRODUCTS
+    // =========================
+
+    function renderProducts(products) {
+
+      const grid =
+        document.getElementById("productGrid");
+
+      const noProducts =
+        document.getElementById("noProducts");
+
+      grid.innerHTML = "";
+
+      if (!products.length) {
+
+        noProducts.style.display = "block";
+
+        return;
+      }
+
+      noProducts.style.display = "none";
+
+
+      products.forEach(product => {
+
+        const card =
+          document.createElement("div");
+
+        card.className = "product";
+
+
+        let imageHTML =
+          "Product Image";
+
+        if (product.image) {
+
+          imageHTML = `
+            <img
+              src="${escapeHTML(product.image)}"
+              alt="${escapeHTML(product.name)}"
+              onerror="this.style.display='none'; this.parentElement.innerText='Product Image';"
+            >
+          `;
+
+        }
+
+
+        card.innerHTML = `
+
+          <div class="product-image">
+            ${imageHTML}
+          </div>
+
+          <div class="product-info">
+
+            <h3>
+              ${escapeHTML(product.name)}
+            </h3>
+
+            <div class="category-name">
+              ${escapeHTML(product.category || "General")}
+            </div>
+
+            ${
+              product.description
+                ? `<div class="description">
+                    ${escapeHTML(product.description)}
+                   </div>`
+                : ""
+            }
+
+            <div class="price">
+              ₹${Number(product.price).toLocaleString("en-IN")}
+            </div>
+
+            <button
+              class="add"
+              onclick="addToCart()"
+            >
+              Add to Cart
+            </button>
+
+          </div>
+        `;
+
+
+        grid.appendChild(card);
+
+      });
+
+    }
+
+
+    // =========================
+    // SEARCH
+    // =========================
+
+    function filterProducts() {
+
+      const search =
+        document.getElementById("searchInput")
+          .value
+          .toLowerCase()
+          .trim();
+
+
+      const filtered =
+        allProducts.filter(product => {
+
+          const matchesSearch =
+            product.name
+              .toLowerCase()
+              .includes(search);
+
+          const matchesCategory =
+            selectedCategory === "All" ||
+            (product.category || "")
+              .toLowerCase() ===
+              selectedCategory.toLowerCase();
+
+          return matchesSearch && matchesCategory;
+
+        });
+
+
+      renderProducts(filtered);
+    }
+
+
+    // =========================
+    // CATEGORY FILTER
+    // =========================
+
+    function filterCategory(category) {
+
+      selectedCategory = category;
+
+      filterProducts();
+
+    }
+
+
+    // =========================
+    // CART
+    // =========================
 
     function addToCart() {
+
       cartCount++;
+
       document.querySelector(".cart").textContent =
         "🛒 Cart (" + cartCount + ")";
+
     }
+
+
+    // =========================
+    // BASIC HTML SAFETY
+    // =========================
+
+    function escapeHTML(value) {
+
+      const div =
+        document.createElement("div");
+
+      div.textContent =
+        value ?? "";
+
+      return div.innerHTML;
+
+    }
+
+
+    // =========================
+    // START
+    // =========================
+
+    loadProducts();
+
   </script>
 
 </body>
