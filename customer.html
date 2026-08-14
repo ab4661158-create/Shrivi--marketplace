@@ -180,10 +180,6 @@
       cursor: pointer;
     }
 
-    .add:hover {
-      opacity: 0.85;
-    }
-
     #loading,
     #noProducts,
     #errorMessage {
@@ -295,6 +291,60 @@
       margin-bottom: 15px;
     }
 
+    /* CHECKOUT */
+
+    #checkoutSection {
+      margin-top: 30px;
+      border-top: 1px solid #ddd;
+      padding-top: 25px;
+    }
+
+    #checkoutSection input,
+    #checkoutSection textarea {
+      width: 100%;
+      padding: 13px;
+      margin-top: 12px;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    #checkoutSection textarea {
+      resize: vertical;
+    }
+
+    .place-order {
+      width: 100%;
+      padding: 13px;
+      margin-top: 15px;
+      background: #111;
+      color: white;
+      border: none;
+      border-radius: 7px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .place-order:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    #orderMessage {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .success-box {
+      background: #f0fff4;
+      border: 1px solid #b7e4c7;
+      padding: 20px;
+      border-radius: 10px;
+      margin-top: 20px;
+      text-align: center;
+    }
+
     footer {
       background: #111;
       color: white;
@@ -363,6 +413,11 @@
       .cart-item-image {
         width: 60px;
         height: 60px;
+      }
+
+      .remove {
+        padding: 6px 8px;
+        font-size: 12px;
       }
     }
   </style>
@@ -517,6 +572,50 @@
       Total: ₹0
     </div>
 
+
+    <!-- CHECKOUT -->
+
+    <div id="checkoutSection">
+
+      <h2>
+        Checkout
+      </h2>
+
+      <input
+        type="text"
+        id="customerName"
+        placeholder="Full Name"
+        autocomplete="name"
+      >
+
+      <input
+        type="tel"
+        id="customerPhone"
+        placeholder="10-digit Mobile Number"
+        maxlength="10"
+        inputmode="numeric"
+        autocomplete="tel"
+      >
+
+      <textarea
+        id="customerAddress"
+        placeholder="Delivery Address"
+        rows="4"
+        autocomplete="street-address"
+      ></textarea>
+
+      <button
+        class="place-order"
+        id="placeOrderButton"
+        onclick="placeOrder()"
+      >
+        Place Order
+      </button>
+
+      <p id="orderMessage"></p>
+
+    </div>
+
   </div>
 
 </section>
@@ -538,7 +637,9 @@ let allProducts = [];
 let selectedCategory = "All";
 
 let cart =
-  JSON.parse(localStorage.getItem("shriviCart")) || [];
+  JSON.parse(
+    localStorage.getItem("shriviCart")
+  ) || [];
 
 
 // =========================
@@ -565,7 +666,8 @@ async function loadProducts() {
     allProducts =
       await response.json();
 
-    loading.style.display = "none";
+    loading.style.display =
+      "none";
 
     renderProducts(allProducts);
 
@@ -576,7 +678,8 @@ async function loadProducts() {
       error
     );
 
-    loading.style.display = "none";
+    loading.style.display =
+      "none";
 
     errorMessage.style.display =
       "block";
@@ -591,10 +694,14 @@ async function loadProducts() {
 function renderProducts(products) {
 
   const grid =
-    document.getElementById("productGrid");
+    document.getElementById(
+      "productGrid"
+    );
 
   const noProducts =
-    document.getElementById("noProducts");
+    document.getElementById(
+      "noProducts"
+    );
 
   grid.innerHTML = "";
 
@@ -613,7 +720,9 @@ function renderProducts(products) {
   products.forEach(product => {
 
     const card =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     card.className =
       "product";
@@ -648,19 +757,26 @@ function renderProducts(products) {
         </h3>
 
         <div class="category-name">
-          ${escapeHTML(product.category || "General")}
+          ${escapeHTML(
+            product.category ||
+            "General"
+          )}
         </div>
 
         ${
           product.description
             ? `<div class="description">
-                ${escapeHTML(product.description)}
+                ${escapeHTML(
+                  product.description
+                )}
                </div>`
             : ""
         }
 
         <div class="price">
-          ₹${Number(product.price).toLocaleString("en-IN")}
+          ₹${Number(
+            product.price
+          ).toLocaleString("en-IN")}
         </div>
 
         <button
@@ -689,34 +805,43 @@ function filterProducts() {
 
   const search =
     document
-      .getElementById("searchInput")
+      .getElementById(
+        "searchInput"
+      )
       .value
       .toLowerCase()
       .trim();
 
 
   const filtered =
-    allProducts.filter(product => {
+    allProducts.filter(
+      product => {
 
-      const matchesSearch =
-        product.name
-          .toLowerCase()
-          .includes(search);
-
-
-      const matchesCategory =
-        selectedCategory === "All" ||
-        (product.category || "")
-          .toLowerCase() ===
-          selectedCategory.toLowerCase();
+        const matchesSearch =
+          product.name
+            .toLowerCase()
+            .includes(search);
 
 
-      return (
-        matchesSearch &&
-        matchesCategory
-      );
+        const matchesCategory =
+          selectedCategory ===
+            "All" ||
+          (
+            product.category ||
+            ""
+          )
+            .toLowerCase() ===
+          selectedCategory
+            .toLowerCase();
 
-    });
+
+        return (
+          matchesSearch &&
+          matchesCategory
+        );
+
+      }
+    );
 
 
   renderProducts(filtered);
@@ -727,7 +852,9 @@ function filterProducts() {
 // CATEGORY
 // =========================
 
-function filterCategory(category) {
+function filterCategory(
+  category
+) {
 
   selectedCategory =
     category;
@@ -744,7 +871,8 @@ function addToCart(product) {
 
   const existing =
     cart.find(
-      item => item.id === product.id
+      item =>
+        item.id === product.id
     );
 
 
@@ -760,11 +888,14 @@ function addToCart(product) {
 
       name: product.name,
 
-      price: Number(product.price),
+      price:
+        Number(product.price),
 
-      image: product.image || "",
+      image:
+        product.image || "",
 
-      category: product.category || "",
+      category:
+        product.category || "",
 
       quantity: 1
 
@@ -806,16 +937,20 @@ function updateCartCount() {
 
   const count =
     cart.reduce(
-      (total, item) =>
-        total + item.quantity,
+      (
+        total,
+        item
+      ) =>
+        total +
+        item.quantity,
       0
     );
 
 
   document.getElementById(
     "cartCount"
-  ).innerText = count;
-
+  ).innerText =
+    count;
 }
 
 
@@ -851,7 +986,10 @@ function openCart() {
 
   renderCart();
 
-  window.scrollTo(0, 0);
+  window.scrollTo(
+    0,
+    0
+  );
 }
 
 
@@ -883,7 +1021,6 @@ function closeCart() {
     ".hero"
   ).style.display =
     "block";
-
 }
 
 
@@ -904,7 +1041,8 @@ function renderCart() {
     );
 
 
-  container.innerHTML = "";
+  container.innerHTML =
+    "";
 
 
   if (!cart.length) {
@@ -933,7 +1071,9 @@ function renderCart() {
 
 
     const div =
-      document.createElement("div");
+      document.createElement(
+        "div"
+      );
 
     div.className =
       "cart-item";
@@ -946,8 +1086,12 @@ function renderCart() {
 
       imageHTML = `
         <img
-          src="${escapeHTML(item.image)}"
-          alt="${escapeHTML(item.name)}"
+          src="${escapeHTML(
+            item.image
+          )}"
+          alt="${escapeHTML(
+            item.name
+          )}"
         >
       `;
 
@@ -963,17 +1107,24 @@ function renderCart() {
       <div class="cart-item-info">
 
         <h3>
-          ${escapeHTML(item.name)}
+          ${escapeHTML(
+            item.name
+          )}
         </h3>
 
         <div class="cart-price">
-          ₹${item.price.toLocaleString("en-IN")}
+          ₹${item.price.toLocaleString(
+            "en-IN"
+          )}
         </div>
 
         <div class="quantity">
 
           <button
-            onclick="changeQuantity(${item.id}, -1)"
+            onclick="changeQuantity(
+              ${item.id},
+              -1
+            )"
           >
             -
           </button>
@@ -983,7 +1134,10 @@ function renderCart() {
           </span>
 
           <button
-            onclick="changeQuantity(${item.id}, 1)"
+            onclick="changeQuantity(
+              ${item.id},
+              1
+            )"
           >
             +
           </button>
@@ -994,7 +1148,9 @@ function renderCart() {
 
       <button
         class="remove"
-        onclick="removeFromCart(${item.id})"
+        onclick="removeFromCart(
+          ${item.id}
+        )"
       >
         Remove
       </button>
@@ -1009,8 +1165,9 @@ function renderCart() {
 
   totalElement.innerText =
     "Total: ₹" +
-    total.toLocaleString("en-IN");
-
+    total.toLocaleString(
+      "en-IN"
+    );
 }
 
 
@@ -1025,7 +1182,8 @@ function changeQuantity(
 
   const item =
     cart.find(
-      product => product.id === id
+      product =>
+        product.id === id
     );
 
 
@@ -1034,14 +1192,16 @@ function changeQuantity(
   }
 
 
-  item.quantity += change;
+  item.quantity +=
+    change;
 
 
   if (item.quantity <= 0) {
 
     cart =
       cart.filter(
-        product => product.id !== id
+        product =>
+          product.id !== id
       );
 
   }
@@ -1052,7 +1212,6 @@ function changeQuantity(
   updateCartCount();
 
   renderCart();
-
 }
 
 
@@ -1060,11 +1219,14 @@ function changeQuantity(
 // REMOVE
 // =========================
 
-function removeFromCart(id) {
+function removeFromCart(
+  id
+) {
 
   cart =
     cart.filter(
-      product => product.id !== id
+      product =>
+        product.id !== id
     );
 
 
@@ -1073,7 +1235,237 @@ function removeFromCart(id) {
   updateCartCount();
 
   renderCart();
+}
 
+
+// =========================
+// PLACE ORDER
+// =========================
+
+async function placeOrder() {
+
+  const name =
+    document
+      .getElementById(
+        "customerName"
+      )
+      .value
+      .trim();
+
+  const phone =
+    document
+      .getElementById(
+        "customerPhone"
+      )
+      .value
+      .trim();
+
+  const address =
+    document
+      .getElementById(
+        "customerAddress"
+      )
+      .value
+      .trim();
+
+  const message =
+    document.getElementById(
+      "orderMessage"
+    );
+
+  const button =
+    document.getElementById(
+      "placeOrderButton"
+    );
+
+
+  message.innerText = "";
+
+
+  if (!cart.length) {
+
+    message.innerText =
+      "Your cart is empty.";
+
+    return;
+  }
+
+
+  if (!name) {
+
+    message.innerText =
+      "Please enter your name.";
+
+    return;
+  }
+
+
+  if (!/^[0-9]{10}$/.test(phone)) {
+
+    message.innerText =
+      "Please enter a valid 10-digit mobile number.";
+
+    return;
+  }
+
+
+  if (!address) {
+
+    message.innerText =
+      "Please enter your delivery address.";
+
+    return;
+  }
+
+
+  button.disabled =
+    true;
+
+  button.innerText =
+    "Placing Order...";
+
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/orders",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body:
+            JSON.stringify({
+
+              customer_name:
+                name,
+
+              customer_phone:
+                phone,
+
+              customer_address:
+                address,
+
+              items:
+                cart,
+
+              total:
+                calculateCartTotal()
+
+            })
+
+        }
+      );
+
+
+    const data =
+      await response.json();
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        data.error ||
+        "Order failed"
+      );
+    }
+
+
+    const orderId =
+      data.order.id;
+
+
+    localStorage.removeItem(
+      "shriviCart"
+    );
+
+    cart = [];
+
+
+    updateCartCount();
+
+
+    document.getElementById(
+      "cartItems"
+    ).innerHTML = `
+
+      <div class="success-box">
+
+        <h2>
+          🎉 Order Placed Successfully!
+        </h2>
+
+        <p style="margin-top:10px;">
+          Your Order ID is:
+        </p>
+
+        <h2 style="margin-top:8px;">
+          #${orderId}
+        </h2>
+
+        <p style="margin-top:12px;">
+          Thank you for shopping with Shrivi.
+        </p>
+
+      </div>
+
+    `;
+
+
+    document.getElementById(
+      "cartTotal"
+    ).innerText =
+      "Total: ₹0";
+
+
+    document.getElementById(
+      "checkoutSection"
+    ).style.display =
+      "none";
+
+
+  } catch (error) {
+
+    console.error(
+      "Order error:",
+      error
+    );
+
+    message.innerText =
+      error.message ||
+      "Unable to place order.";
+
+    button.disabled =
+      false;
+
+    button.innerText =
+      "Place Order";
+  }
+}
+
+
+// =========================
+// CART TOTAL
+// =========================
+
+function calculateCartTotal() {
+
+  return cart.reduce(
+    (
+      total,
+      item
+    ) =>
+      total +
+      (
+        Number(item.price) *
+        Number(item.quantity)
+      ),
+    0
+  );
 }
 
 
@@ -1084,13 +1476,14 @@ function removeFromCart(id) {
 function escapeHTML(value) {
 
   const div =
-    document.createElement("div");
+    document.createElement(
+      "div"
+    );
 
   div.textContent =
     value ?? "";
 
   return div.innerHTML;
-
 }
 
 
