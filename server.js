@@ -7,13 +7,17 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 // FIXED LOGIN
-const ADMIN_USER = "admin";
-const ADMIN_PASSWORD = "Shrivi@2026";
+const ADMIN_USER = process.env.ADMIN_USER || "admin";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
 let ADMIN_HASH;
 
 (async () => {
-  ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    if (!ADMIN_PASSWORD) {
+        throw new Error("ADMIN_PASSWORD environment variable is missing");
+    }
+
+    ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
 })();
 
 app.use(express.json());
