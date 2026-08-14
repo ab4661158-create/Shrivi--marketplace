@@ -42,18 +42,19 @@
       letter-spacing: 2px;
     }
 
-    .cart {
+    .cart-button {
       background: white;
       color: #111;
       padding: 10px 16px;
       border-radius: 8px;
       font-weight: bold;
+      border: none;
+      cursor: pointer;
     }
 
     .search {
       max-width: 700px;
       margin: 15px auto 0;
-      display: flex;
     }
 
     .search input {
@@ -196,6 +197,104 @@
       display: none;
     }
 
+    /* CART */
+
+    #cartPanel {
+      display: none;
+      max-width: 900px;
+      margin: 25px auto;
+      padding: 20px;
+    }
+
+    .cart-box {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px #ddd;
+    }
+
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px 0;
+      border-bottom: 1px solid #ddd;
+    }
+
+    .cart-item-image {
+      width: 80px;
+      height: 80px;
+      background: #eee;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border-radius: 8px;
+      color: #888;
+    }
+
+    .cart-item-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .cart-item-info {
+      flex: 1;
+    }
+
+    .cart-item-info h3 {
+      margin-bottom: 5px;
+    }
+
+    .cart-price {
+      font-weight: bold;
+    }
+
+    .quantity {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .quantity button {
+      width: 30px;
+      height: 30px;
+      padding: 0;
+      border: none;
+      border-radius: 5px;
+      background: #111;
+      color: white;
+      cursor: pointer;
+    }
+
+    .remove {
+      background: #ddd;
+      color: #111;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .cart-total {
+      text-align: right;
+      font-size: 22px;
+      font-weight: bold;
+      margin-top: 20px;
+    }
+
+    .close-cart {
+      background: #111;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 7px;
+      cursor: pointer;
+      margin-bottom: 15px;
+    }
+
     footer {
       background: #111;
       color: white;
@@ -223,7 +322,7 @@
         font-size: 22px;
       }
 
-      .cart {
+      .cart-button {
         padding: 8px 12px;
         font-size: 14px;
       }
@@ -256,300 +355,754 @@
       .price {
         font-size: 18px;
       }
+
+      .cart-item {
+        align-items: flex-start;
+      }
+
+      .cart-item-image {
+        width: 60px;
+        height: 60px;
+      }
     }
   </style>
 </head>
 
 <body>
 
-  <header>
-    <div class="top">
-      <div class="logo">SHRIVI</div>
-      <div class="cart">🛒 Cart (0)</div>
+<header>
+
+  <div class="top">
+
+    <div class="logo">
+      SHRIVI
     </div>
 
-    <div class="search">
-      <input
-        type="text"
-        id="searchInput"
-        placeholder="Search products..."
-        oninput="filterProducts()"
-      >
+    <button
+      class="cart-button"
+      onclick="openCart()"
+    >
+      🛒 Cart (<span id="cartCount">0</span>)
+    </button>
+
+  </div>
+
+  <div class="search">
+
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Search products..."
+      oninput="filterProducts()"
+    >
+
+  </div>
+
+</header>
+
+
+<section class="hero">
+
+  <h1>
+    Welcome to Shrivi Marketplace
+  </h1>
+
+  <p>
+    Shop your favourite products at great prices.
+  </p>
+
+</section>
+
+
+<section class="categories">
+
+  <h2>Categories</h2>
+
+  <div class="category-list">
+
+    <div
+      class="category"
+      onclick="filterCategory('All')"
+    >
+      All
     </div>
-  </header>
 
-  <section class="hero">
-    <h1>Welcome to Shrivi Marketplace</h1>
-    <p>Shop your favourite products at great prices.</p>
-  </section>
-
-  <section class="categories">
-    <h2>Categories</h2>
-
-    <div class="category-list">
-      <div class="category" onclick="filterCategory('All')">All</div>
-      <div class="category" onclick="filterCategory('Fashion')">Fashion</div>
-      <div class="category" onclick="filterCategory('Electronics')">Electronics</div>
-      <div class="category" onclick="filterCategory('Home')">Home</div>
-      <div class="category" onclick="filterCategory('Beauty')">Beauty</div>
-      <div class="category" onclick="filterCategory('Grocery')">Grocery</div>
-    </div>
-  </section>
-
-  <section class="products">
-    <h2>Products</h2>
-
-    <div id="loading">
-      Loading products...
+    <div
+      class="category"
+      onclick="filterCategory('Fashion')"
+    >
+      Fashion
     </div>
 
-    <div id="errorMessage">
-      Unable to load products.
+    <div
+      class="category"
+      onclick="filterCategory('Electronics')"
+    >
+      Electronics
     </div>
 
-    <div id="noProducts">
-      No products available.
+    <div
+      class="category"
+      onclick="filterCategory('Home')"
+    >
+      Home
     </div>
 
-    <div class="product-grid" id="productGrid"></div>
+    <div
+      class="category"
+      onclick="filterCategory('Beauty')"
+    >
+      Beauty
+    </div>
 
-  </section>
+    <div
+      class="category"
+      onclick="filterCategory('Grocery')"
+    >
+      Grocery
+    </div>
 
-  <footer>
-    <p>© 2026 Shrivi Marketplace</p>
-  </footer>
+  </div>
 
-
-  <script>
-
-    let cartCount = 0;
-    let allProducts = [];
-    let selectedCategory = "All";
+</section>
 
 
-    // =========================
-    // LOAD PRODUCTS
-    // =========================
+<section class="products">
 
-    async function loadProducts() {
+  <h2>Products</h2>
 
-      const loading =
-        document.getElementById("loading");
+  <div id="loading">
+    Loading products...
+  </div>
 
-      const errorMessage =
-        document.getElementById("errorMessage");
+  <div id="errorMessage">
+    Unable to load products.
+  </div>
 
-      const noProducts =
-        document.getElementById("noProducts");
+  <div id="noProducts">
+    No products available.
+  </div>
 
-      try {
+  <div
+    class="product-grid"
+    id="productGrid"
+  ></div>
 
-        const response =
-          await fetch("/api/products");
+</section>
 
-        if (!response.ok) {
-          throw new Error("Failed to load products");
-        }
 
-        allProducts =
-          await response.json();
+<!-- CART -->
 
-        loading.style.display = "none";
+<section id="cartPanel">
 
-        renderProducts(allProducts);
+  <div class="cart-box">
 
-      } catch (error) {
+    <button
+      class="close-cart"
+      onclick="closeCart()"
+    >
+      ← Continue Shopping
+    </button>
 
-        console.error("Products error:", error);
+    <h2>
+      Your Cart
+    </h2>
 
-        loading.style.display = "none";
+    <div id="cartItems"></div>
 
-        errorMessage.style.display = "block";
-      }
+    <div
+      class="cart-total"
+      id="cartTotal"
+    >
+      Total: ₹0
+    </div>
+
+  </div>
+
+</section>
+
+
+<footer>
+
+  <p>
+    © 2026 Shrivi Marketplace
+  </p>
+
+</footer>
+
+
+<script>
+
+let allProducts = [];
+
+let selectedCategory = "All";
+
+let cart =
+  JSON.parse(localStorage.getItem("shriviCart")) || [];
+
+
+// =========================
+// LOAD PRODUCTS
+// =========================
+
+async function loadProducts() {
+
+  const loading =
+    document.getElementById("loading");
+
+  const errorMessage =
+    document.getElementById("errorMessage");
+
+  try {
+
+    const response =
+      await fetch("/api/products");
+
+    if (!response.ok) {
+      throw new Error("Failed to load products");
+    }
+
+    allProducts =
+      await response.json();
+
+    loading.style.display = "none";
+
+    renderProducts(allProducts);
+
+  } catch (error) {
+
+    console.error(
+      "Products error:",
+      error
+    );
+
+    loading.style.display = "none";
+
+    errorMessage.style.display =
+      "block";
+  }
+}
+
+
+// =========================
+// RENDER PRODUCTS
+// =========================
+
+function renderProducts(products) {
+
+  const grid =
+    document.getElementById("productGrid");
+
+  const noProducts =
+    document.getElementById("noProducts");
+
+  grid.innerHTML = "";
+
+  if (!products.length) {
+
+    noProducts.style.display =
+      "block";
+
+    return;
+  }
+
+  noProducts.style.display =
+    "none";
+
+
+  products.forEach(product => {
+
+    const card =
+      document.createElement("div");
+
+    card.className =
+      "product";
+
+
+    let imageHTML =
+      "Product Image";
+
+    if (product.image) {
+
+      imageHTML = `
+        <img
+          src="${escapeHTML(product.image)}"
+          alt="${escapeHTML(product.name)}"
+          onerror="this.style.display='none'; this.parentElement.innerText='Product Image';"
+        >
+      `;
+
     }
 
 
-    // =========================
-    // RENDER PRODUCTS
-    // =========================
+    card.innerHTML = `
 
-    function renderProducts(products) {
+      <div class="product-image">
+        ${imageHTML}
+      </div>
 
-      const grid =
-        document.getElementById("productGrid");
+      <div class="product-info">
 
-      const noProducts =
-        document.getElementById("noProducts");
+        <h3>
+          ${escapeHTML(product.name)}
+        </h3>
 
-      grid.innerHTML = "";
+        <div class="category-name">
+          ${escapeHTML(product.category || "General")}
+        </div>
 
-      if (!products.length) {
-
-        noProducts.style.display = "block";
-
-        return;
-      }
-
-      noProducts.style.display = "none";
-
-
-      products.forEach(product => {
-
-        const card =
-          document.createElement("div");
-
-        card.className = "product";
-
-
-        let imageHTML =
-          "Product Image";
-
-        if (product.image) {
-
-          imageHTML = `
-            <img
-              src="${escapeHTML(product.image)}"
-              alt="${escapeHTML(product.name)}"
-              onerror="this.style.display='none'; this.parentElement.innerText='Product Image';"
-            >
-          `;
-
+        ${
+          product.description
+            ? `<div class="description">
+                ${escapeHTML(product.description)}
+               </div>`
+            : ""
         }
 
+        <div class="price">
+          ₹${Number(product.price).toLocaleString("en-IN")}
+        </div>
 
-        card.innerHTML = `
+        <button
+          class="add"
+          onclick='addToCart(${JSON.stringify(product)})'
+        >
+          Add to Cart
+        </button>
 
-          <div class="product-image">
-            ${imageHTML}
-          </div>
-
-          <div class="product-info">
-
-            <h3>
-              ${escapeHTML(product.name)}
-            </h3>
-
-            <div class="category-name">
-              ${escapeHTML(product.category || "General")}
-            </div>
-
-            ${
-              product.description
-                ? `<div class="description">
-                    ${escapeHTML(product.description)}
-                   </div>`
-                : ""
-            }
-
-            <div class="price">
-              ₹${Number(product.price).toLocaleString("en-IN")}
-            </div>
-
-            <button
-              class="add"
-              onclick="addToCart()"
-            >
-              Add to Cart
-            </button>
-
-          </div>
-        `;
+      </div>
+    `;
 
 
-        grid.appendChild(card);
+    grid.appendChild(card);
 
-      });
+  });
 
-    }
+}
 
 
-    // =========================
-    // SEARCH
-    // =========================
+// =========================
+// SEARCH
+// =========================
 
-    function filterProducts() {
+function filterProducts() {
 
-      const search =
-        document.getElementById("searchInput")
-          .value
+  const search =
+    document
+      .getElementById("searchInput")
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  const filtered =
+    allProducts.filter(product => {
+
+      const matchesSearch =
+        product.name
           .toLowerCase()
-          .trim();
+          .includes(search);
 
 
-      const filtered =
-        allProducts.filter(product => {
-
-          const matchesSearch =
-            product.name
-              .toLowerCase()
-              .includes(search);
-
-          const matchesCategory =
-            selectedCategory === "All" ||
-            (product.category || "")
-              .toLowerCase() ===
-              selectedCategory.toLowerCase();
-
-          return matchesSearch && matchesCategory;
-
-        });
+      const matchesCategory =
+        selectedCategory === "All" ||
+        (product.category || "")
+          .toLowerCase() ===
+          selectedCategory.toLowerCase();
 
 
-      renderProducts(filtered);
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+
+    });
+
+
+  renderProducts(filtered);
+}
+
+
+// =========================
+// CATEGORY
+// =========================
+
+function filterCategory(category) {
+
+  selectedCategory =
+    category;
+
+  filterProducts();
+}
+
+
+// =========================
+// ADD TO CART
+// =========================
+
+function addToCart(product) {
+
+  const existing =
+    cart.find(
+      item => item.id === product.id
+    );
+
+
+  if (existing) {
+
+    existing.quantity++;
+
+  } else {
+
+    cart.push({
+
+      id: product.id,
+
+      name: product.name,
+
+      price: Number(product.price),
+
+      image: product.image || "",
+
+      category: product.category || "",
+
+      quantity: 1
+
+    });
+
+  }
+
+
+  saveCart();
+
+  updateCartCount();
+
+  alert(
+    product.name +
+    " added to cart!"
+  );
+}
+
+
+// =========================
+// SAVE CART
+// =========================
+
+function saveCart() {
+
+  localStorage.setItem(
+    "shriviCart",
+    JSON.stringify(cart)
+  );
+
+}
+
+
+// =========================
+// CART COUNT
+// =========================
+
+function updateCartCount() {
+
+  const count =
+    cart.reduce(
+      (total, item) =>
+        total + item.quantity,
+      0
+    );
+
+
+  document.getElementById(
+    "cartCount"
+  ).innerText = count;
+
+}
+
+
+// =========================
+// OPEN CART
+// =========================
+
+function openCart() {
+
+  document.getElementById(
+    "cartPanel"
+  ).style.display =
+    "block";
+
+
+  document.querySelector(
+    ".products"
+  ).style.display =
+    "none";
+
+
+  document.querySelector(
+    ".categories"
+  ).style.display =
+    "none";
+
+
+  document.querySelector(
+    ".hero"
+  ).style.display =
+    "none";
+
+
+  renderCart();
+
+  window.scrollTo(0, 0);
+}
+
+
+// =========================
+// CLOSE CART
+// =========================
+
+function closeCart() {
+
+  document.getElementById(
+    "cartPanel"
+  ).style.display =
+    "none";
+
+
+  document.querySelector(
+    ".products"
+  ).style.display =
+    "block";
+
+
+  document.querySelector(
+    ".categories"
+  ).style.display =
+    "block";
+
+
+  document.querySelector(
+    ".hero"
+  ).style.display =
+    "block";
+
+}
+
+
+// =========================
+// RENDER CART
+// =========================
+
+function renderCart() {
+
+  const container =
+    document.getElementById(
+      "cartItems"
+    );
+
+  const totalElement =
+    document.getElementById(
+      "cartTotal"
+    );
+
+
+  container.innerHTML = "";
+
+
+  if (!cart.length) {
+
+    container.innerHTML =
+      "<p style='padding:20px 0;'>Your cart is empty.</p>";
+
+    totalElement.innerText =
+      "Total: ₹0";
+
+    return;
+  }
+
+
+  let total = 0;
+
+
+  cart.forEach(item => {
+
+    const itemTotal =
+      item.price *
+      item.quantity;
+
+
+    total += itemTotal;
+
+
+    const div =
+      document.createElement("div");
+
+    div.className =
+      "cart-item";
+
+
+    let imageHTML =
+      "Image";
+
+    if (item.image) {
+
+      imageHTML = `
+        <img
+          src="${escapeHTML(item.image)}"
+          alt="${escapeHTML(item.name)}"
+        >
+      `;
+
     }
 
 
-    // =========================
-    // CATEGORY FILTER
-    // =========================
+    div.innerHTML = `
 
-    function filterCategory(category) {
+      <div class="cart-item-image">
+        ${imageHTML}
+      </div>
 
-      selectedCategory = category;
+      <div class="cart-item-info">
 
-      filterProducts();
+        <h3>
+          ${escapeHTML(item.name)}
+        </h3>
 
-    }
+        <div class="cart-price">
+          ₹${item.price.toLocaleString("en-IN")}
+        </div>
+
+        <div class="quantity">
+
+          <button
+            onclick="changeQuantity(${item.id}, -1)"
+          >
+            -
+          </button>
+
+          <span>
+            ${item.quantity}
+          </span>
+
+          <button
+            onclick="changeQuantity(${item.id}, 1)"
+          >
+            +
+          </button>
+
+        </div>
+
+      </div>
+
+      <button
+        class="remove"
+        onclick="removeFromCart(${item.id})"
+      >
+        Remove
+      </button>
+
+    `;
 
 
-    // =========================
-    // CART
-    // =========================
+    container.appendChild(div);
 
-    function addToCart() {
-
-      cartCount++;
-
-      document.querySelector(".cart").textContent =
-        "🛒 Cart (" + cartCount + ")";
-
-    }
+  });
 
 
-    // =========================
-    // BASIC HTML SAFETY
-    // =========================
+  totalElement.innerText =
+    "Total: ₹" +
+    total.toLocaleString("en-IN");
 
-    function escapeHTML(value) {
-
-      const div =
-        document.createElement("div");
-
-      div.textContent =
-        value ?? "";
-
-      return div.innerHTML;
-
-    }
+}
 
 
-    // =========================
-    // START
-    // =========================
+// =========================
+// CHANGE QUANTITY
+// =========================
 
-    loadProducts();
+function changeQuantity(
+  id,
+  change
+) {
 
-  </script>
+  const item =
+    cart.find(
+      product => product.id === id
+    );
+
+
+  if (!item) {
+    return;
+  }
+
+
+  item.quantity += change;
+
+
+  if (item.quantity <= 0) {
+
+    cart =
+      cart.filter(
+        product => product.id !== id
+      );
+
+  }
+
+
+  saveCart();
+
+  updateCartCount();
+
+  renderCart();
+
+}
+
+
+// =========================
+// REMOVE
+// =========================
+
+function removeFromCart(id) {
+
+  cart =
+    cart.filter(
+      product => product.id !== id
+    );
+
+
+  saveCart();
+
+  updateCartCount();
+
+  renderCart();
+
+}
+
+
+// =========================
+// HTML SAFETY
+// =========================
+
+function escapeHTML(value) {
+
+  const div =
+    document.createElement("div");
+
+  div.textContent =
+    value ?? "";
+
+  return div.innerHTML;
+
+}
+
+
+// =========================
+// START
+// =========================
+
+updateCartCount();
+
+loadProducts();
+
+</script>
 
 </body>
 </html>
