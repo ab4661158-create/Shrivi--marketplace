@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+      <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -131,6 +131,7 @@
       align-items: center;
       justify-content: center;
       color: #888;
+      font-size: 18px;
     }
 
     .product-info {
@@ -150,4 +151,170 @@
     .add {
       width: 100%;
       padding: 11px;
-      border:
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      color: white;
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .add:hover {
+      opacity: 0.85;
+    }
+
+    footer {
+      background: #111;
+      color: white;
+      text-align: center;
+      padding: 25px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 800px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .hero h1 {
+        font-size: 30px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      header {
+        padding: 14px;
+      }
+
+      .logo {
+        font-size: 22px;
+      }
+
+      .cart {
+        padding: 8px 12px;
+        font-size: 14px;
+      }
+
+      .hero {
+        padding: 35px 15px;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      .product-image {
+        height: 150px;
+      }
+
+      .product-info {
+        padding: 10px;
+      }
+
+      .price {
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="top">
+      <div class="logo">SHRIVI</div>
+      <div class="cart">🛒 Cart (0)</div>
+    </div>
+
+    <div class="search">
+      <input type="text" placeholder="Search products...">
+    </div>
+  </header>
+
+  <section class="hero">
+    <h1>Welcome to Shrivi Marketplace</h1>
+    <p>Shop your favourite products at great prices.</p>
+  </section>
+
+  <section class="categories">
+    <h2>Categories</h2>
+
+    <div class="category-list">
+      <div class="category">All</div>
+      <div class="category">Fashion</div>
+      <div class="category">Electronics</div>
+      <div class="category">Home</div>
+      <div class="category">Beauty</div>
+      <div class="category">Grocery</div>
+    </div>
+  </section>
+
+  <section class="products">
+    <h2>Products</h2>
+
+    <div class="product-grid">
+
+      <div class="product">
+        <div class="product-image">Product Image</div>
+        <div class="product-info">
+          <h3>Product 1</h3>
+          <div class="price">₹499</div>
+          <button class="add" onclick="addToCart()">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image">Product Image</div>
+        <div class="product-info">
+          <h3>Product 2</h3>
+          <div class="price">₹799</div>
+          <button class="add" onclick="addToCart()">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image">Product Image</div>
+        <div class="product-info">
+          <h3>Product 3</h3>
+          <div class="price">₹999</div>
+          <button class="add" onclick="addToCart()">Add to Cart</button>
+        </div>
+      </div>
+
+      <div class="product">
+        <div class="product-image">Product Image</div>
+        <div class="product-info">
+          <h3>Product 4</h3>
+          <div class="price">₹1,299</div>
+          <button class="add" onclick="addToCart()">Add to Cart</button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 Shrivi Marketplace</p>
+  </footer>
+
+  <script>
+    let cartCount = 0;
+
+    function addToCart() {
+      cartCount++;
+      document.querySelector(".cart").textContent =
+        "🛒 Cart (" + cartCount + ")";
+    }
+  </script>
+
+</body>
+</html>
