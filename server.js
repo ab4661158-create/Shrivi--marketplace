@@ -15,15 +15,17 @@ const pool = new Pool({
   }
 });
 
-// Admin login
+// Admin credentials
 const ADMIN_USER = process.env.ADMIN_USER || "admin";
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
-let ADMIN_HASH;
+let ADMIN_HASH = null;
 
+// Create admin password hash
 (async () => {
   if (!ADMIN_PASSWORD) {
-    throw new Error("ADMIN_PASSWORD environment variable is missing");
+    console.error("ADMIN_PASSWORD environment variable is missing");
+    return;
   }
 
   ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
@@ -41,13 +43,17 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
+      sameSite: "lax",
       maxAge: 24 * 60 * 60 * 1000
     }
   })
 );
 
-// Pages
+// =========================
+// PAGES
+// =========================
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "admin.html"));
 });
@@ -56,39 +62,81 @@ app.get("/shop", (req, res) => {
   res.sendFile(path.join(__dirname, "customer.html"));
 });
 
-// Login
+// =========================
+// LOGIN
+// =========================
+
 app.post("/api/login", async (req, res) => {
-  const { username, password } = req.body || {};
+  try {
+    const { username, password } = req.body || {};
 
-  if (
-    username === ADMIN_USER &&
-    ADMIN_HASH &&
-    (await bcrypt.compare(password || "", ADMIN_HASH))
-  ) {
-    req.session.admin = {
-      username: ADMIN_USER
-    };
+    if (!ADMIN_HASH) {
+      return res.status(500).json({
+        error: "Admin login is not configured"
+      });
+    }
 
-    return res.json({
-      ok: true
+    const validUser = username === ADMIN_USER;
+
+    const validPassword = await bcrypt.compare(
+      password || "",
+      ADMIN_HASH
+    );
+
+    if (validUser && validPassword) {
+      req.session.admin = {
+        username: ADMIN_USER
+      };
+
+      return req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+
+          return res.status(500).json({
+            error: "Session error"
+          });
+        }
+
+        res.json({
+          ok: true
+        });
+      });
+    }
+
+    return res.status(401).json({
+      error: "Invalid username or password"
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+
+    res.status(500).json({
+      error: "Login error"
     });
   }
-
-  return res.status(401).json({
-    error: "Invalid username or password"
-  });
 });
 
-// Logout
+// =========================
+// LOGOUT
+// =========================
+
 app.post("/api/logout", (req, res) => {
-  req.session.destroy(() => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({
+        error: "Logout error"
+      });
+    }
+
     res.json({
       ok: true
     });
   });
 });
 
-// Check login
+// =========================
+// CHECK LOGIN
+// =========================
+
 app.get("/api/me", (req, res) => {
   if (req.session.admin) {
     return res.json({
@@ -102,7 +150,10 @@ app.get("/api/me", (req, res) => {
   });
 });
 
-// Admin authentication middleware
+// =========================
+// ADMIN SECURITY
+// =========================
+
 function requireAdmin(req, res, next) {
   if (!req.session.admin) {
     return res.status(401).json({
@@ -113,7 +164,10 @@ function requireAdmin(req, res, next) {
   next();
 }
 
-// Create database tables
+// =========================
+// DATABASE TABLES
+// =========================
+
 async function initializeDatabase() {
   await pool.query(`
     CREATE TABLE IF NOT EXISTS products (
@@ -148,26 +202,33 @@ async function initializeDatabase() {
   console.log("SHRIVI database tables ready");
 }
 
-// Dashboard statistics
+// =========================
+// DASHBOARD
+// =========================
+
 app.get("/api/dashboard", requireAdmin, async (req, res) => {
   try {
-    const productsResult = await pool.query(
-      "SELECT COUNT(*) FROM products"
+    const products = await pool.query(
+      "SELECT COUNT(*) AS count FROM products"
     );
 
-    const ordersResult = await pool.query(
-      "SELECT COUNT(*) FROM orders"
+    const orders = await pool.query(
+      "SELECT COUNT(*) AS count FROM orders"
     );
 
-    const sellersResult = await pool.query(
-      "SELECT COUNT(*) FROM sellers"
+    const sellers = await pool.query(
+      "SELECT COUNT(*) AS count FROM sellers"
     );
 
-    res.json({
-      products: Number(productsResult.rows[0].count),
-      orders: Number(ordersResult.rows[0].count),
-      sellers: Number(sellersResult.rows[0].count)
-    });
+    const result = {
+      products: Number(products.rows[0].count),
+      orders: Number(orders.rows[0].count),
+      sellers: Number(sellers.rows[0].count)
+    };
+
+    console.log("Dashboard data:", result);
+
+    res.json(result);
   } catch (error) {
     console.error("Dashboard error:", error);
 
@@ -177,21 +238,35 @@ app.get("/api/dashboard", requireAdmin, async (req, res) => {
   }
 });
 
-// Test PostgreSQL connection
-pool
-  .query("SELECT NOW()")
-  .then(() => {
-    console.log("SHRIVI PostgreSQL connected successfully");
-    return initializeDatabase();
-  })
-  .catch((error) => {
+// =========================
+// DATABASE CONNECTION
+// =========================
+
+async function startDatabase() {
+  try {
+    await pool.query("SELECT NOW()");
+
+    console.log(
+      "SHRIVI PostgreSQL connected successfully"
+    );
+
+    await initializeDatabase();
+  } catch (error) {
     console.error(
       "PostgreSQL connection error:",
       error.message
     );
-  });
+  }
+}
 
-// Start server
+startDatabase();
+
+// =========================
+// START SERVER
+// =========================
+
 app.listen(PORT, () => {
-  console.log(`SHRIVI server running on port ${PORT}`);
+  console.log(
+    `SHRIVI server running on port ${PORT}`
+  );
 });
