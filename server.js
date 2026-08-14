@@ -33,7 +33,7 @@ let ADMIN_HASH = null;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.set("trust proxy", 1);
 // Session
 app.use(
   session({
