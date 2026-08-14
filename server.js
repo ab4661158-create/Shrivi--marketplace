@@ -34,6 +34,7 @@ let ADMIN_HASH = null;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.set("trust proxy", 1);
+
 // Session
 app.use(
   session({
@@ -163,6 +164,71 @@ function requireAdmin(req, res, next) {
 
   next();
 }
+
+// =========================
+// PRODUCT API
+// =========================
+
+// Get all products
+app.get("/api/products", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT * FROM products ORDER BY id DESC"
+    );
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Products fetch error:", error);
+
+    res.status(500).json({
+      error: "Failed to fetch products"
+    });
+  }
+});
+
+// Add product - Admin only
+app.post("/api/products", requireAdmin, async (req, res) => {
+  try {
+    const {
+      name,
+      price,
+      category,
+      image,
+      description
+    } = req.body || {};
+
+    if (!name || price === undefined) {
+      return res.status(400).json({
+        error: "Product name and price are required"
+      });
+    }
+
+    const result = await pool.query(
+      `INSERT INTO products
+       (name, price, category, image, description)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [
+        name,
+        price,
+        category || null,
+        image || null,
+        description || null
+      ]
+    );
+
+    res.status(201).json({
+      ok: true,
+      product: result.rows[0]
+    });
+  } catch (error) {
+    console.error("Product add error:", error);
+
+    res.status(500).json({
+      error: "Failed to add product"
+    });
+  }
+});
 
 // =========================
 // DATABASE TABLES
