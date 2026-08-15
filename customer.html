@@ -18,13 +18,18 @@
       color: #111;
     }
 
+    /* =========================
+       HEADER
+    ========================= */
+
     header {
       background: #111;
       color: white;
-      padding: 18px;
+      padding: 12px 15px;
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
 
     .top {
@@ -37,38 +42,52 @@
     }
 
     .logo {
-      font-size: 28px;
-      font-weight: bold;
+      font-size: 30px;
+      font-weight: 800;
       letter-spacing: 2px;
     }
 
     .cart-button {
       background: white;
       color: #111;
-      padding: 10px 16px;
-      border-radius: 8px;
+      padding: 11px 18px;
+      border-radius: 20px;
       font-weight: bold;
       border: none;
       cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .cart-button:hover {
+      transform: scale(1.03);
     }
 
     .search {
-      max-width: 700px;
-      margin: 15px auto 0;
+      max-width: 850px;
+      margin: 12px auto 2px;
     }
 
     .search input {
       width: 100%;
-      padding: 14px;
+      padding: 15px 18px;
       border: none;
-      border-radius: 8px;
+      border-radius: 25px;
       font-size: 16px;
+      outline: none;
     }
+
+    .search input:focus {
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
+    }
+
+    /* =========================
+       HERO
+    ========================= */
 
     .hero {
       background: white;
       text-align: center;
-      padding: 50px 20px;
+      padding: 55px 20px;
     }
 
     .hero h1 {
@@ -80,6 +99,10 @@
       color: #555;
       font-size: 18px;
     }
+
+    /* =========================
+       CATEGORIES
+    ========================= */
 
     .categories {
       max-width: 1100px;
@@ -96,6 +119,12 @@
       display: flex;
       gap: 12px;
       overflow-x: auto;
+      padding-bottom: 5px;
+      scrollbar-width: none;
+    }
+
+    .category-list::-webkit-scrollbar {
+      display: none;
     }
 
     .category {
@@ -105,7 +134,17 @@
       white-space: nowrap;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       cursor: pointer;
+      transition: 0.2s;
     }
+
+    .category:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    /* =========================
+       PRODUCTS
+    ========================= */
 
     .products {
       max-width: 1100px;
@@ -124,6 +163,12 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      transition: 0.2s;
+    }
+
+    .product:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
 
     .product-image {
@@ -149,6 +194,7 @@
 
     .product-info h3 {
       margin-bottom: 8px;
+      font-size: 18px;
     }
 
     .category-name {
@@ -161,6 +207,7 @@
       color: #555;
       font-size: 14px;
       margin-bottom: 10px;
+      line-height: 1.4;
     }
 
     .price {
@@ -178,6 +225,11 @@
       color: white;
       font-size: 15px;
       cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .add:hover {
+      background: #333;
     }
 
     #loading,
@@ -193,7 +245,9 @@
       display: none;
     }
 
-    /* CART */
+    /* =========================
+       CART
+    ========================= */
 
     #cartPanel {
       display: none;
@@ -227,6 +281,7 @@
       overflow: hidden;
       border-radius: 8px;
       color: #888;
+      flex-shrink: 0;
     }
 
     .cart-item-image img {
@@ -291,7 +346,9 @@
       margin-bottom: 15px;
     }
 
-    /* CHECKOUT */
+    /* =========================
+       CHECKOUT
+    ========================= */
 
     #checkoutSection {
       margin-top: 30px;
@@ -307,7 +364,6 @@
       border: 1px solid #ccc;
       border-radius: 7px;
       font-size: 15px;
-      box-sizing: border-box;
     }
 
     #checkoutSection textarea {
@@ -345,6 +401,10 @@
       text-align: center;
     }
 
+    /* =========================
+       FOOTER
+    ========================= */
+
     footer {
       background: #111;
       color: white;
@@ -353,7 +413,12 @@
       margin-top: 30px;
     }
 
+    /* =========================
+       MOBILE
+    ========================= */
+
     @media (max-width: 800px) {
+
       .product-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -364,17 +429,27 @@
     }
 
     @media (max-width: 500px) {
+
       header {
-        padding: 14px;
+        padding: 12px;
       }
 
       .logo {
-        font-size: 22px;
+        font-size: 23px;
       }
 
       .cart-button {
         padding: 8px 12px;
         font-size: 14px;
+      }
+
+      .search {
+        margin-top: 12px;
+      }
+
+      .search input {
+        padding: 13px 16px;
+        font-size: 15px;
       }
 
       .hero {
@@ -387,6 +462,14 @@
 
       .hero p {
         font-size: 16px;
+      }
+
+      .categories {
+        margin-top: 20px;
+      }
+
+      .category {
+        padding: 12px 18px;
       }
 
       .product-grid {
@@ -402,8 +485,21 @@
         padding: 10px;
       }
 
+      .product-info h3 {
+        font-size: 15px;
+      }
+
+      .description {
+        font-size: 12px;
+      }
+
       .price {
         font-size: 18px;
+      }
+
+      .add {
+        padding: 9px;
+        font-size: 13px;
       }
 
       .cart-item {
@@ -447,7 +543,7 @@
     <input
       type="text"
       id="searchInput"
-      placeholder="Search products..."
+      placeholder="🔎 Search products..."
       oninput="filterProducts()"
     >
 
@@ -475,46 +571,28 @@
 
   <div class="category-list">
 
-    <div
-      class="category"
-      onclick="filterCategory('All')"
-    >
+    <div class="category" onclick="filterCategory('All')">
       All
     </div>
 
-    <div
-      class="category"
-      onclick="filterCategory('Fashion')"
-    >
-      Fashion
+    <div class="category" onclick="filterCategory('Fashion')">
+      👕 Fashion
     </div>
 
-    <div
-      class="category"
-      onclick="filterCategory('Electronics')"
-    >
-      Electronics
+    <div class="category" onclick="filterCategory('Electronics')">
+      📱 Electronics
     </div>
 
-    <div
-      class="category"
-      onclick="filterCategory('Home')"
-    >
-      Home
+    <div class="category" onclick="filterCategory('Home')">
+      🏠 Home
     </div>
 
-    <div
-      class="category"
-      onclick="filterCategory('Beauty')"
-    >
-      Beauty
+    <div class="category" onclick="filterCategory('Beauty')">
+      💄 Beauty
     </div>
 
-    <div
-      class="category"
-      onclick="filterCategory('Grocery')"
-    >
-      Grocery
+    <div class="category" onclick="filterCategory('Grocery')">
+      🛒 Grocery
     </div>
 
   </div>
@@ -852,9 +930,7 @@ function filterProducts() {
 // CATEGORY
 // =========================
 
-function filterCategory(
-  category
-) {
+function filterCategory(category) {
 
   selectedCategory =
     category;
@@ -1219,9 +1295,7 @@ function changeQuantity(
 // REMOVE
 // =========================
 
-function removeFromCart(
-  id
-) {
+function removeFromCart(id) {
 
   cart =
     cart.filter(
