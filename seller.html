@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shrivi Seller Center</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f5f6f8;
+  color:#222;
+}
+
+header{
+  background:#111827;
+  color:white;
+  padding:15px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.logo{
+  font-size:22px;
+  font-weight:bold;
+}
+
+button{
+  border:0;
+  border-radius:7px;
+  padding:10px 15px;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.primary{
+  background:#2563eb;
+  color:white;
+}
+
+.danger{
+  background:#dc2626;
+  color:white;
+}
+
+.success{
+  background:#16a34a;
+  color:white;
+}
+
+.container{
+  max-width:1100px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.card{
+  background:white;
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+h2{
+  margin-bottom:15px;
+}
+
+input,textarea,select{
+  width:100%;
+  padding:11px;
+  border:1px solid #ddd;
+  border-radius:7px;
+  margin:6px 0 12px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+}
+
+.stat{
+  background:white;
+  padding:18px;
+  border-radius:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.05);
+}
+
+.stat h3{
+  font-size:14px;
+  color:#666;
+  margin-bottom:8px;
+}
+
+.stat strong{
+  font-size:25px;
+}
+
+.tabs{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:20px;
+}
+
+.tabs button{
+  background:#e5e7eb;
+}
+
+.tabs button.active{
+  background:#2563eb;
+  color:white;
+}
+
+.hidden{
+  display:none!important;
+}
+
+.product{
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:15px;
+  margin-bottom:12px;
+}
+
+.product-actions{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.order{
+  border:1px solid #eee;
+  padding:15px;
+  border-radius:10px;
+  margin-bottom:12px;
+}
+
+.badge{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:15px;
+  background:#e5e7eb;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.message{
+  padding:10px;
+  border-radius:7px;
+  margin-bottom:12px;
+  display:none;
+}
+
+.error{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.ok{
+  background:#dcfce7;
+  color:#166534;
+}
+
+@media(max-width:800px){
+  .grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:500px){
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  header{
+    padding:12px;
+  }
+
+  .container{
+    margin-top:12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">🛍️ Shrivi Seller Center</div>
+  <button id="logoutBtn" class="danger hidden">Logout</button>
+</header>
+
+<div class="container">
+
+<!-- ================= AUTH ================= -->
+
+<section
