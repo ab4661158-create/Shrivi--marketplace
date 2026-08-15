@@ -30,6 +30,7 @@ let ADMIN_HASH = null;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 app.set("trust proxy", 1);
 
 app.use(
@@ -163,16 +164,79 @@ function requireAdmin(req, res, next) {
 }
 
 // =========================
-// PRODUCTS
+// PRODUCT HELPERS
+// =========================
+
+function calculateSalePrice(price, discountPercent) {
+  const originalPrice = Number(price) || 0;
+  const discount = Number(discountPercent) || 0;
+
+  const salePrice =
+    originalPrice -
+    (originalPrice * discount) / 100;
+
+  return Math.round(salePrice * 100) / 100;
+}
+
+function validDiscount(value) {
+  const discount = Number(value);
+
+  return (
+    Number.isFinite(discount) &&
+    discount >= 0 &&
+    discount <= 100
+  );
+}
+
+function validStock(value) {
+  const stock = Number(value);
+
+  return (
+    Number.isInteger(stock) &&
+    stock >= 0
+  );
+}
+
+// =========================
+// PRODUCTS - PUBLIC
 // =========================
 
 app.get("/api/products", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT * FROM products ORDER BY id DESC"
-    );
+    const result = await pool.query(`
+      SELECT
+        id,
+        name,
+        price,
+        category,
+        image,
+        description,
+        stock,
+        discount_percent,
+        created_at
+      FROM products
+      ORDER BY id DESC
+    `);
 
-    res.json(result.rows);
+    const products = result.rows.map((product) => {
+      const originalPrice = Number(product.price) || 0;
+      const discountPercent =
+        Number(product.discount_percent) || 0;
+
+      return {
+        ...product,
+        price: originalPrice,
+        original_price: originalPrice,
+        discount_percent: discountPercent,
+        sale_price: calculateSalePrice(
+          originalPrice,
+          discountPercent
+        ),
+        stock: Number(product.stock) || 0
+      };
+    });
+
+    res.json(products);
 
   } catch (error) {
     console.error("Products fetch error:", error);
@@ -183,6 +247,10 @@ app.get("/api/products", async (req, res) => {
   }
 });
 
+// =========================
+// ADD PRODUCT - ADMIN
+// =========================
+
 app.post("/api/products", requireAdmin, async (req, res) => {
   try {
     const {
@@ -190,32 +258,87 @@ app.post("/api/products", requireAdmin, async (req, res) => {
       price,
       category,
       image,
-      description
+      description,
+      stock,
+      discount_percent
     } = req.body || {};
 
-    if (!name || price === undefined) {
+    const numericPrice = Number(price);
+
+    const numericStock =
+      stock === undefined ||
+      stock === ""
+        ? 999999
+        : Number(stock);
+
+    const numericDiscount =
+      discount_percent === undefined ||
+      discount_percent === ""
+        ? 0
+        : Number(discount_percent);
+
+    if (!name || !name.trim()) {
       return res.status(400).json({
-        error: "Product name and price are required"
+        error: "Product name is required"
+      });
+    }
+
+    if (
+      !Number.isFinite(numericPrice) ||
+      numericPrice < 0
+    ) {
+      return res.status(400).json({
+        error: "Valid product price is required"
+      });
+    }
+
+    if (!validStock(numericStock)) {
+      return res.status(400).json({
+        error: "Stock must be a whole number 0 or greater"
+      });
+    }
+
+    if (!validDiscount(numericDiscount)) {
+      return res.status(400).json({
+        error: "Discount must be between 0 and 100"
       });
     }
 
     const result = await pool.query(
       `INSERT INTO products
-       (name, price, category, image, description)
-       VALUES ($1, $2, $3, $4, $5)
+       (
+         name,
+         price,
+         category,
+         image,
+         description,
+         stock,
+         discount_percent
+       )
+       VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING *`,
       [
-        name,
-        price,
+        name.trim(),
+        numericPrice,
         category || null,
         image || null,
-        description || null
+        description || null,
+        numericStock,
+        numericDiscount
       ]
     );
 
+    const product = result.rows[0];
+
     res.status(201).json({
       ok: true,
-      product: result.rows[0]
+      product: {
+        ...product,
+        sale_price: calculateSalePrice(
+          product.price,
+          product.discount_percent
+        )
+      }
     });
 
   } catch (error) {
@@ -228,17 +351,18 @@ app.post("/api/products", requireAdmin, async (req, res) => {
 });
 
 // =========================
-// CREATE ORDER
+// CREATE ORDER - SECURE
 // =========================
 
 app.post("/api/orders", async (req, res) => {
+  const client = await pool.connect();
+
   try {
     const {
       customer_name,
       customer_phone,
       customer_address,
-      items,
-      total
+      items
     } = req.body || {};
 
     if (
@@ -253,31 +377,216 @@ app.post("/api/orders", async (req, res) => {
       });
     }
 
-    const result = await pool.query(
+    const name = String(customer_name).trim();
+    const phone = String(customer_phone).trim();
+    const address = String(customer_address).trim();
+
+    if (!name) {
+      return res.status(400).json({
+        error: "Customer name is required"
+      });
+    }
+
+    if (!/^[0-9]{10}$/.test(phone)) {
+      return res.status(400).json({
+        error: "Valid 10-digit mobile number is required"
+      });
+    }
+
+    if (!address) {
+      return res.status(400).json({
+        error: "Delivery address is required"
+      });
+    }
+
+    // Combine duplicate product IDs safely
+    const quantityMap = new Map();
+
+    for (const item of items) {
+      const id = Number(item && item.id);
+      const quantity = Number(item && item.quantity);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0 ||
+        !Number.isInteger(quantity) ||
+        quantity <= 0 ||
+        quantity > 999
+      ) {
+        return res.status(400).json({
+          error: "Invalid cart item"
+        });
+      }
+
+      quantityMap.set(
+        id,
+        (quantityMap.get(id) || 0) + quantity
+      );
+    }
+
+    const productIds =
+      Array.from(quantityMap.keys());
+
+    await client.query("BEGIN");
+
+    // Lock products while checking stock.
+    const productResult = await client.query(
+      `SELECT
+         id,
+         name,
+         price,
+         category,
+         image,
+         description,
+         stock,
+         discount_percent
+       FROM products
+       WHERE id = ANY($1::int[])
+       FOR UPDATE`,
+      [productIds]
+    );
+
+    if (
+      productResult.rows.length !==
+      productIds.length
+    ) {
+      await client.query("ROLLBACK");
+
+      return res.status(400).json({
+        error: "One or more products are no longer available"
+      });
+    }
+
+    const productsById = new Map();
+
+    for (const product of productResult.rows) {
+      productsById.set(
+        Number(product.id),
+        product
+      );
+    }
+
+    let finalTotal = 0;
+    const verifiedItems = [];
+
+    for (const id of productIds) {
+      const product =
+        productsById.get(id);
+
+      const quantity =
+        quantityMap.get(id);
+
+      const stock =
+        Number(product.stock) || 0;
+
+      if (stock < quantity) {
+        await client.query("ROLLBACK");
+
+        return res.status(400).json({
+          error:
+            `${product.name} has only ${stock} item(s) available`
+        });
+      }
+
+      const originalPrice =
+        Number(product.price) || 0;
+
+      const discountPercent =
+        Number(product.discount_percent) || 0;
+
+      const salePrice =
+        calculateSalePrice(
+          originalPrice,
+          discountPercent
+        );
+
+      const itemTotal =
+        Math.round(
+          salePrice * quantity * 100
+        ) / 100;
+
+      finalTotal += itemTotal;
+
+      verifiedItems.push({
+        id: Number(product.id),
+        name: product.name,
+        category: product.category || "",
+        image: product.image || "",
+        quantity,
+        original_price: originalPrice,
+        discount_percent: discountPercent,
+        price: salePrice,
+        item_total: itemTotal
+      });
+    }
+
+    finalTotal =
+      Math.round(finalTotal * 100) / 100;
+
+    // Reduce stock only after every item passed validation.
+    for (const id of productIds) {
+      const quantity =
+        quantityMap.get(id);
+
+      await client.query(
+        `UPDATE products
+         SET stock = stock - $1
+         WHERE id = $2`,
+        [quantity, id]
+      );
+    }
+
+    const orderResult = await client.query(
       `INSERT INTO orders
-       (customer_name, customer_phone, customer_address, items, total)
-       VALUES ($1, $2, $3, $4, $5)
+       (
+         customer_name,
+         customer_phone,
+         customer_address,
+         items,
+         total,
+         status
+       )
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [
-        customer_name,
-        customer_phone,
-        customer_address,
-        JSON.stringify(items),
-        Number(total) || 0
+        name,
+        phone,
+        address,
+        JSON.stringify(verifiedItems),
+        finalTotal,
+        "pending"
       ]
     );
 
+    await client.query("COMMIT");
+
     res.status(201).json({
       ok: true,
-      order: result.rows[0]
+      order: orderResult.rows[0]
     });
 
   } catch (error) {
-    console.error("Order create error:", error);
+
+    try {
+      await client.query("ROLLBACK");
+    } catch (rollbackError) {
+      console.error(
+        "Rollback error:",
+        rollbackError
+      );
+    }
+
+    console.error(
+      "Order create error:",
+      error
+    );
 
     res.status(500).json({
       error: "Failed to create order"
     });
+
+  } finally {
+    client.release();
   }
 });
 
@@ -320,6 +629,17 @@ async function initializeDatabase() {
     )
   `);
 
+  // Safe migration for existing products
+  await pool.query(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS stock INTEGER NOT NULL DEFAULT 999999
+  `);
+
+  await pool.query(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0
+  `);
+
   await pool.query(`
     CREATE TABLE IF NOT EXISTS orders (
       id SERIAL PRIMARY KEY,
@@ -360,7 +680,9 @@ async function initializeDatabase() {
     )
   `);
 
-  console.log("SHRIVI database tables ready");
+  console.log(
+    "SHRIVI database tables ready"
+  );
 }
 
 // =========================
@@ -383,14 +705,22 @@ app.get("/api/dashboard", requireAdmin, async (req, res) => {
     );
 
     res.json({
-      products: Number(products.rows[0].count),
-      orders: Number(orders.rows[0].count),
-      sellers: Number(sellers.rows[0].count)
+      products:
+        Number(products.rows[0].count),
+
+      orders:
+        Number(orders.rows[0].count),
+
+      sellers:
+        Number(sellers.rows[0].count)
     });
 
   } catch (error) {
 
-    console.error("Dashboard error:", error);
+    console.error(
+      "Dashboard error:",
+      error
+    );
 
     res.status(500).json({
       error: "Database error"
