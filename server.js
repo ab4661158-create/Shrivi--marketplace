@@ -1608,7 +1608,64 @@ app.patch(
     }
   }
 );
+// =========================
+// UPDATE ORDER STATUS - ADMIN
+// =========================
 
+app.put("/api/orders/:id/status", requireAdmin, async (req, res) => {
+  try {
+    const orderId = Number(req.params.id);
+    const status = String(req.body?.status || "").trim().toLowerCase();
+
+    const allowedStatuses = [
+      "pending",
+      "confirmed",
+      "shipped",
+      "delivered",
+      "cancelled"
+    ];
+
+    if (!Number.isInteger(orderId) || orderId <= 0) {
+      return res.status(400).json({
+        error: "Invalid order ID"
+      });
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      return res.status(400).json({
+        error: "Invalid order status"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      UPDATE orders
+      SET status = $1
+      WHERE id = $2
+      RETURNING *
+      `,
+      [status, orderId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Order not found"
+      });
+    }
+
+    res.json({
+      ok: true,
+      order: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error("Order status update error:", error);
+
+    res.status(500).json({
+      error: "Failed to update order status"
+    });
+  }
+});
 // =========================
 // DATABASE TABLES
 // =========================
