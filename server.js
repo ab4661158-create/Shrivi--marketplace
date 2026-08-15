@@ -1564,7 +1564,64 @@ app.post("/api/orders", async (req, res) => {
     client.release();
   }
 });
+// =========================
+// CUSTOMER ORDER TRACKING
+// =========================
 
+app.get("/api/orders/track/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid order ID"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        status,
+        total,
+        items,
+        created_at
+      FROM orders
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({
+        error: "Order not found"
+      });
+    }
+
+    const order = result.rows[0];
+
+    res.json({
+      id: order.id,
+      status: order.status,
+      total: Number(order.total) || 0,
+      items: Array.isArray(order.items)
+        ? order.items
+        : [],
+      created_at: order.created_at
+    });
+
+  } catch (error) {
+    console.error(
+      "Order tracking error:",
+      error
+    );
+
+    res.status(500).json({
+      error: "Failed to track order"
+    });
+  }
+});
 // =========================
 // ADMIN ORDERS
 // =========================
