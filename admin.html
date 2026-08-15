@@ -1,147 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Shrivi Marketplace - Admin</title>
+<title>Shrivi Marketplace - Admin</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-        }
+<style>
+* {
+    box-sizing: border-box;
+}
 
-        header {
-            background: #111;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f5f5f5;
+    color: #111;
+}
 
-        header h1 {
-            margin: 0;
-        }
+header {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 20px;
+}
 
-        header p {
-            margin: 8px 0 0;
-        }
+header h1 {
+    margin: 0;
+}
 
-        .container {
-            max-width: 900px;
-            margin: 30px auto;
-            padding: 20px;
-        }
+header p {
+    margin: 8px 0 0;
+}
 
-        .card {
-            background: white;
-            padding: 25px;
-            margin-bottom: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px #ddd;
-        }
+.container {
+    max-width: 1100px;
+    margin: 25px auto;
+    padding: 15px;
+}
 
-        input,
-        textarea,
-        button {
-            width: 100%;
-            padding: 13px;
-            margin-top: 10px;
-            box-sizing: border-box;
-        }
+.card {
+    background: white;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px #ddd;
+}
 
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-            font-family: Arial, sans-serif;
-        }
+input,
+textarea,
+button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
 
-        button {
-            background: #111;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+input,
+textarea {
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 15px;
+}
 
-        button:hover {
-            background: #333;
-        }
+textarea {
+    min-height: 90px;
+    resize: vertical;
+}
 
-        #dashboard {
-            display: none;
-        }
+button {
+    background: #111;
+    color: white;
+    border: none;
+    border-radius: 7px;
+    font-size: 15px;
+    cursor: pointer;
+}
 
-        #message,
-        #productMessage {
-            font-weight: bold;
-            margin-top: 15px;
-        }
+button:hover {
+    background: #333;
+}
 
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
+button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
 
-        .stat {
-            background: #f5f5f5;
-            padding: 20px;
-            text-align: center;
-            border-radius: 8px;
-        }
+#dashboard {
+    display: none;
+}
 
-        .stat h3 {
-            margin: 0 0 10px;
-        }
+.message {
+    margin-top: 12px;
+    font-weight: bold;
+}
 
-        .stat p {
-            font-size: 25px;
-            margin: 0;
-            font-weight: bold;
-        }
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
 
-        .product-card {
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #ddd;
-        }
+.stat {
+    background: #f5f5f5;
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+}
 
-        .price-preview {
-            background: #f5f5f5;
-            padding: 15px;
-            margin-top: 15px;
-            border-radius: 8px;
-            font-size: 17px;
-        }
+.stat h3 {
+    margin: 0 0 10px;
+}
 
-        .price-preview strong {
-            font-size: 22px;
-        }
+.stat p {
+    font-size: 25px;
+    margin: 0;
+    font-weight: bold;
+}
 
-        .old-price {
-            text-decoration: line-through;
-            margin-right: 10px;
-        }
+.price-preview {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
 
-        .sale-price {
-            font-weight: bold;
-        }
+.original-preview {
+    color: #777;
+    text-decoration: line-through;
+}
 
-        @media (max-width: 600px) {
-            .container {
-                padding: 12px;
-                margin: 15px auto;
-            }
+.sale-preview {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 5px;
+}
 
-            .stats {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+.product-list {
+    margin-top: 25px;
+}
+
+.admin-product {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 18px;
+    margin-top: 15px;
+    background: #fff;
+}
+
+.admin-product h3 {
+    margin: 0 0 8px;
+}
+
+.product-meta {
+    color: #555;
+    line-height: 1.7;
+}
+
+.badge {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-top: 5px;
+    background: #eee;
+}
+
+.low-stock {
+    background: #fff0f0;
+    color: #b00020;
+}
+
+.out-stock {
+    background: #eee;
+    color: #555;
+}
+
+.discount-badge {
+    background: #f0fff4;
+    color: #087f23;
+}
+
+.product-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.edit-box {
+    display: none;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.delete-btn {
+    background: #b00020;
+}
+
+.delete-btn:hover {
+    background: #850018;
+}
+
+.cancel-btn {
+    background: #777;
+}
+
+.loading {
+    text-align: center;
+    padding: 20px;
+    font-weight: bold;
+}
+
+.empty {
+    text-align: center;
+    padding: 25px;
+    color: #666;
+}
+
+.logout {
+    margin-top: 20px;
+}
+
+@media (max-width: 700px) {
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .product-actions {
+        grid-template-columns: 1fr;
+    }
+
+    .card {
+        padding: 18px;
+    }
+}
+</style>
 </head>
 
 <body>
@@ -153,234 +251,278 @@
 
 <div class="container">
 
-    <!-- LOGIN -->
-    <div class="card" id="loginCard">
+<!-- =========================
+     LOGIN
+========================= -->
 
-        <h2>Admin Login</h2>
+<div class="card" id="loginCard">
 
-        <input
-            type="text"
-            id="username"
-            placeholder="Username"
-            autocomplete="username"
-        >
+    <h2>Admin Login</h2>
 
-        <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            autocomplete="current-password"
-        >
+    <input
+        type="text"
+        id="username"
+        placeholder="Username"
+        autocomplete="username"
+    >
 
-        <button onclick="login()">Login</button>
+    <input
+        type="password"
+        id="password"
+        placeholder="Password"
+        autocomplete="current-password"
+    >
 
-        <p id="message"></p>
+    <button onclick="login()">
+        Login
+    </button>
+
+    <p id="message" class="message"></p>
+
+</div>
+
+
+<!-- =========================
+     DASHBOARD
+========================= -->
+
+<div class="card" id="dashboard">
+
+    <h2>Dashboard</h2>
+
+    <p>
+        Welcome to Shrivi Marketplace Admin Panel.
+    </p>
+
+    <div class="stats">
+
+        <div class="stat">
+            <h3>Products</h3>
+            <p id="products">0</p>
+        </div>
+
+        <div class="stat">
+            <h3>Orders</h3>
+            <p id="orders">0</p>
+        </div>
+
+        <div class="stat">
+            <h3>Sellers</h3>
+            <p id="sellers">0</p>
+        </div>
 
     </div>
 
 
-    <!-- DASHBOARD -->
-    <div class="card" id="dashboard">
+<!-- =========================
+     ADD PRODUCT
+========================= -->
 
-        <h2>Dashboard</h2>
+<div class="product-list">
 
-        <p>
-            Welcome to Shrivi Marketplace Admin Panel.
-        </p>
+<h2>Add Product</h2>
 
-        <div class="stats">
+<input
+    type="text"
+    id="productName"
+    placeholder="Product Name"
+>
 
-            <div class="stat">
-                <h3>Products</h3>
-                <p id="products">-</p>
-            </div>
+<input
+    type="number"
+    id="productPrice"
+    placeholder="Original Price ₹"
+    min="0"
+    step="0.01"
+    oninput="updateAddPreview()"
+>
 
-            <div class="stat">
-                <h3>Orders</h3>
-                <p id="orders">-</p>
-            </div>
+<input
+    type="number"
+    id="productStock"
+    placeholder="Stock Quantity"
+    min="0"
+    step="1"
+    value="0"
+>
 
-            <div class="stat">
-                <h3>Sellers</h3>
-                <p id="sellers">-</p>
-            </div>
+<input
+    type="number"
+    id="productDiscount"
+    placeholder="Discount %"
+    min="0"
+    max="100"
+    step="0.01"
+    value="0"
+    oninput="updateAddPreview()"
+>
 
-        </div>
+<div class="price-preview">
 
-
-        <!-- ADD PRODUCT -->
-        <div class="product-card">
-
-            <h2>Add Product</h2>
-
-            <input
-                type="text"
-                id="productName"
-                placeholder="Product Name"
-            >
-
-            <input
-                type="number"
-                id="productPrice"
-                placeholder="Product Price"
-                min="0"
-                step="0.01"
-                oninput="updateSalePrice()"
-            >
-
-            <input
-                type="number"
-                id="productStock"
-                placeholder="Stock Quantity"
-                min="0"
-                step="1"
-            >
-
-            <input
-                type="number"
-                id="productDiscount"
-                placeholder="Discount %"
-                min="0"
-                max="100"
-                step="0.01"
-                oninput="updateSalePrice()"
-            >
-
-            <div class="price-preview">
-                <div>
-                    Original Price:
-                    <span id="previewOriginal">₹0.00</span>
-                </div>
-
-                <div>
-                    Discount:
-                    <span id="previewDiscount">0%</span>
-                </div>
-
-                <div style="margin-top:8px;">
-                    Sale Price:
-                    <strong id="previewSale">₹0.00</strong>
-                </div>
-            </div>
-
-            <input
-                type="text"
-                id="productCategory"
-                placeholder="Category"
-            >
-
-            <input
-                type="url"
-                id="productImage"
-                placeholder="Product Image URL"
-            >
-
-            <textarea
-                id="productDescription"
-                placeholder="Product Description"
-            ></textarea>
-
-            <button onclick="addProduct()">
-                Add Product
-            </button>
-
-            <p id="productMessage"></p>
-
-        </div>
-
-
-        <button onclick="logout()">Logout</button>
-
+    <div>
+        Original Price:
+        <span
+            id="addOriginalPrice"
+            class="original-preview"
+        >
+            ₹0.00
+        </span>
     </div>
+
+    <div>
+        Discount:
+        <strong id="addDiscount">
+            0%
+        </strong>
+    </div>
+
+    <div class="sale-preview">
+        Sale Price:
+        <span id="addSalePrice">
+            ₹0.00
+        </span>
+    </div>
+
+</div>
+
+<input
+    type="text"
+    id="productCategory"
+    placeholder="Category"
+>
+
+<input
+    type="url"
+    id="productImage"
+    placeholder="Product Image URL"
+>
+
+<textarea
+    id="productDescription"
+    placeholder="Product Description"
+></textarea>
+
+<button onclick="addProduct()">
+    Add Product
+</button>
+
+<p
+    id="productMessage"
+    class="message"
+></p>
+
+</div>
+
+
+<!-- =========================
+     PRODUCT MANAGEMENT
+========================= -->
+
+<div class="product-list">
+
+<h2>Product Management</h2>
+
+<div id="adminProducts">
+
+    <div class="loading">
+        Loading products...
+    </div>
+
+</div>
+
+</div>
+
+
+<button
+    class="logout"
+    onclick="logout()"
+>
+    Logout
+</button>
+
+</div>
 
 </div>
 
 
 <script>
 
-function updateSalePrice() {
-
-    const price =
-        Number(document.getElementById("productPrice").value) || 0;
-
-    const discount =
-        Number(document.getElementById("productDiscount").value) || 0;
-
-    const safeDiscount =
-        Math.min(Math.max(discount, 0), 100);
-
-    const salePrice =
-        price - (price * safeDiscount / 100);
-
-    const roundedSalePrice =
-        Math.round(salePrice * 100) / 100;
-
-    document.getElementById("previewOriginal").innerText =
-        "₹" + price.toFixed(2);
-
-    document.getElementById("previewDiscount").innerText =
-        safeDiscount + "%";
-
-    document.getElementById("previewSale").innerText =
-        "₹" + roundedSalePrice.toFixed(2);
-}
-
+// =========================
+// LOGIN
+// =========================
 
 async function login() {
 
     const username =
-        document.getElementById("username").value.trim();
+        document
+        .getElementById("username")
+        .value
+        .trim();
 
     const password =
-        document.getElementById("password").value;
+        document
+        .getElementById("password")
+        .value;
 
     const message =
-        document.getElementById("message");
+        document
+        .getElementById("message");
 
     if (!username || !password) {
+
         message.innerText =
             "Username and password required.";
+
         return;
     }
 
     try {
 
-        const response = await fetch("/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                username: username,
-                password: password
-            })
-        });
+        const response =
+            await fetch("/api/login", {
 
-        const data = await response.json();
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json"
+                },
+
+                body: JSON.stringify({
+                    username,
+                    password
+                })
+
+            });
+
+        const data =
+            await response.json();
 
         if (response.ok && data.ok) {
 
-            message.innerText =
-                "Login successful!";
+            document
+                .getElementById("loginCard")
+                .style.display = "none";
 
-            document.getElementById("loginCard").style.display =
-                "none";
-
-            document.getElementById("dashboard").style.display =
-                "block";
+            document
+                .getElementById("dashboard")
+                .style.display = "block";
 
             loadDashboard();
+
+            loadAdminProducts();
 
         } else {
 
             message.innerText =
-                data.error || "Wrong username or password.";
+                data.error ||
+                "Wrong username or password.";
 
         }
 
     } catch (error) {
 
-        console.error("Login error:", error);
+        console.error(error);
 
         message.innerText =
             "Server connection failed.";
@@ -388,6 +530,10 @@ async function login() {
     }
 }
 
+
+// =========================
+// DASHBOARD
+// =========================
 
 async function loadDashboard() {
 
@@ -403,20 +549,104 @@ async function loadDashboard() {
         const data =
             await response.json();
 
-        document.getElementById("products").innerText =
+        document
+            .getElementById("products")
+            .innerText =
             data.products ?? 0;
 
-        document.getElementById("orders").innerText =
+        document
+            .getElementById("orders")
+            .innerText =
             data.orders ?? 0;
 
-        document.getElementById("sellers").innerText =
+        document
+            .getElementById("sellers")
+            .innerText =
             data.sellers ?? 0;
 
     } catch (error) {
 
-        console.log("Dashboard error:", error);
+        console.error(
+            "Dashboard error:",
+            error
+        );
 
     }
+}
+
+
+// =========================
+// ADD PRICE PREVIEW
+// =========================
+
+function calculateSalePrice(
+    price,
+    discount
+) {
+
+    const p =
+        Number(price) || 0;
+
+    const d =
+        Number(discount) || 0;
+
+    return Math.round(
+        (
+            p -
+            (p * d / 100)
+        ) * 100
+    ) / 100;
+}
+
+
+function updateAddPreview() {
+
+    const price =
+        Number(
+            document
+            .getElementById("productPrice")
+            .value
+        ) || 0;
+
+    const discount =
+        Number(
+            document
+            .getElementById("productDiscount")
+            .value
+        ) || 0;
+
+    const sale =
+        calculateSalePrice(
+            price,
+            discount
+        );
+
+    document
+        .getElementById("addOriginalPrice")
+        .innerText =
+        "₹" +
+        price.toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits: 2
+            }
+        );
+
+    document
+        .getElementById("addDiscount")
+        .innerText =
+        discount + "%";
+
+    document
+        .getElementById("addSalePrice")
+        .innerText =
+        "₹" +
+        sale.toLocaleString(
+            "en-IN",
+            {
+                minimumFractionDigits: 2
+            }
+        );
 }
 
 
@@ -426,205 +656,891 @@ async function loadDashboard() {
 
 async function addProduct() {
 
-    const productMessage =
-        document.getElementById("productMessage");
+    const message =
+        document
+        .getElementById("productMessage");
 
     const name =
-        document.getElementById("productName").value.trim();
+        document
+        .getElementById("productName")
+        .value
+        .trim();
 
     const price =
-        document.getElementById("productPrice").value;
+        document
+        .getElementById("productPrice")
+        .value;
 
     const stock =
-        document.getElementById("productStock").value;
+        document
+        .getElementById("productStock")
+        .value;
 
     const discount =
-        document.getElementById("productDiscount").value;
+        document
+        .getElementById("productDiscount")
+        .value;
 
     const category =
-        document.getElementById("productCategory").value.trim();
+        document
+        .getElementById("productCategory")
+        .value
+        .trim();
 
     const image =
-        document.getElementById("productImage").value.trim();
+        document
+        .getElementById("productImage")
+        .value
+        .trim();
 
     const description =
-        document.getElementById("productDescription").value.trim();
+        document
+        .getElementById("productDescription")
+        .value
+        .trim();
 
 
     if (!name || price === "") {
 
-        productMessage.innerText =
+        message.innerText =
             "Product name and price are required.";
 
         return;
     }
 
-
-    const numericPrice = Number(price);
-
-    const numericStock =
-        stock === "" ? 999999 : Number(stock);
-
-    const numericDiscount =
-        discount === "" ? 0 : Number(discount);
-
-
     if (
-        !Number.isFinite(numericPrice) ||
-        numericPrice < 0
+        stock === "" ||
+        Number(stock) < 0 ||
+        !Number.isInteger(
+            Number(stock)
+        )
     ) {
 
-        productMessage.innerText =
-            "Enter a valid product price.";
-
-        return;
-    }
-
-
-    if (
-        !Number.isInteger(numericStock) ||
-        numericStock < 0
-    ) {
-
-        productMessage.innerText =
+        message.innerText =
             "Stock must be a whole number 0 or greater.";
 
         return;
     }
 
-
     if (
-        !Number.isFinite(numericDiscount) ||
-        numericDiscount < 0 ||
-        numericDiscount > 100
+        Number(discount) < 0 ||
+        Number(discount) > 100
     ) {
 
-        productMessage.innerText =
+        message.innerText =
             "Discount must be between 0 and 100.";
 
         return;
     }
 
 
-    productMessage.innerText =
+    message.innerText =
         "Adding product...";
 
 
     try {
 
-        const response = await fetch("/api/products", {
+        const response =
+            await fetch(
+                "/api/products",
+                {
+                    method: "POST",
 
-            method: "POST",
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                    body:
+                        JSON.stringify({
 
-            body: JSON.stringify({
+                            name,
 
-                name: name,
+                            price:
+                                Number(price),
 
-                price: numericPrice,
+                            category,
 
-                category: category,
+                            image,
 
-                image: image,
+                            description,
 
-                description: description,
+                            stock:
+                                Number(stock),
 
-                stock: numericStock,
+                            discount_percent:
+                                Number(discount)
 
-                discount_percent: numericDiscount
-
-            })
-
-        });
+                        })
+                }
+            );
 
 
         const data =
             await response.json();
 
 
-        if (response.ok && data.ok) {
+        if (
+            response.ok &&
+            data.ok
+        ) {
 
-            productMessage.innerText =
+            message.innerText =
                 "Product added successfully!";
 
+            document
+                .getElementById("productName")
+                .value = "";
 
-            document.getElementById("productName").value =
-                "";
+            document
+                .getElementById("productPrice")
+                .value = "";
 
-            document.getElementById("productPrice").value =
-                "";
+            document
+                .getElementById("productStock")
+                .value = "0";
 
-            document.getElementById("productStock").value =
-                "";
+            document
+                .getElementById("productDiscount")
+                .value = "0";
 
-            document.getElementById("productDiscount").value =
-                "";
+            document
+                .getElementById("productCategory")
+                .value = "";
 
-            document.getElementById("productCategory").value =
-                "";
+            document
+                .getElementById("productImage")
+                .value = "";
 
-            document.getElementById("productImage").value =
-                "";
+            document
+                .getElementById("productDescription")
+                .value = "";
 
-            document.getElementById("productDescription").value =
-                "";
-
-
-            updateSalePrice();
+            updateAddPreview();
 
             loadDashboard();
 
+            loadAdminProducts();
+
         } else {
 
-            productMessage.innerText =
-                data.error || "Failed to add product.";
+            message.innerText =
+                data.error ||
+                "Failed to add product.";
 
         }
 
     } catch (error) {
 
-        console.error("Add product error:", error);
+        console.error(
+            "Add product error:",
+            error
+        );
 
-        productMessage.innerText =
+        message.innerText =
             "Server connection failed.";
 
     }
 }
 
 
+// =========================
+// LOAD ADMIN PRODUCTS
+// =========================
+
+async function loadAdminProducts() {
+
+    const container =
+        document
+        .getElementById("adminProducts");
+
+    container.innerHTML =
+        '<div class="loading">Loading products...</div>';
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/admin/products"
+            );
+
+        if (!response.ok) {
+
+            if (response.status === 401) {
+
+                container.innerHTML =
+                    '<div class="empty">Admin login required.</div>';
+
+                return;
+            }
+
+            throw new Error(
+                "Failed to load products"
+            );
+        }
+
+        const products =
+            await response.json();
+
+        renderAdminProducts(products);
+
+    } catch (error) {
+
+        console.error(error);
+
+        container.innerHTML =
+            '<div class="empty">Unable to load products.</div>';
+
+    }
+}
+
+
+// =========================
+// RENDER ADMIN PRODUCTS
+// =========================
+
+function renderAdminProducts(products) {
+
+    const container =
+        document
+        .getElementById("adminProducts");
+
+    container.innerHTML = "";
+
+    if (!products.length) {
+
+        container.innerHTML =
+            '<div class="empty">No products found.</div>';
+
+        return;
+    }
+
+
+    products.forEach(product => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "admin-product";
+
+        const stock =
+            Number(product.stock) || 0;
+
+        const discount =
+            Number(
+                product.discount_percent
+            ) || 0;
+
+        const originalPrice =
+            Number(product.price) || 0;
+
+        const salePrice =
+            Number(
+                product.sale_price
+            ) ||
+            calculateSalePrice(
+                originalPrice,
+                discount
+            );
+
+
+        let stockBadge =
+            `<span class="badge">
+                Stock: ${stock}
+             </span>`;
+
+        if (stock === 0) {
+
+            stockBadge =
+                `<span class="badge out-stock">
+                    OUT OF STOCK
+                 </span>`;
+
+        } else if (stock <= 5) {
+
+            stockBadge =
+                `<span class="badge low-stock">
+                    LOW STOCK: ${stock}
+                 </span>`;
+
+        }
+
+
+        const discountBadge =
+            discount > 0
+            ? `<span class="badge discount-badge">
+                    ${discount}% OFF
+               </span>`
+            : "";
+
+
+        card.innerHTML = `
+
+            <h3>
+                ${escapeHTML(product.name)}
+            </h3>
+
+            <div class="product-meta">
+
+                Category:
+                ${escapeHTML(
+                    product.category ||
+                    "General"
+                )}
+
+                <br>
+
+                Original Price:
+                ₹${originalPrice.toLocaleString(
+                    "en-IN"
+                )}
+
+                <br>
+
+                Sale Price:
+                <strong>
+                    ₹${salePrice.toLocaleString(
+                        "en-IN"
+                    )}
+                </strong>
+
+                <br>
+
+                ${stockBadge}
+                ${discountBadge}
+
+            </div>
+
+            <div class="product-actions">
+
+                <button
+                    onclick="toggleEdit(${product.id})"
+                >
+                    Edit
+                </button>
+
+                <button
+                    class="delete-btn"
+                    onclick="deleteProduct(${product.id})"
+                >
+                    Delete
+                </button>
+
+            </div>
+
+            <div
+                class="edit-box"
+                id="edit-${product.id}"
+            >
+
+                <h3>Edit Product</h3>
+
+                <input
+                    id="edit-name-${product.id}"
+                    value="${escapeAttribute(
+                        product.name
+                    )}"
+                    placeholder="Product Name"
+                >
+
+                <input
+                    type="number"
+                    id="edit-price-${product.id}"
+                    value="${originalPrice}"
+                    min="0"
+                    step="0.01"
+                    oninput="updateEditPreview(${product.id})"
+                    placeholder="Original Price"
+                >
+
+                <input
+                    type="number"
+                    id="edit-stock-${product.id}"
+                    value="${stock}"
+                    min="0"
+                    step="1"
+                    placeholder="Stock"
+                >
+
+                <input
+                    type="number"
+                    id="edit-discount-${product.id}"
+                    value="${discount}"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    oninput="updateEditPreview(${product.id})"
+                    placeholder="Discount %"
+                >
+
+                <div
+                    class="price-preview"
+                    id="preview-${product.id}"
+                >
+                    Sale Price:
+                    <strong>
+                        ₹${salePrice.toLocaleString(
+                            "en-IN",
+                            {
+                                minimumFractionDigits: 2
+                            }
+                        )}
+                    </strong>
+                </div>
+
+                <input
+                    id="edit-category-${product.id}"
+                    value="${escapeAttribute(
+                        product.category || ""
+                    )}"
+                    placeholder="Category"
+                >
+
+                <input
+                    type="url"
+                    id="edit-image-${product.id}"
+                    value="${escapeAttribute(
+                        product.image || ""
+                    )}"
+                    placeholder="Image URL"
+                >
+
+                <textarea
+                    id="edit-description-${product.id}"
+                    placeholder="Description"
+                >${escapeHTML(
+                    product.description || ""
+                )}</textarea>
+
+                <button
+                    onclick="saveProduct(${product.id})"
+                >
+                    Save Changes
+                </button>
+
+                <button
+                    class="cancel-btn"
+                    onclick="toggleEdit(${product.id})"
+                >
+                    Cancel
+                </button>
+
+                <p
+                    id="edit-message-${product.id}"
+                    class="message"
+                ></p>
+
+            </div>
+        `;
+
+
+        container.appendChild(card);
+
+    });
+}
+
+
+// =========================
+// EDIT TOGGLE
+// =========================
+
+function toggleEdit(id) {
+
+    const box =
+        document
+        .getElementById(
+            "edit-" + id
+        );
+
+    if (!box) {
+        return;
+    }
+
+    box.style.display =
+        box.style.display === "block"
+            ? "none"
+            : "block";
+}
+
+
+// =========================
+// EDIT PRICE PREVIEW
+// =========================
+
+function updateEditPreview(id) {
+
+    const price =
+        Number(
+            document
+            .getElementById(
+                "edit-price-" + id
+            )
+            .value
+        ) || 0;
+
+    const discount =
+        Number(
+            document
+            .getElementById(
+                "edit-discount-" + id
+            )
+            .value
+        ) || 0;
+
+    const sale =
+        calculateSalePrice(
+            price,
+            discount
+        );
+
+    document
+        .getElementById(
+            "preview-" + id
+        )
+        .innerHTML = `
+            Sale Price:
+            <strong>
+                ₹${sale.toLocaleString(
+                    "en-IN",
+                    {
+                        minimumFractionDigits: 2
+                    }
+                )}
+            </strong>
+        `;
+}
+
+
+// =========================
+// SAVE PRODUCT
+// =========================
+
+async function saveProduct(id) {
+
+    const message =
+        document
+        .getElementById(
+            "edit-message-" + id
+        );
+
+    const name =
+        document
+        .getElementById(
+            "edit-name-" + id
+        )
+        .value
+        .trim();
+
+    const price =
+        Number(
+            document
+            .getElementById(
+                "edit-price-" + id
+            )
+            .value
+        );
+
+    const stock =
+        Number(
+            document
+            .getElementById(
+                "edit-stock-" + id
+            )
+            .value
+        );
+
+    const discount =
+        Number(
+            document
+            .getElementById(
+                "edit-discount-" + id
+            )
+            .value
+        );
+
+    const category =
+        document
+        .getElementById(
+            "edit-category-" + id
+        )
+        .value
+        .trim();
+
+    const image =
+        document
+        .getElementById(
+            "edit-image-" + id
+        )
+        .value
+        .trim();
+
+    const description =
+        document
+        .getElementById(
+            "edit-description-" + id
+        )
+        .value
+        .trim();
+
+
+    if (!name) {
+
+        message.innerText =
+            "Product name is required.";
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(price) ||
+        price < 0
+    ) {
+
+        message.innerText =
+            "Enter a valid price.";
+
+        return;
+    }
+
+    if (
+        !Number.isInteger(stock) ||
+        stock < 0
+    ) {
+
+        message.innerText =
+            "Stock must be a whole number 0 or greater.";
+
+        return;
+    }
+
+    if (
+        !Number.isFinite(discount) ||
+        discount < 0 ||
+        discount > 100
+    ) {
+
+        message.innerText =
+            "Discount must be between 0 and 100.";
+
+        return;
+    }
+
+
+    message.innerText =
+        "Saving...";
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/products/" + id,
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            name,
+
+                            price,
+
+                            category,
+
+                            image,
+
+                            description,
+
+                            stock,
+
+                            discount_percent:
+                                discount
+
+                        })
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.ok
+        ) {
+
+            message.innerText =
+                "Product updated successfully!";
+
+            loadDashboard();
+
+            loadAdminProducts();
+
+        } else {
+
+            message.innerText =
+                data.error ||
+                "Failed to update product.";
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        message.innerText =
+            "Server connection failed.";
+
+    }
+}
+
+
+// =========================
+// DELETE PRODUCT
+// =========================
+
+async function deleteProduct(id) {
+
+    const confirmed =
+        confirm(
+            "Are you sure you want to delete this product?"
+        );
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/products/" + id,
+                {
+                    method: "DELETE"
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (
+            response.ok &&
+            data.ok
+        ) {
+
+            alert(
+                "Product deleted successfully."
+            );
+
+            loadDashboard();
+
+            loadAdminProducts();
+
+        } else {
+
+            alert(
+                data.error ||
+                "Failed to delete product."
+            );
+
+        }
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            "Server connection failed."
+        );
+
+    }
+}
+
+
+// =========================
+// LOGOUT
+// =========================
+
 async function logout() {
 
     try {
 
-        await fetch("/api/logout", {
-            method: "POST"
-        });
+        await fetch(
+            "/api/logout",
+            {
+                method: "POST"
+            }
+        );
 
     } catch (error) {
 
-        console.log("Logout error:", error);
+        console.error(error);
 
     }
 
-    document.getElementById("dashboard").style.display =
-        "none";
 
-    document.getElementById("loginCard").style.display =
-        "block";
+    document
+        .getElementById("dashboard")
+        .style.display = "none";
 
-    document.getElementById("username").value =
-        "";
+    document
+        .getElementById("loginCard")
+        .style.display = "block";
 
-    document.getElementById("password").value =
-        "";
+    document
+        .getElementById("username")
+        .value = "";
 
-    document.getElementById("message").innerText =
+    document
+        .getElementById("password")
+        .value = "";
+
+    document
+        .getElementById("message")
+        .innerText =
         "Logged out.";
-
 }
+
+
+// =========================
+// HTML SAFETY
+// =========================
+
+function escapeHTML(value) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent =
+        value ?? "";
+
+    return div.innerHTML;
+}
+
+
+function escapeAttribute(value) {
+
+    return escapeHTML(value)
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+// =========================
+// START
+// =========================
+
+updateAddPreview();
 
 </script>
 
