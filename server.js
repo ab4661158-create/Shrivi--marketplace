@@ -717,7 +717,225 @@ app.post("/api/orders", async (req, res) => {
     client.release();
   }
 });
+// =========================
+// PRODUCT MANAGEMENT - ADMIN
+// =========================
 
+// UPDATE PRODUCT
+app.put("/api/products/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid product ID"
+      });
+    }
+
+    const {
+      name,
+      price,
+      category,
+      image,
+      description,
+      stock,
+      discount_percent
+    } = req.body || {};
+
+    const numericPrice = Number(price);
+    const numericStock = Number(stock);
+    const numericDiscount = Number(discount_percent);
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        error: "Product name is required"
+      });
+    }
+
+    if (
+      !Number.isFinite(numericPrice) ||
+      numericPrice < 0
+    ) {
+      return res.status(400).json({
+        error: "Valid product price is required"
+      });
+    }
+
+    if (!validStock(numericStock)) {
+      return res.status(400).json({
+        error: "Stock must be a whole number 0 or greater"
+      });
+    }
+
+    if (!validDiscount(numericDiscount)) {
+      return res.status(400).json({
+        error: "Discount must be between 0 and 100"
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE products
+       SET
+         name = $1,
+         price = $2,
+         category = $3,
+         image = $4,
+         description = $5,
+         stock = $6,
+         discount_percent = $7
+       WHERE id = $8
+       RETURNING *`,
+      [
+        name.trim(),
+        numericPrice,
+        category || null,
+        image || null,
+        description || null,
+        numericStock,
+        numericDiscount,
+        id
+      ]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: "Product not found"
+      });
+    }
+
+    const product = result.rows[0];
+
+    res.json({
+      ok: true,
+      product: {
+        ...product,
+        sale_price: calculateSalePrice(
+          product.price,
+          product.discount_percent
+        )
+      }
+    });
+
+  } catch (error) {
+    console.error(
+      "Product update error:",
+      error
+    );
+
+    res.status(500).json({
+      error: "Failed to update product"
+    });
+  }
+});
+
+
+// DELETE PRODUCT
+app.delete(
+  "/api/products/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          error: "Invalid product ID"
+        });
+      }
+
+      const result = await pool.query(
+        `DELETE FROM products
+         WHERE id = $1
+         RETURNING id, name`,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          error: "Product not found"
+        });
+      }
+
+      res.json({
+        ok: true,
+        message: "Product deleted successfully",
+        product: result.rows[0]
+      });
+
+    } catch (error) {
+      console.error(
+        "Product delete error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Failed to delete product"
+      });
+    }
+  }
+);
+
+
+// ADMIN PRODUCT LIST
+app.get(
+  "/api/admin/products",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          id,
+          name,
+          price,
+          category,
+          image,
+          description,
+          stock,
+          discount_percent,
+          created_at
+        FROM products
+        ORDER BY id DESC
+      `);
+
+      const products = result.rows.map(
+        (product) => {
+          const originalPrice =
+            Number(product.price) || 0;
+
+          const discountPercent =
+            Number(product.discount_percent) || 0;
+
+          return {
+            ...product,
+            price: originalPrice,
+            original_price: originalPrice,
+            discount_percent:
+              discountPercent,
+            sale_price:
+              calculateSalePrice(
+                originalPrice,
+                discountPercent
+              ),
+            stock:
+              Number(product.stock) || 0
+          };
+        }
+      );
+
+      res.json(products);
+
+    } catch (error) {
+      console.error(
+        "Admin products fetch error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Failed to fetch admin products"
+      });
+    }
+  }
+);
 // =========================
 // ADMIN ORDERS
 // =========================
