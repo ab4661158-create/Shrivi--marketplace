@@ -3,195 +3,325 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Shrivi Seller Center</title>
 
 <style>
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:Arial,sans-serif;
+* {
+  box-sizing: border-box;
 }
 
-body{
-  background:#f5f6f8;
-  color:#222;
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  color: #172033;
 }
 
-header{
-  background:#111827;
-  color:white;
-  padding:15px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+header {
+  background: #111827;
+  color: white;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
-.logo{
-  font-size:22px;
-  font-weight:bold;
+.logo {
+  font-size: 25px;
+  font-weight: bold;
 }
 
-button{
-  border:0;
-  border-radius:7px;
-  padding:10px 15px;
-  cursor:pointer;
-  font-weight:bold;
+.logo span {
+  margin-right: 8px;
 }
 
-.primary{
-  background:#2563eb;
-  color:white;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
-.danger{
-  background:#dc2626;
-  color:white;
+button {
+  border: 0;
+  border-radius: 8px;
+  padding: 11px 16px;
+  cursor: pointer;
+  font-weight: bold;
 }
 
-.success{
-  background:#16a34a;
-  color:white;
+.logout-btn {
+  background: #ef4444;
+  color: white;
 }
 
-.container{
-  max-width:1100px;
-  margin:20px auto;
-  padding:0 15px;
+.container {
+  max-width: 1150px;
+  margin: auto;
+  padding: 20px;
 }
 
-.card{
-  background:white;
-  border-radius:12px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 2px 10px rgba(0,0,0,.06);
+.hidden {
+  display: none !important;
 }
 
-h2{
-  margin-bottom:15px;
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 14px rgba(0,0,0,.06);
 }
 
-input,textarea,select{
-  width:100%;
-  padding:11px;
-  border:1px solid #ddd;
-  border-radius:7px;
-  margin:6px 0 12px;
+.auth-box {
+  max-width: 480px;
+  margin: 45px auto;
 }
 
-textarea{
-  min-height:90px;
-  resize:vertical;
+h1, h2, h3 {
+  margin-top: 0;
 }
 
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
 }
 
-.stat{
-  background:white;
-  padding:18px;
-  border-radius:10px;
-  box-shadow:0 2px 8px rgba(0,0,0,.05);
+textarea {
+  min-height: 90px;
+  resize: vertical;
 }
 
-.stat h3{
-  font-size:14px;
-  color:#666;
-  margin-bottom:8px;
+.primary {
+  background: #2563eb;
+  color: white;
 }
 
-.stat strong{
-  font-size:25px;
+.success {
+  background: #16a34a;
+  color: white;
 }
 
-.tabs{
-  display:flex;
-  gap:8px;
-  flex-wrap:wrap;
-  margin-bottom:20px;
+.warning {
+  background: #f59e0b;
+  color: white;
 }
 
-.tabs button{
-  background:#e5e7eb;
+.danger {
+  background: #dc2626;
+  color: white;
 }
 
-.tabs button.active{
-  background:#2563eb;
-  color:white;
+.secondary {
+  background: #e5e7eb;
+  color: #111827;
 }
 
-.hidden{
-  display:none!important;
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 20px;
 }
 
-.product{
-  border:1px solid #eee;
-  border-radius:10px;
-  padding:15px;
-  margin-bottom:12px;
+.tab {
+  background: white;
+  color: #111827;
+  white-space: nowrap;
 }
 
-.product-actions{
-  display:flex;
-  gap:8px;
-  margin-top:10px;
+.tab.active {
+  background: #2563eb;
+  color: white;
 }
 
-.order{
-  border:1px solid #eee;
-  padding:15px;
-  border-radius:10px;
-  margin-bottom:12px;
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
 }
 
-.badge{
-  display:inline-block;
-  padding:5px 9px;
-  border-radius:15px;
-  background:#e5e7eb;
-  font-size:12px;
-  font-weight:bold;
+.stat {
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 3px 14px rgba(0,0,0,.06);
 }
 
-.message{
-  padding:10px;
-  border-radius:7px;
-  margin-bottom:12px;
-  display:none;
+.stat-title {
+  color: #6b7280;
+  font-size: 14px;
 }
 
-.error{
-  background:#fee2e2;
-  color:#991b1b;
+.stat-value {
+  font-size: 30px;
+  font-weight: bold;
+  margin-top: 7px;
 }
 
-.ok{
-  background:#dcfce7;
-  color:#166534;
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
 }
 
-@media(max-width:800px){
-  .grid{
-    grid-template-columns:repeat(2,1fr);
+.product {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 3px 14px rgba(0,0,0,.06);
+}
+
+.product-image {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.product-body {
+  padding: 15px;
+}
+
+.price {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.old-price {
+  color: #888;
+  text-decoration: line-through;
+  font-size: 14px;
+}
+
+.discount {
+  color: #16a34a;
+  font-weight: bold;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.order {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.order-items {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.message {
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: none;
+}
+
+.message.success-msg {
+  display: block;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.message.error-msg {
+  display: block;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.profile-line {
+  margin: 8px 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 30px;
+  color: #6b7280;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal-box {
+  background: white;
+  width: 100%;
+  max-width: 550px;
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.close {
+  float: right;
+  background: #e5e7eb;
+}
+
+@media (max-width: 850px) {
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media(max-width:500px){
-  .grid{
-    grid-template-columns:1fr;
+@media (max-width: 600px) {
+  header {
+    padding: 15px;
   }
 
-  header{
-    padding:12px;
+  .logo {
+    font-size: 20px;
   }
 
-  .container{
-    margin-top:12px;
+  .container {
+    padding: 12px;
+  }
+
+  .stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .stat {
+    padding: 15px;
+  }
+
+  .stat-value {
+    font-size: 24px;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
@@ -200,12 +330,1772 @@ textarea{
 <body>
 
 <header>
-  <div class="logo">🛍️ Shrivi Seller Center</div>
-  <button id="logoutBtn" class="danger hidden">Logout</button>
+  <div class="logo">
+    <span>🛍️</span> Shrivi Seller Center
+  </div>
+
+  <div class="header-right">
+    <span id="sellerNameHeader"></span>
+    <button
+      id="logoutBtn"
+      class="logout-btn hidden"
+      onclick="logoutSeller()"
+    >
+      Logout
+    </button>
+  </div>
 </header>
 
 <div class="container">
 
-<!-- ================= AUTH ================= -->
+  <!-- ================= AUTH ================= -->
 
-<section
+  <section id="authSection">
+
+    <div class="card auth-box">
+
+      <div id="authMessage" class="message"></div>
+
+      <div id="loginBox">
+
+        <h2>Seller Login</h2>
+
+        <p>Login to manage your Shrivi products and orders.</p>
+
+        <label>Email</label>
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="seller@example.com"
+        >
+
+        <label>Password</label>
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+        >
+
+        <button
+          class="primary"
+          style="width:100%"
+          onclick="sellerLogin()"
+        >
+          Login
+        </button>
+
+        <br><br>
+
+        <button
+          class="secondary"
+          style="width:100%"
+          onclick="showRegister()"
+        >
+          Create Seller Account
+        </button>
+
+      </div>
+
+      <div id="registerBox" class="hidden">
+
+        <h2>Create Seller Account</h2>
+
+        <label>Seller Name</label>
+        <input
+          id="registerName"
+          type="text"
+          placeholder="Your name / business name"
+        >
+
+        <label>Email</label>
+        <input
+          id="registerEmail"
+          type="email"
+          placeholder="seller@example.com"
+        >
+
+        <label>Phone</label>
+        <input
+          id="registerPhone"
+          type="tel"
+          maxlength="10"
+          placeholder="10 digit mobile number"
+        >
+
+        <label>Password</label>
+        <input
+          id="registerPassword"
+          type="password"
+          placeholder="Minimum 8 characters"
+        >
+
+        <button
+          class="success"
+          style="width:100%"
+          onclick="registerSeller()"
+        >
+          Register
+        </button>
+
+        <br><br>
+
+        <button
+          class="secondary"
+          style="width:100%"
+          onclick="showLogin()"
+        >
+          Already have an account? Login
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= SELLER APP ================= -->
+
+  <section id="sellerSection" class="hidden">
+
+    <div id="mainMessage" class="message"></div>
+
+    <!-- TABS -->
+
+    <div class="tabs">
+
+      <button
+        id="tabDashboard"
+        class="tab active"
+        onclick="showTab('dashboard')"
+      >
+        📊 Dashboard
+      </button>
+
+      <button
+        id="tabProducts"
+        class="tab"
+        onclick="showTab('products')"
+      >
+        📦 Products
+      </button>
+
+      <button
+        id="tabOrders"
+        class="tab"
+        onclick="showTab('orders')"
+      >
+        🛒 Orders
+      </button>
+
+      <button
+        id="tabProfile"
+        class="tab"
+        onclick="showTab('profile')"
+      >
+        👤 Profile
+      </button>
+
+    </div>
+
+
+    <!-- ================= DASHBOARD ================= -->
+
+    <div id="dashboardTab">
+
+      <h2>Seller Dashboard</h2>
+
+      <div class="stats">
+
+        <div class="stat">
+          <div class="stat-title">
+            Products
+          </div>
+
+          <div
+            id="statProducts"
+            class="stat-value"
+          >
+            0
+          </div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-title">
+            Total Stock
+          </div>
+
+          <div
+            id="statStock"
+            class="stat-value"
+          >
+            0
+          </div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-title">
+            Orders
+          </div>
+
+          <div
+            id="statOrders"
+            class="stat-value"
+          >
+            0
+          </div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-title">
+            Revenue
+          </div>
+
+          <div
+            id="statRevenue"
+            class="stat-value"
+          >
+            ₹0
+          </div>
+        </div>
+
+      </div>
+
+      <br>
+
+      <div class="card">
+
+        <h3>Quick Actions</h3>
+
+        <div class="actions">
+
+          <button
+            class="primary"
+            onclick="showTab('products'); openAddProduct()"
+          >
+            + Add Product
+          </button>
+
+          <button
+            class="secondary"
+            onclick="showTab('orders')"
+          >
+            View Orders
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ================= PRODUCTS ================= -->
+
+    <div id="productsTab" class="hidden">
+
+      <div class="card">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          gap:10px;
+          flex-wrap:wrap;
+        ">
+
+          <h2>My Products</h2>
+
+          <button
+            class="primary"
+            onclick="openAddProduct()"
+          >
+            + Add Product
+          </button>
+
+        </div>
+
+      </div>
+
+      <div
+        id="productsGrid"
+        class="product-grid"
+      ></div>
+
+    </div>
+
+
+    <!-- ================= ORDERS ================= -->
+
+    <div id="ordersTab" class="hidden">
+
+      <div class="card">
+
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+        ">
+
+          <h2>My Orders</h2>
+
+          <button
+            class="secondary"
+            onclick="loadOrders()"
+          >
+            🔄 Refresh
+          </button>
+
+        </div>
+
+      </div>
+
+      <div id="ordersList"></div>
+
+    </div>
+
+
+    <!-- ================= PROFILE ================= -->
+
+    <div id="profileTab" class="hidden">
+
+      <div class="card">
+
+        <h2>Seller Profile</h2>
+
+        <div class="profile-line">
+          <strong>Name:</strong>
+          <span id="profileName"></span>
+        </div>
+
+        <div class="profile-line">
+          <strong>Email:</strong>
+          <span id="profileEmail"></span>
+        </div>
+
+        <div class="profile-line">
+          <strong>Phone:</strong>
+          <span id="profilePhone"></span>
+        </div>
+
+        <div class="profile-line">
+          <strong>Status:</strong>
+          <span id="profileStatus"></span>
+        </div>
+
+        <div class="profile-line">
+          <strong>Seller ID:</strong>
+          <span id="profileId"></span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<!-- ================= PRODUCT MODAL ================= -->
+
+<div
+  id="productModal"
+  class="modal hidden"
+>
+
+  <div class="modal-box">
+
+    <button
+      class="close"
+      onclick="closeProductModal()"
+    >
+      ✕
+    </button>
+
+    <h2 id="productModalTitle">
+      Add Product
+    </h2>
+
+    <input
+      id="productId"
+      type="hidden"
+    >
+
+    <label>Product Name</label>
+
+    <input
+      id="productName"
+      type="text"
+      placeholder="Product name"
+    >
+
+    <label>Price</label>
+
+    <input
+      id="productPrice"
+      type="number"
+      min="0"
+      step="0.01"
+      placeholder="399"
+    >
+
+    <label>Category</label>
+
+    <input
+      id="productCategory"
+      type="text"
+      placeholder="Electronics"
+    >
+
+    <label>Image URL</label>
+
+    <input
+      id="productImage"
+      type="url"
+      placeholder="https://..."
+    >
+
+    <label>Description</label>
+
+    <textarea
+      id="productDescription"
+      placeholder="Product description"
+    ></textarea>
+
+    <label>Stock</label>
+
+    <input
+      id="productStock"
+      type="number"
+      min="0"
+      step="1"
+      placeholder="100"
+    >
+
+    <label>Discount %</label>
+
+    <input
+      id="productDiscount"
+      type="number"
+      min="0"
+      max="100"
+      step="0.01"
+      placeholder="10"
+    >
+
+    <div class="actions">
+
+      <button
+        class="success"
+        onclick="saveProduct()"
+      >
+        Save Product
+      </button>
+
+      <button
+        class="secondary"
+        onclick="closeProductModal()"
+      >
+        Cancel
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let currentSeller = null;
+let currentProducts = [];
+
+
+/* =========================
+   AUTH UI
+========================= */
+
+function showRegister() {
+  document
+    .getElementById("loginBox")
+    .classList.add("hidden");
+
+  document
+    .getElementById("registerBox")
+    .classList.remove("hidden");
+
+  clearMessage("authMessage");
+}
+
+function showLogin() {
+  document
+    .getElementById("registerBox")
+    .classList.add("hidden");
+
+  document
+    .getElementById("loginBox")
+    .classList.remove("hidden");
+
+  clearMessage("authMessage");
+}
+
+
+/* =========================
+   MESSAGE
+========================= */
+
+function showMessage(
+  elementId,
+  message,
+  type = "success"
+) {
+  const el =
+    document.getElementById(elementId);
+
+  if (!el) return;
+
+  el.textContent = message;
+
+  el.className =
+    "message " +
+    (
+      type === "error"
+        ? "error-msg"
+        : "success-msg"
+    );
+}
+
+function clearMessage(elementId) {
+  const el =
+    document.getElementById(elementId);
+
+  if (!el) return;
+
+  el.textContent = "";
+  el.className = "message";
+}
+
+
+/* =========================
+   SELLER REGISTER
+========================= */
+
+async function registerSeller() {
+
+  clearMessage("authMessage");
+
+  const name =
+    document
+      .getElementById("registerName")
+      .value
+      .trim();
+
+  const email =
+    document
+      .getElementById("registerEmail")
+      .value
+      .trim();
+
+  const phone =
+    document
+      .getElementById("registerPhone")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("registerPassword")
+      .value;
+
+  if (!name) {
+    return showMessage(
+      "authMessage",
+      "Seller name is required",
+      "error"
+    );
+  }
+
+  if (!email) {
+    return showMessage(
+      "authMessage",
+      "Email is required",
+      "error"
+    );
+  }
+
+  if (password.length < 8) {
+    return showMessage(
+      "authMessage",
+      "Password must be at least 8 characters",
+      "error"
+    );
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/register",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            name,
+            email,
+            phone,
+            password
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Registration failed"
+      );
+    }
+
+    currentSeller =
+      data.seller;
+
+    showSellerApp();
+
+    showMessage(
+      "mainMessage",
+      "Seller account created successfully!"
+    );
+
+    await loadDashboard();
+    await loadProducts();
+    await loadOrders();
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================
+   SELLER LOGIN
+========================= */
+
+async function sellerLogin() {
+
+  clearMessage("authMessage");
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("loginPassword")
+      .value;
+
+  if (!email || !password) {
+    return showMessage(
+      "authMessage",
+      "Email and password are required",
+      "error"
+    );
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/login",
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Login failed"
+      );
+    }
+
+    currentSeller =
+      data.seller;
+
+    showSellerApp();
+
+    await loadDashboard();
+    await loadProducts();
+    await loadOrders();
+
+  } catch (error) {
+
+    showMessage(
+      "authMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================
+   CHECK SESSION
+========================= */
+
+async function checkSellerSession() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/me",
+        {
+          credentials: "include"
+        }
+      );
+
+    if (!response.ok) {
+      return;
+    }
+
+    const data =
+      await response.json();
+
+    if (
+      data.loggedIn &&
+      data.seller
+    ) {
+
+      currentSeller =
+        data.seller;
+
+      showSellerApp();
+
+      await loadDashboard();
+      await loadProducts();
+      await loadOrders();
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Session check error:",
+      error
+    );
+  }
+}
+
+
+/* =========================
+   SHOW SELLER APP
+========================= */
+
+function showSellerApp() {
+
+  document
+    .getElementById("authSection")
+    .classList.add("hidden");
+
+  document
+    .getElementById("sellerSection")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("logoutBtn")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("sellerNameHeader")
+    .textContent =
+      currentSeller?.name || "";
+
+  updateProfile();
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logoutSeller() {
+
+  try {
+
+    await fetch(
+      "/api/seller/logout",
+      {
+        method: "POST",
+        credentials: "include"
+      }
+    );
+
+  } catch (error) {
+    console.error(error);
+  }
+
+  currentSeller = null;
+
+  document
+    .getElementById("sellerSection")
+    .classList.add("hidden");
+
+  document
+    .getElementById("authSection")
+    .classList.remove("hidden");
+
+  document
+    .getElementById("logoutBtn")
+    .classList.add("hidden");
+
+  document
+    .getElementById("sellerNameHeader")
+    .textContent = "";
+
+  showLogin();
+}
+
+
+/* =========================
+   TABS
+========================= */
+
+function showTab(tab) {
+
+  const tabs = [
+    "dashboard",
+    "products",
+    "orders",
+    "profile"
+  ];
+
+  tabs.forEach(name => {
+
+    const section =
+      document.getElementById(
+        name + "Tab"
+      );
+
+    const button =
+      document.getElementById(
+        "tab" +
+        name.charAt(0).toUpperCase() +
+        name.slice(1)
+      );
+
+    if (name === tab) {
+
+      section.classList.remove(
+        "hidden"
+      );
+
+      button.classList.add(
+        "active"
+      );
+
+    } else {
+
+      section.classList.add(
+        "hidden"
+      );
+
+      button.classList.remove(
+        "active"
+      );
+    }
+  });
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function loadDashboard() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/dashboard",
+        {
+          credentials: "include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Dashboard failed"
+      );
+    }
+
+    document
+      .getElementById("statProducts")
+      .textContent =
+        data.products || 0;
+
+    document
+      .getElementById("statStock")
+      .textContent =
+        data.stock || 0;
+
+    document
+      .getElementById("statOrders")
+      .textContent =
+        data.orders || 0;
+
+    document
+      .getElementById("statRevenue")
+      .textContent =
+        "₹" +
+        Number(
+          data.revenue || 0
+        ).toFixed(2);
+
+  } catch (error) {
+
+    showMessage(
+      "mainMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================
+   PRODUCTS
+========================= */
+
+async function loadProducts() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/products",
+        {
+          credentials: "include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to load products"
+      );
+    }
+
+    currentProducts =
+      Array.isArray(data)
+        ? data
+        : [];
+
+    renderProducts();
+
+  } catch (error) {
+
+    showMessage(
+      "mainMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+function renderProducts() {
+
+  const grid =
+    document.getElementById(
+      "productsGrid"
+    );
+
+  if (!currentProducts.length) {
+
+    grid.innerHTML = `
+      <div class="card empty"
+           style="grid-column:1/-1">
+        <h3>No products yet</h3>
+        <p>Add your first product to start selling.</p>
+
+        <button
+          class="primary"
+          onclick="openAddProduct()"
+        >
+          + Add Product
+        </button>
+      </div>
+    `;
+
+    return;
+  }
+
+  grid.innerHTML =
+    currentProducts.map(product => {
+
+      const image =
+        product.image ||
+        "https://via.placeholder.com/500x350?text=Shrivi";
+
+      const price =
+        Number(
+          product.price || 0
+        );
+
+      const salePrice =
+        Number(
+          product.sale_price ||
+          price
+        );
+
+      const discount =
+        Number(
+          product.discount_percent ||
+          0
+        );
+
+      return `
+
+        <div class="product">
+
+          <img
+            class="product-image"
+            src="${escapeHtml(image)}"
+            onerror="this.src='https://via.placeholder.com/500x350?text=Shrivi'"
+          >
+
+          <div class="product-body">
+
+            <h3>
+              ${escapeHtml(
+                product.name || ""
+              )}
+            </h3>
+
+            <div class="price">
+              ₹${salePrice.toFixed(2)}
+            </div>
+
+            ${
+              discount > 0
+                ? `
+                  <div class="old-price">
+                    ₹${price.toFixed(2)}
+                  </div>
+
+                  <div class="discount">
+                    ${discount}% OFF
+                  </div>
+                `
+                : ""
+            }
+
+            <p>
+              Category:
+              ${escapeHtml(
+                product.category || "-"
+              )}
+            </p>
+
+            <p>
+              Stock:
+              <strong>
+                ${Number(
+                  product.stock || 0
+                )}
+              </strong>
+            </p>
+
+            <div class="actions">
+
+              <button
+                class="warning"
+                onclick="editProduct(${product.id})"
+              >
+                Edit
+              </button>
+
+              <button
+                class="danger"
+                onclick="deleteProduct(${product.id})"
+              >
+                Delete
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+
+/* =========================
+   ADD PRODUCT
+========================= */
+
+function openAddProduct() {
+
+  document
+    .getElementById("productModalTitle")
+    .textContent =
+      "Add Product";
+
+  document
+    .getElementById("productId")
+    .value = "";
+
+  document
+    .getElementById("productName")
+    .value = "";
+
+  document
+    .getElementById("productPrice")
+    .value = "";
+
+  document
+    .getElementById("productCategory")
+    .value = "";
+
+  document
+    .getElementById("productImage")
+    .value = "";
+
+  document
+    .getElementById("productDescription")
+    .value = "";
+
+  document
+    .getElementById("productStock")
+    .value = "0";
+
+  document
+    .getElementById("productDiscount")
+    .value = "0";
+
+  document
+    .getElementById("productModal")
+    .classList.remove("hidden");
+}
+
+
+/* =========================
+   EDIT PRODUCT
+========================= */
+
+function editProduct(id) {
+
+  const product =
+    currentProducts.find(
+      p => Number(p.id) === Number(id)
+    );
+
+  if (!product) {
+    return;
+  }
+
+  document
+    .getElementById("productModalTitle")
+    .textContent =
+      "Edit Product";
+
+  document
+    .getElementById("productId")
+    .value =
+      product.id;
+
+  document
+    .getElementById("productName")
+    .value =
+      product.name || "";
+
+  document
+    .getElementById("productPrice")
+    .value =
+      product.price || 0;
+
+  document
+    .getElementById("productCategory")
+    .value =
+      product.category || "";
+
+  document
+    .getElementById("productImage")
+    .value =
+      product.image || "";
+
+  document
+    .getElementById("productDescription")
+    .value =
+      product.description || "";
+
+  document
+    .getElementById("productStock")
+    .value =
+      product.stock || 0;
+
+  document
+    .getElementById("productDiscount")
+    .value =
+      product.discount_percent || 0;
+
+  document
+    .getElementById("productModal")
+    .classList.remove("hidden");
+}
+
+
+/* =========================
+   SAVE PRODUCT
+========================= */
+
+async function saveProduct() {
+
+  const id =
+    document
+      .getElementById("productId")
+      .value;
+
+  const name =
+    document
+      .getElementById("productName")
+      .value
+      .trim();
+
+  const price =
+    document
+      .getElementById("productPrice")
+      .value;
+
+  const category =
+    document
+      .getElementById("productCategory")
+      .value
+      .trim();
+
+  const image =
+    document
+      .getElementById("productImage")
+      .value
+      .trim();
+
+  const description =
+    document
+      .getElementById("productDescription")
+      .value
+      .trim();
+
+  const stock =
+    document
+      .getElementById("productStock")
+      .value;
+
+  const discount_percent =
+    document
+      .getElementById("productDiscount")
+      .value;
+
+  if (!name) {
+    return alert(
+      "Product name is required"
+    );
+  }
+
+  if (
+    price === "" ||
+    Number(price) < 0
+  ) {
+    return alert(
+      "Valid price is required"
+    );
+  }
+
+  try {
+
+    const url =
+      id
+        ? `/api/seller/products/${id}`
+        : "/api/seller/products";
+
+    const method =
+      id ? "PUT" : "POST";
+
+    const response =
+      await fetch(
+        url,
+        {
+          method,
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            name,
+            price: Number(price),
+            category,
+            image,
+            description,
+            stock: Number(stock),
+            discount_percent:
+              Number(
+                discount_percent
+              )
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to save product"
+      );
+    }
+
+    closeProductModal();
+
+    showMessage(
+      "mainMessage",
+      id
+        ? "Product updated successfully!"
+        : "Product added successfully!"
+    );
+
+    await loadProducts();
+    await loadDashboard();
+
+  } catch (error) {
+
+    alert(error.message);
+  }
+}
+
+
+/* =========================
+   DELETE PRODUCT
+========================= */
+
+async function deleteProduct(id) {
+
+  const product =
+    currentProducts.find(
+      p => Number(p.id) === Number(id)
+    );
+
+  const ok =
+    confirm(
+      `Delete "${product?.name || "this product"}"?`
+    );
+
+  if (!ok) {
+    return;
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/seller/products/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to delete product"
+      );
+    }
+
+    showMessage(
+      "mainMessage",
+      "Product deleted successfully!"
+    );
+
+    await loadProducts();
+    await loadDashboard();
+
+  } catch (error) {
+
+    showMessage(
+      "mainMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================
+   CLOSE MODAL
+========================= */
+
+function closeProductModal() {
+
+  document
+    .getElementById("productModal")
+    .classList.add("hidden");
+}
+
+
+/* =========================
+   ORDERS
+========================= */
+
+async function loadOrders() {
+
+  try {
+
+    const response =
+      await fetch(
+        "/api/seller/orders",
+        {
+          credentials: "include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to load orders"
+      );
+    }
+
+    renderOrders(
+      Array.isArray(data)
+        ? data
+        : []
+    );
+
+  } catch (error) {
+
+    showMessage(
+      "mainMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+function renderOrders(orders) {
+
+  const container =
+    document.getElementById(
+      "ordersList"
+    );
+
+  if (!orders.length) {
+
+    container.innerHTML = `
+      <div class="card empty">
+        <h3>No orders yet</h3>
+        <p>Your customer orders will appear here.</p>
+      </div>
+    `;
+
+    return;
+  }
+
+  container.innerHTML =
+    orders.map(order => {
+
+      const items =
+        Array.isArray(order.items)
+          ? order.items
+          : [];
+
+      return `
+
+        <div class="order">
+
+          <h3>
+            Order #${order.id}
+          </h3>
+
+          <p>
+            <strong>Status:</strong>
+            ${escapeHtml(
+              order.status || "pending"
+            )}
+          </p>
+
+          <p>
+            <strong>Customer:</strong>
+            ${escapeHtml(
+              order.customer_name || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Phone:</strong>
+            ${escapeHtml(
+              order.customer_phone || "-"
+            )}
+          </p>
+
+          <p>
+            <strong>Address:</strong>
+            ${escapeHtml(
+              order.customer_address || "-"
+            )}
+          </p>
+
+          <div class="order-items">
+
+            <strong>Products</strong>
+
+            ${
+              items.length
+                ? items.map(item => `
+                    <div style="
+                      padding:8px 0;
+                      border-bottom:1px solid #eee;
+                    ">
+                      ${escapeHtml(
+                        item.name || ""
+                      )}
+                      ×
+                      ${Number(
+                        item.quantity || 0
+                      )}
+                      —
+                      ₹${Number(
+                        item.item_total || 0
+                      ).toFixed(2)}
+                    </div>
+                  `).join("")
+                : "<p>No items</p>"
+            }
+
+          </div>
+
+          <p>
+            <strong>Your Total:</strong>
+            ₹${Number(
+              order.seller_total || 0
+            ).toFixed(2)}
+          </p>
+
+          <div class="actions">
+
+            <button
+              class="warning"
+              onclick="updateOrderStatus(${order.id}, 'confirmed')"
+            >
+              Confirm
+            </button>
+
+            <button
+              class="primary"
+              onclick="updateOrderStatus(${order.id}, 'shipped')"
+            >
+              Shipped
+            </button>
+
+            <button
+              class="success"
+              onclick="updateOrderStatus(${order.id}, 'delivered')"
+            >
+              Delivered
+            </button>
+
+            <button
+              class="danger"
+              onclick="updateOrderStatus(${order.id}, 'cancelled')"
+            >
+              Cancel
+            </button>
+
+          </div>
+
+        </div>
+      `;
+
+    }).join("");
+}
+
+
+/* =========================
+   UPDATE ORDER
+========================= */
+
+async function updateOrderStatus(
+  orderId,
+  status
+) {
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/seller/orders/${orderId}/status`,
+        {
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          credentials: "include",
+
+          body: JSON.stringify({
+            status
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error ||
+        "Failed to update order"
+      );
+    }
+
+    showMessage(
+      "mainMessage",
+      `Order #${orderId} marked as ${status}.`
+    );
+
+    await loadOrders();
+    await loadDashboard();
+
+  } catch (error) {
+
+    showMessage(
+      "mainMessage",
+      error.message,
+      "error"
+    );
+  }
+}
+
+
+/* =========================
+   PROFILE
+========================= */
+
+function updateProfile() {
+
+  if (!currentSeller) {
+    return;
+  }
+
+  document
+    .getElementById("profileName")
+    .textContent =
+      currentSeller.name || "-";
+
+  document
+    .getElementById("profileEmail")
+    .textContent =
+      currentSeller.email || "-";
+
+  document
+    .getElementById("profilePhone")
+    .textContent =
+      currentSeller.phone || "-";
+
+  document
+    .getElementById("profileStatus")
+    .textContent =
+      currentSeller.status || "-";
+
+  document
+    .getElementById("profileId")
+    .textContent =
+      currentSeller.id || "-";
+}
+
+
+/* =========================
+   HTML ESCAPE
+========================= */
+
+function escapeHtml(value) {
+
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+
+/* =========================
+   START
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    checkSellerSession();
+  }
+);
+
+</script>
+
+</body>
+</html>
