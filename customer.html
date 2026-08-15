@@ -3,1980 +3,1398 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Shrivi Marketplace</title>
 
 <style>
-*{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-}
-
-body{
-    font-family:Arial,Helvetica,sans-serif;
-    background:#f5f5f5;
-    color:#222;
-}
-
-button,input,select{
-    font:inherit;
-}
-
-button{
-    cursor:pointer;
-}
-
-.hidden{
-    display:none!important;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f5f5f5;color:#222}
+button,input,textarea{font:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
 
 /* HEADER */
+.header{background:#111827;color:#fff;position:sticky;top:0;z-index:1000}
+.header-top{max-width:1400px;margin:auto;padding:14px 20px;display:flex;align-items:center;gap:20px}
+.logo{font-size:28px;font-weight:800;letter-spacing:1px;white-space:nowrap}
+.search-box{flex:1;display:flex;max-width:750px}
+.search-box input{width:100%;padding:13px 16px;border:0;outline:0;border-radius:7px 0 0 7px}
+.search-btn{border:0;padding:0 20px;background:#f59e0b;font-weight:bold;border-radius:0 7px 7px 0}
+.cart-btn{border:0;background:#fff;color:#111827;padding:11px 16px;border-radius:8px;font-weight:bold;white-space:nowrap}
 
-.header{
-    background:#111827;
-    color:white;
-    position:sticky;
-    top:0;
-    z-index:1000;
-}
-
-.header-top{
-    max-width:1400px;
-    margin:auto;
-    padding:14px 20px;
-    display:flex;
-    align-items:center;
-    gap:20px;
-}
-
-.logo{
-    font-size:28px;
-    font-weight:800;
-    letter-spacing:1px;
-    white-space:nowrap;
-}
-
-.search-box{
-    flex:1;
-    display:flex;
-    max-width:750px;
-}
-
-.search-box input{
-    width:100%;
-    padding:13px 16px;
-    border:none;
-    outline:none;
-    border-radius:7px 0 0 7px;
-    font-size:15px;
-}
-
-.search-btn{
-    border:none;
-    padding:0 20px;
-    background:#f59e0b;
-    color:#111;
-    font-weight:bold;
-    border-radius:0 7px 7px 0;
-}
-
-.cart-btn{
-    border:none;
-    background:white;
-    color:#111827;
-    padding:11px 16px;
-    border-radius:8px;
-    font-weight:bold;
-    white-space:nowrap;
-}
-
-/* CATEGORY BAR */
-
-.category-bar{
-    background:#1f2937;
-    overflow-x:auto;
-}
-
-.categories{
-    max-width:1400px;
-    margin:auto;
-    display:flex;
-    gap:8px;
-    padding:9px 20px;
-}
-
-.category-btn{
-    background:transparent;
-    color:white;
-    border:1px solid #4b5563;
-    padding:8px 15px;
-    border-radius:20px;
-    white-space:nowrap;
-}
-
-.category-btn.active,
-.category-btn:hover{
-    background:#f59e0b;
-    color:#111;
-    border-color:#f59e0b;
-}
+/* CATEGORIES */
+.category-bar{background:#1f2937;overflow-x:auto}
+.categories{max-width:1400px;margin:auto;display:flex;gap:8px;padding:9px 20px}
+.category-btn{background:transparent;color:#fff;border:1px solid #4b5563;padding:8px 15px;border-radius:20px;white-space:nowrap}
+.category-btn.active,.category-btn:hover{background:#f59e0b;color:#111;border-color:#f59e0b}
 
 /* MAIN */
-
-.container{
-    max-width:1400px;
-    margin:auto;
-    padding:20px;
-}
+.container{max-width:1400px;margin:auto;padding:20px}
 
 /* HERO */
-
-.hero{
-    background:linear-gradient(135deg,#111827,#374151);
-    color:white;
-    border-radius:16px;
-    padding:45px 35px;
-    margin-bottom:25px;
-}
-
-.hero h1{
-    font-size:36px;
-    margin-bottom:10px;
-}
-
-.hero p{
-    color:#d1d5db;
-    font-size:17px;
-    margin-bottom:20px;
-}
-
-.hero-btn{
-    background:#f59e0b;
-    border:none;
-    padding:12px 20px;
-    border-radius:8px;
-    font-weight:bold;
-}
+.hero{background:linear-gradient(135deg,#111827,#374151);color:#fff;border-radius:16px;padding:45px 35px;margin-bottom:25px}
+.hero h1{font-size:36px;margin-bottom:10px}
+.hero p{color:#d1d5db;font-size:17px;margin-bottom:20px}
+.hero-btn{background:#f59e0b;border:0;padding:12px 20px;border-radius:8px;font-weight:bold}
 
 /* SECTION */
-
-.section{
-    margin-bottom:28px;
-}
-
-.section-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:15px;
-}
-
-.section-title h2{
-    font-size:24px;
-}
-
-.result-count{
-    color:#666;
-    font-size:14px;
-}
+.section{margin-bottom:28px}
+.section-title{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+.section-title h2{font-size:24px}
+.result-count{color:#666;font-size:14px}
 
 /* PRODUCTS */
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.product-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 9px rgba(0,0,0,.08);transition:.2s}
+.product-card:hover{transform:translateY(-3px);box-shadow:0 7px 20px rgba(0,0,0,.13)}
+.product-image-wrap{height:250px;background:#f3f4f6;position:relative;display:flex;align-items:center;justify-content:center}
+.product-image{width:100%;height:100%;object-fit:cover}
+.no-image{color:#888;font-size:14px}
+.discount{position:absolute;top:10px;left:10px;background:#dc2626;color:#fff;padding:5px 8px;border-radius:5px;font-size:12px;font-weight:bold}
+.product-info{padding:15px}
+.category{color:#666;font-size:12px;margin-bottom:7px}
+.product-name{font-size:17px;font-weight:bold;margin-bottom:8px;min-height:40px}
+.price-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.sale-price{font-size:21px;font-weight:bold}
+.original-price{color:#888;text-decoration:line-through;font-size:14px}
+.discount-text{color:#15803d;font-size:13px;font-weight:bold}
+.stock{color:#15803d;font-size:13px;margin:9px 0}
+.out-stock{color:#dc2626}
+.add-cart,.view-details{width:100%;border:0;padding:11px;border-radius:7px;font-weight:bold}
+.add-cart{background:#111827;color:#fff;margin-top:8px}
+.add-cart:hover{background:#f59e0b;color:#111}
+.view-details{background:#e5e7eb;color:#111827;margin-top:8px}
+.view-details:hover{background:#d1d5db}
 
-.products{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:18px;
-}
+/* PRODUCT DETAILS */
+.details-page{background:#fff;border-radius:15px;padding:25px;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.back-btn{border:0;background:#e5e7eb;padding:10px 16px;border-radius:7px;font-weight:bold;margin-bottom:20px}
+.details-grid{display:grid;grid-template-columns:1fr 1fr;gap:35px}
+.details-image-wrap{height:520px;background:#f3f4f6;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.details-image{width:100%;height:100%;object-fit:contain}
+.details-content{padding:10px 5px}
+.details-category{color:#666;font-size:14px;margin-bottom:10px}
+.details-title{font-size:34px;margin-bottom:15px}
+.details-price{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:15px 0}
+.details-sale-price{font-size:30px;font-weight:bold}
+.details-original-price{font-size:18px;color:#888;text-decoration:line-through}
+.details-discount{background:#dc2626;color:#fff;padding:6px 9px;border-radius:5px;font-weight:bold}
+.details-description{color:#555;line-height:1.7;margin:20px 0}
+.details-stock{font-weight:bold;color:#15803d;margin-bottom:18px}
+.quantity-box{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.qty-btn{width:35px;height:35px;border:1px solid #ccc;background:#fff;border-radius:6px}
+.qty-value{font-weight:bold;min-width:25px;text-align:center}
+.details-actions{display:flex;gap:10px}
+.details-actions button{flex:1;border:0;padding:14px;border-radius:8px;font-weight:bold}
+.details-cart{background:#111827;color:#fff}
+.buy-now{background:#f59e0b;color:#111}
 
-.product-card{
-    background:white;
-    border-radius:12px;
-    overflow:hidden;
-    position:relative;
-    box-shadow:0 2px 9px rgba(0,0,0,.08);
-    transition:.2s;
-}
+/* CART */
+.cart-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;display:none}
+.cart-overlay.open{display:block}
+.cart-drawer{position:absolute;right:0;top:0;height:100%;width:min(430px,100%);background:#fff;display:flex;flex-direction:column}
+.cart-header{padding:18px;background:#111827;color:#fff;display:flex;justify-content:space-between;align-items:center}
+.close-cart{background:none;border:0;color:#fff;font-size:25px}
+.cart-items{flex:1;overflow:auto;padding:15px}
+.cart-item{border-bottom:1px solid #ddd;padding:13px 0}
+.cart-item-name{font-weight:bold;margin-bottom:6px}
+.cart-item-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.qty-controls{display:flex;align-items:center;gap:8px}
+.cart-qty-btn{border:1px solid #ccc;background:#fff;width:28px;height:28px;border-radius:5px}
+.remove-btn{border:0;color:#dc2626;background:none;font-size:12px}
+.cart-footer{border-top:1px solid #ddd;padding:18px}
+.cart-total{display:flex;justify-content:space-between;font-size:20px;font-weight:bold;margin-bottom:15px}
+.checkout-btn{width:100%;background:#f59e0b;border:0;padding:13px;border-radius:8px;font-weight:bold}
 
-.product-card:hover{
-    transform:translateY(-3px);
-    box-shadow:0 7px 20px rgba(0,0,0,.13);
-}
-
-.product-image-wrap{
-    height:250px;
-    background:#f3f4f6;
-    position:relative;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-}
-
-.product-image{
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.no-image{
-    color:#888;
-    font-size:14px;
-}
-
-.discount{
-    position:absolute;
-    top:10px;
-    left:10px;
-    background:#dc2626;
-    color:white;
-    padding:5px 8px;
-    border-radius:5px;
-    font-size:12px;
-    font-weight:bold;
-}
-
-.product-info{
-    padding:15px;
-}
-
-.category{
-    color:#666;
-    font-size:12px;
-    margin-bottom:7px;
-}
-
-.product-name{
-    font-size:17px;
-    font-weight:bold;
-    margin-bottom:8px;
-    min-height:40px;
-}
-
-.price-line{
-    display:flex;
-    gap:8px;
-    align-items:center;
-    flex-wrap:wrap;
-}
-
-.sale-price{
-    font-size:21px;
-    font-weight:bold;
-}
-
-.original-price{
-    color:#888;
-    text-decoration:line-through;
-    font-size:14px;
-}
-
-.discount-text{
-    color:#15803d;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.stock{
-    color:#15803d;
-    font-size:13px;
-    margin:9px 0;
-}
-
-.out-stock{
-    color:#dc2626;
-}
-
-.add-cart{
-    width:100%;
-    background:#111827;
-    color:white;
-    border:none;
-    padding:11px;
-    border-radius:7px;
-    font-weight:bold;
-}
-
-.add-cart:hover{
-    background:#f59e0b;
-    color:#111;
-}
-
-/* CART DRAWER */
-
-.cart-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.5);
-    z-index:2000;
-    display:none;
-}
-
-.cart-overlay.open{
-    display:block;
-}
-
-.cart-drawer{
-    position:absolute;
-    right:0;
-    top:0;
-    height:100%;
-    width:min(430px,100%);
-    background:white;
-    display:flex;
-    flex-direction:column;
-}
-
-.cart-header{
-    padding:18px;
-    background:#111827;
-    color:white;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-}
-
-.close-cart{
-    background:none;
-    border:none;
-    color:white;
-    font-size:25px;
-}
-
-.cart-items{
-    flex:1;
-    overflow:auto;
-    padding:15px;
-}
-
-.cart-item{
-    border-bottom:1px solid #ddd;
-    padding:13px 0;
-}
-
-.cart-item-name{
-    font-weight:bold;
-    margin-bottom:6px;
-}
-
-.cart-item-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:10px;
-}
-
-.qty-controls{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-
-.qty-btn{
-    border:1px solid #ccc;
-    background:white;
-    width:28px;
-    height:28px;
-    border-radius:5px;
-}
-
-.remove-btn{
-    border:none;
-    color:#dc2626;
-    background:none;
-    font-size:12px;
-}
-
-.cart-footer{
-    border-top:1px solid #ddd;
-    padding:18px;
-}
-
-.cart-total{
-    display:flex;
-    justify-content:space-between;
-    font-size:20px;
-    font-weight:bold;
-    margin-bottom:15px;
-}
-
-.checkout-btn{
-    width:100%;
-    background:#f59e0b;
-    border:none;
-    padding:13px;
-    border-radius:8px;
-    font-weight:bold;
-}
-
-/* CHECKOUT */
-
-.modal-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.6);
-    z-index:3000;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:20px;
-}
-
-.modal-overlay.open{
-    display:flex;
-}
-
-.modal{
-    width:100%;
-    max-width:500px;
-    max-height:90vh;
-    overflow:auto;
-    background:white;
-    border-radius:15px;
-    padding:25px;
-}
-
-.modal h2{
-    margin-bottom:20px;
-}
-
-.form-group{
-    margin-bottom:15px;
-}
-
-.form-group label{
-    display:block;
-    font-weight:bold;
-    margin-bottom:6px;
-}
-
-.form-group input,
-.form-group textarea{
-    width:100%;
-    padding:11px;
-    border:1px solid #ccc;
-    border-radius:7px;
-    outline:none;
-}
-
-.form-group textarea{
-    min-height:90px;
-    resize:vertical;
-}
-
-.modal-actions{
-    display:flex;
-    gap:10px;
-}
-
-.modal-actions button{
-    flex:1;
-    padding:11px;
-    border:none;
-    border-radius:7px;
-    font-weight:bold;
-}
-
-.cancel-btn{
-    background:#e5e7eb;
-}
-
-.place-order{
-    background:#15803d;
-    color:white;
-}
-
-.message{
-    padding:12px;
-    border-radius:7px;
-    margin-bottom:15px;
-    display:none;
-}
-
-.message.success{
-    background:#dcfce7;
-    color:#166534;
-}
-
-.message.error{
-    background:#fee2e2;
-    color:#991b1b;
-}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.open{display:flex}
+.modal{width:100%;max-width:500px;max-height:90vh;overflow:auto;background:#fff;border-radius:15px;padding:25px}
+.modal h2{margin-bottom:20px}
+.form-group{margin-bottom:15px}
+.form-group label{display:block;font-weight:bold;margin-bottom:6px}
+.form-group input,.form-group textarea{width:100%;padding:11px;border:1px solid #ccc;border-radius:7px;outline:0}
+.form-group textarea{min-height:90px;resize:vertical}
+.modal-actions{display:flex;gap:10px}
+.modal-actions button{flex:1;padding:11px;border:0;border-radius:7px;font-weight:bold}
+.cancel-btn{background:#e5e7eb}
+.place-order{background:#15803d;color:#fff}
+.message{padding:12px;border-radius:7px;margin-bottom:15px;display:none}
+.message.success{background:#dcfce7;color:#166534}
+.message.error{background:#fee2e2;color:#991b1b}
 
 /* FOOTER */
-
-footer{
-    background:#111827;
-    color:#d1d5db;
-    text-align:center;
-    padding:25px;
-    margin-top:30px;
-}
+footer{background:#111827;color:#d1d5db;text-align:center;padding:25px;margin-top:30px}
 
 /* MOBILE */
-
-@media(max-width:1050px){
-    .products{
-        grid-template-columns:repeat(3,1fr);
-    }
-}
-
+@media(max-width:1050px){.products{grid-template-columns:repeat(3,1fr)}}
 @media(max-width:750px){
-
-    .header-top{
-        flex-wrap:wrap;
-        padding:12px;
-        gap:10px;
-    }
-
-    .logo{
-        font-size:24px;
-    }
-
-    .search-box{
-        order:3;
-        flex-basis:100%;
-        max-width:none;
-    }
-
-    .container{
-        padding:12px;
-    }
-
-    .hero{
-        padding:30px 20px;
-    }
-
-    .hero h1{
-        font-size:27px;
-    }
-
-    .products{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-    }
-
-    .product-image-wrap{
-        height:190px;
-    }
-
-    .product-info{
-        padding:11px;
-    }
-
-    .product-name{
-        font-size:15px;
-    }
-
-    .sale-price{
-        font-size:18px;
-    }
-
-    .section-title h2{
-        font-size:20px;
-    }
+.header-top{flex-wrap:wrap;padding:12px;gap:10px}
+.logo{font-size:24px}
+.search-box{order:3;flex-basis:100%;max-width:none}
+.container{padding:12px}
+.hero{padding:30px 20px}
+.hero h1{font-size:27px}
+.products{grid-template-columns:repeat(2,1fr);gap:10px}
+.product-image-wrap{height:190px}
+.product-info{padding:11px}
+.product-name{font-size:15px}
+.sale-price{font-size:18px}
+.details-grid{grid-template-columns:1fr;gap:20px}
+.details-image-wrap{height:380px}
+.details-title{font-size:27px}
+.details-actions{flex-direction:column}
 }
-
 @media(max-width:450px){
-
-    .products{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .product-image-wrap{
-        height:160px;
-    }
-
-    .cart-btn{
-        padding:9px 11px;
-        font-size:13px;
-    }
-
-    .hero{
-        padding:25px 17px;
-    }
-
-    .hero p{
-        font-size:14px;
-    }
+.product-image-wrap{height:160px}
+.cart-btn{padding:9px 11px;font-size:13px}
+.hero{padding:25px 17px}
+.hero p{font-size:14px}
+.details-image-wrap{height:300px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-
 <header class="header">
 
-    <div class="header-top">
+<div class="header-top">
 
-        <div class="logo">
-            SHRIVI
-        </div>
+<div class="logo">SHRIVI</div>
 
-        <div class="search-box">
+<div class="search-box">
+<input
+type="search"
+id="searchInput"
+placeholder="Search products..."
+oninput="filterProducts()"
+>
+<button class="search-btn" onclick="filterProducts()">Search</button>
+</div>
 
-            <input
-                type="search"
-                id="searchInput"
-                placeholder="Search products..."
-                oninput="filterProducts()"
-            >
+<button class="cart-btn" onclick="openCart()">
+🛒 Cart (<span id="cartCount">0</span>)
+</button>
 
-            <button
-                class="search-btn"
-                onclick="filterProducts()"
-            >
-                Search
-            </button>
+</div>
 
-        </div>
-
-        <button
-            class="cart-btn"
-            onclick="openCart()"
-        >
-            🛒 Cart (<span id="cartCount">0</span>)
-        </button>
-
-    </div>
-
-
-    <div class="category-bar">
-
-        <div
-            class="categories"
-            id="categoryButtons"
-        >
-
-            <button
-                class="category-btn active"
-                onclick="selectCategory('All',this)"
-            >
-                All
-            </button>
-
-        </div>
-
-    </div>
+<div class="category-bar">
+<div class="categories" id="categoryButtons">
+<button class="category-btn active" onclick="selectCategory('All',this)">All</button>
+</div>
+</div>
 
 </header>
 
 
-<!-- MAIN -->
-
 <main class="container">
 
-    <!-- HERO -->
+<!-- SHOP PAGE -->
 
-    <section class="hero">
+<div id="shopPage">
 
-        <h1>
-            Welcome to Shrivi
-        </h1>
+<section class="hero">
 
-        <p>
-            Discover great products at amazing prices.
-        </p>
+<h1>Welcome to Shrivi</h1>
 
-        <button
-            class="hero-btn"
-            onclick="scrollToProducts()"
-        >
-            Shop Now
-        </button>
+<p>Discover great products at amazing prices.</p>
 
-    </section>
+<button class="hero-btn" onclick="scrollToProducts()">
+Shop Now
+</button>
 
+</section>
 
-    <!-- PRODUCTS -->
+<section class="section" id="productsSection">
 
-    <section
-        class="section"
-        id="productsSection"
-    >
+<div class="section-title">
 
-        <div class="section-title">
+<h2>Products</h2>
 
-            <h2>
-                Products
-            </h2>
+<span class="result-count" id="resultCount">
+Loading...
+</span>
 
-            <span
-                class="result-count"
-                id="resultCount"
-            >
-                Loading...
-            </span>
+</div>
 
-        </div>
+<div id="products" class="products"></div>
+
+</section>
+
+</div>
 
 
-        <div
-            id="products"
-            class="products"
-        ></div>
+<!-- DETAILS PAGE -->
 
-    </section>
+<div id="detailsPage" class="hidden">
+
+<div class="details-page">
+
+<button class="back-btn" onclick="showShop()">
+← Back to Products
+</button>
+
+<div id="detailsContent"></div>
+
+</div>
+
+</div>
 
 </main>
 
 
 <!-- CART -->
 
-<div
-    class="cart-overlay"
-    id="cartOverlay"
-    onclick="closeCartOutside(event)"
->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCartOutside(event)">
 
-    <div
-        class="cart-drawer"
-        onclick="event.stopPropagation()"
-    >
+<div class="cart-drawer" onclick="event.stopPropagation()">
 
-        <div class="cart-header">
+<div class="cart-header">
 
-            <h2>
-                Your Cart
-            </h2>
+<h2>Your Cart</h2>
 
-            <button
-                class="close-cart"
-                onclick="closeCart()"
-            >
-                ×
-            </button>
+<button class="close-cart" onclick="closeCart()">×</button>
 
-        </div>
+</div>
 
+<div class="cart-items" id="cartItems"></div>
 
-        <div
-            class="cart-items"
-            id="cartItems"
-        ></div>
+<div class="cart-footer">
 
+<div class="cart-total">
+<span>Total</span>
+<span>₹<span id="cartTotal">0.00</span></span>
+</div>
 
-        <div class="cart-footer">
+<button class="checkout-btn" onclick="openCheckout()">
+Proceed to Checkout
+</button>
 
-            <div class="cart-total">
+</div>
 
-                <span>
-                    Total
-                </span>
-
-                <span>
-                    ₹<span id="cartTotal">0.00</span>
-                </span>
-
-            </div>
-
-            <button
-                class="checkout-btn"
-                onclick="openCheckout()"
-            >
-                Proceed to Checkout
-            </button>
-
-        </div>
-
-    </div>
+</div>
 
 </div>
 
 
 <!-- CHECKOUT -->
 
-<div
-    class="modal-overlay"
-    id="checkoutModal"
->
+<div class="modal-overlay" id="checkoutModal">
 
-    <div class="modal">
+<div class="modal">
 
-        <h2>
-            Checkout
-        </h2>
+<h2>Checkout</h2>
 
+<div id="checkoutMessage" class="message"></div>
 
-        <div
-            id="checkoutMessage"
-            class="message"
-        ></div>
+<form onsubmit="placeOrder(event)">
 
+<div class="form-group">
+<label>Full Name</label>
+<input type="text" id="customerName" required>
+</div>
 
-        <form onsubmit="placeOrder(event)">
+<div class="form-group">
+<label>Mobile Number</label>
+<input type="tel" id="customerPhone" required>
+</div>
 
-            <div class="form-group">
+<div class="form-group">
+<label>Delivery Address</label>
+<textarea id="customerAddress" required></textarea>
+</div>
 
-                <label>
-                    Full Name
-                </label>
+<div class="modal-actions">
 
-                <input
-                    type="text"
-                    id="customerName"
-                    required
-                >
+<button type="button" class="cancel-btn" onclick="closeCheckout()">
+Cancel
+</button>
 
-            </div>
+<button type="submit" class="place-order" id="placeOrderBtn">
+Place Order
+</button>
 
+</div>
 
-            <div class="form-group">
+</form>
 
-                <label>
-                    Mobile Number
-                </label>
-
-                <input
-                    type="tel"
-                    id="customerPhone"
-                    required
-                >
-
-            </div>
-
-
-            <div class="form-group">
-
-                <label>
-                    Delivery Address
-                </label>
-
-                <textarea
-                    id="customerAddress"
-                    required
-                ></textarea>
-
-            </div>
-
-
-            <div class="modal-actions">
-
-                <button
-                    type="button"
-                    class="cancel-btn"
-                    onclick="closeCheckout()"
-                >
-                    Cancel
-                </button>
-
-                <button
-                    type="submit"
-                    class="place-order"
-                    id="placeOrderBtn"
-                >
-                    Place Order
-                </button>
-
-            </div>
-
-        </form>
-
-    </div>
+</div>
 
 </div>
 
 
-<!-- FOOTER -->
-
 <footer>
-
-    © 2026 Shrivi Marketplace.
-    All rights reserved.
-
+© 2026 Shrivi Marketplace. All rights reserved.
 </footer>
 
 
 <script>
 
-/* =====================================================
-   DATA
-===================================================== */
+let allProducts=[];
+let filteredProducts=[];
+let cart=JSON.parse(localStorage.getItem("shrivi_cart")||"[]");
+let selectedCategory="All";
+let selectedProduct=null;
+let detailQuantity=1;
 
-let allProducts = [];
-let filteredProducts = [];
 
-let cart = JSON.parse(
-    localStorage.getItem("shrivi_cart") || "[]"
+/* API */
+
+async function apiFetch(url,options={}){
+
+const response=await fetch(url,{
+...options,
+headers:{
+"Content-Type":"application/json",
+...(options.headers||{})
+}
+});
+
+let data=null;
+
+try{
+data=await response.json();
+}catch(e){}
+
+if(!response.ok){
+throw new Error(
+data?.message||
+data?.error||
+`Request failed (${response.status})`
 );
+}
 
-let selectedCategory = "All";
-
-
-/* =====================================================
-   API
-===================================================== */
-
-async function apiFetch(url, options = {}){
-
-    const response = await fetch(url,{
-        ...options,
-        headers:{
-            "Content-Type":"application/json",
-            ...(options.headers || {})
-        }
-    });
-
-    let data = null;
-
-    try{
-        data = await response.json();
-    }catch(error){
-        data = null;
-    }
-
-    if(!response.ok){
-
-        throw new Error(
-            data?.message ||
-            data?.error ||
-            `Request failed (${response.status})`
-        );
-    }
-
-    return data;
+return data;
 }
 
 
-/* =====================================================
-   ESCAPE
-===================================================== */
+/* ESCAPE */
 
 function escapeHTML(value){
 
-    if(value === null || value === undefined){
-        return "";
-    }
+if(value===null||value===undefined)return "";
 
-    return String(value)
-        .replace(/&/g,"&amp;")
-        .replace(/</g,"&lt;")
-        .replace(/>/g,"&gt;")
-        .replace(/"/g,"&quot;")
-        .replace(/'/g,"&#039;");
+return String(value)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 }
 
 
-/* =====================================================
-   LOAD PRODUCTS
-===================================================== */
+/* LOAD */
 
 async function loadProducts(){
 
-    const container =
-        document.getElementById("products");
+const container=document.getElementById("products");
 
-    container.innerHTML = `
-        <div style="
-            grid-column:1/-1;
-            text-align:center;
-            padding:40px;
-        ">
-            Loading products...
-        </div>
-    `;
+container.innerHTML=`
+<div style="grid-column:1/-1;text-align:center;padding:40px">
+Loading products...
+</div>
+`;
 
-    try{
+try{
 
-        const data =
-            await apiFetch("/api/products");
+const data=await apiFetch("/api/products");
 
-        if(Array.isArray(data)){
-            allProducts = data;
-        }
-        else if(Array.isArray(data?.products)){
-            allProducts = data.products;
-        }
-        else{
-            allProducts = [];
-        }
+if(Array.isArray(data)){
+allProducts=data;
+}else if(Array.isArray(data?.products)){
+allProducts=data.products;
+}else{
+allProducts=[];
+}
 
-        buildCategories();
+buildCategories();
 
-        filteredProducts = [...allProducts];
+filteredProducts=[...allProducts];
 
-        renderProducts();
+renderProducts();
 
-    }catch(error){
+}catch(error){
 
-        console.error(error);
+console.error(error);
 
-        container.innerHTML = `
-            <div style="
-                grid-column:1/-1;
-                text-align:center;
-                padding:40px;
-            ">
-                Unable to load products.
-            </div>
-        `;
-    }
+container.innerHTML=`
+<div style="grid-column:1/-1;text-align:center;padding:40px">
+Unable to load products.
+</div>
+`;
+}
 }
 
 
-/* =====================================================
-   CATEGORIES
-===================================================== */
+/* CATEGORIES */
 
 function buildCategories(){
 
-    const container =
-        document.getElementById(
-            "categoryButtons"
-        );
+const container=document.getElementById("categoryButtons");
 
-    const categories = [
-        ...new Set(
-            allProducts
-                .map(product => product.category)
-                .filter(Boolean)
-        )
-    ];
+const categories=[
+...new Set(
+allProducts
+.map(p=>p.category)
+.filter(Boolean)
+)
+];
 
-    container.innerHTML = `
-        <button
-            class="category-btn active"
-            onclick="selectCategory('All',this)"
-        >
-            All
-        </button>
-    `;
+container.innerHTML=`
+<button
+class="category-btn active"
+onclick="selectCategory('All',this)"
+>
+All
+</button>
+`;
 
-    categories.forEach(category => {
+categories.forEach(category=>{
 
-        const button =
-            document.createElement("button");
+const button=document.createElement("button");
 
-        button.className =
-            "category-btn";
+button.className="category-btn";
+button.textContent=category;
 
-        button.textContent =
-            category;
+button.onclick=()=>{
+selectCategory(category,button);
+};
 
-        button.onclick = () =>
-            selectCategory(
-                category,
-                button
-            );
+container.appendChild(button);
 
-        container.appendChild(button);
-    });
+});
 }
 
-
-/* =====================================================
-   CATEGORY FILTER
-===================================================== */
 
 function selectCategory(category,button){
 
-    selectedCategory =
-        category;
+selectedCategory=category;
 
-    document
-        .querySelectorAll(".category-btn")
-        .forEach(btn =>
-            btn.classList.remove("active")
-        );
+document
+.querySelectorAll(".category-btn")
+.forEach(btn=>btn.classList.remove("active"));
 
-    button.classList.add("active");
+button.classList.add("active");
 
-    filterProducts();
+filterProducts();
 }
 
 
-/* =====================================================
-   SEARCH + FILTER
-===================================================== */
+/* FILTER */
 
 function filterProducts(){
 
-    const search =
-        document
-            .getElementById("searchInput")
-            .value
-            .trim()
-            .toLowerCase();
+const search=document
+.getElementById("searchInput")
+.value
+.trim()
+.toLowerCase();
 
-    filteredProducts =
-        allProducts.filter(product => {
+filteredProducts=allProducts.filter(product=>{
 
-            const name =
-                String(
-                    product.name || ""
-                ).toLowerCase();
+const name=String(product.name||"").toLowerCase();
+const category=String(product.category||"").toLowerCase();
+const description=String(product.description||"").toLowerCase();
 
-            const category =
-                String(
-                    product.category || ""
-                ).toLowerCase();
+const searchMatch=
+!search||
+name.includes(search)||
+category.includes(search)||
+description.includes(search);
 
-            const description =
-                String(
-                    product.description || ""
-                ).toLowerCase();
+const categoryMatch=
+selectedCategory==="All"||
+category===selectedCategory.toLowerCase();
 
-            const matchesSearch =
-                !search ||
-                name.includes(search) ||
-                category.includes(search) ||
-                description.includes(search);
+return searchMatch&&categoryMatch;
+});
 
-            const matchesCategory =
-                selectedCategory === "All" ||
-                category ===
-                selectedCategory.toLowerCase();
-
-            return (
-                matchesSearch &&
-                matchesCategory
-            );
-        });
-
-    renderProducts();
+renderProducts();
 }
 
 
-/* =====================================================
-   PRICE
-===================================================== */
+/* PRICE */
 
 function getSalePrice(product){
 
-    const price =
-        Number(product.price) || 0;
+const price=Number(product.price)||0;
+const discount=Number(product.discount_percent)||0;
 
-    const discount =
-        Number(
-            product.discount_percent
-        ) || 0;
+if(discount>0){
+return Math.max(
+0,
+price-(price*discount/100)
+);
+}
 
-    if(discount > 0){
+if(product.sale_price!==undefined){
+return Number(product.sale_price)||price;
+}
 
-        return Math.max(
-            0,
-            price -
-            (
-                price *
-                discount /
-                100
-            )
-        );
-    }
-
-    if(product.sale_price !== undefined){
-
-        return Number(
-            product.sale_price
-        ) || price;
-    }
-
-    return price;
+return price;
 }
 
 
-/* =====================================================
-   RENDER PRODUCTS
-===================================================== */
+/* PRODUCTS */
 
 function renderProducts(){
 
-    const container =
-        document.getElementById(
-            "products"
-        );
+const container=document.getElementById("products");
 
-    document.getElementById(
-        "resultCount"
-    ).textContent =
-        `${filteredProducts.length} products`;
+document.getElementById("resultCount").textContent=
+`${filteredProducts.length} products`;
 
+if(!filteredProducts.length){
 
-    if(!filteredProducts.length){
+container.innerHTML=`
+<div style="
+grid-column:1/-1;
+text-align:center;
+padding:50px 20px;
+background:#fff;
+border-radius:12px;
+">
+<h3>No products found</h3>
+<p style="color:#777;margin-top:8px">
+Try another search or category.
+</p>
+</div>
+`;
 
-        container.innerHTML = `
-            <div style="
-                grid-column:1/-1;
-                text-align:center;
-                padding:50px 20px;
-                background:white;
-                border-radius:12px;
-            ">
-
-                <h3>
-                    No products found
-                </h3>
-
-                <p style="
-                    color:#777;
-                    margin-top:8px;
-                ">
-                    Try another search or category.
-                </p>
-
-            </div>
-        `;
-
-        return;
-    }
-
-
-    container.innerHTML =
-        filteredProducts
-            .map(product => {
-
-                const id =
-                    Number(product.id);
-
-                const name =
-                    escapeHTML(
-                        product.name ||
-                        "Product"
-                    );
-
-                const category =
-                    escapeHTML(
-                        product.category ||
-                        ""
-                    );
-
-                const image =
-                    escapeHTML(
-                        product.image ||
-                        ""
-                    );
-
-                const price =
-                    Number(
-                        product.price
-                    ) || 0;
-
-                const discount =
-                    Number(
-                        product.discount_percent
-                    ) || 0;
-
-                const salePrice =
-                    getSalePrice(product);
-
-                const stock =
-                    Number(
-                        product.stock
-                    ) || 0;
-
-                return `
-
-                    <div class="product-card">
-
-                        <div class="product-image-wrap">
-
-                            ${
-                                image
-                                ?
-                                `
-                                <img
-                                    src="${image}"
-                                    alt="${name}"
-                                    class="product-image"
-                                    onerror="
-                                        this.style.display='none';
-                                        this.parentElement
-                                            .querySelector('.no-image')
-                                            .style.display='block';
-                                    "
-                                >
-                                `
-                                :
-                                ""
-                            }
-
-                            <div
-                                class="no-image"
-                                style="
-                                    display:${image ? "none":"block"};
-                                "
-                            >
-                                Product Image
-                            </div>
-
-
-                            ${
-                                discount > 0
-                                ?
-                                `
-                                <span class="discount">
-                                    ${discount}% OFF
-                                </span>
-                                `
-                                :
-                                ""
-                            }
-
-                        </div>
-
-
-                        <div class="product-info">
-
-                            <div class="category">
-                                ${category}
-                            </div>
-
-
-                            <div class="product-name">
-                                ${name}
-                            </div>
-
-
-                            <div class="price-line">
-
-                                <span class="sale-price">
-                                    ₹${salePrice.toFixed(2)}
-                                </span>
-
-                                ${
-                                    discount > 0
-                                    ?
-                                    `
-                                    <span class="original-price">
-                                        ₹${price.toFixed(2)}
-                                    </span>
-                                    `
-                                    :
-                                    ""
-                                }
-
-                            </div>
-
-
-                            ${
-                                discount > 0
-                                ?
-                                `
-                                <div class="discount-text">
-                                    You save ₹${(
-                                        price -
-                                        salePrice
-                                    ).toFixed(2)}
-                                </div>
-                                `
-                                :
-                                ""
-                            }
-
-
-                            ${
-                                stock > 0
-                                ?
-                                `
-                                <div class="stock">
-                                    ✓ ${stock} available
-                                </div>
-                                `
-                                :
-                                `
-                                <div class="stock out-stock">
-                                    Out of stock
-                                </div>
-                                `
-                            }
-
-
-                            <button
-                                class="add-cart"
-                                onclick="addToCart(${id})"
-                                ${stock <= 0 ? "disabled" : ""}
-                            >
-                                ${
-                                    stock > 0
-                                    ?
-                                    "Add to Cart"
-                                    :
-                                    "Out of Stock"
-                                }
-                            </button>
-
-                        </div>
-
-                    </div>
-                `;
-
-            })
-            .join("");
+return;
 }
 
 
-/* =====================================================
-   CART
-===================================================== */
+container.innerHTML=filteredProducts.map(product=>{
+
+const id=Number(product.id);
+const name=escapeHTML(product.name||"Product");
+const category=escapeHTML(product.category||"");
+const image=escapeHTML(product.image||"");
+const price=Number(product.price)||0;
+const discount=Number(product.discount_percent)||0;
+const salePrice=getSalePrice(product);
+const stock=Number(product.stock)||0;
+
+return `
+
+<div class="product-card">
+
+<div class="product-image-wrap">
+
+${
+image
+?
+`
+<img
+src="${image}"
+alt="${name}"
+class="product-image"
+onerror="this.style.display='none';this.parentElement.querySelector('.no-image').style.display='block'"
+>
+`
+:""
+}
+
+<div class="no-image" style="display:${image?"none":"block"}">
+Product Image
+</div>
+
+${
+discount>0
+?
+`<span class="discount">${discount}% OFF</span>`
+:""
+}
+
+</div>
+
+<div class="product-info">
+
+<div class="category">${category}</div>
+
+<div class="product-name">${name}</div>
+
+<div class="price-line">
+
+<span class="sale-price">
+₹${salePrice.toFixed(2)}
+</span>
+
+${
+discount>0
+?
+`<span class="original-price">₹${price.toFixed(2)}</span>`
+:""
+}
+
+</div>
+
+${
+discount>0
+?
+`
+<div class="discount-text">
+You save ₹${(price-salePrice).toFixed(2)}
+</div>
+`
+:""
+}
+
+<div class="${stock>0?"stock":"stock out-stock"}">
+${stock>0?`✓ ${stock} available`:"Out of stock"}
+</div>
+
+<button
+class="view-details"
+onclick="openProductDetails(${id})"
+>
+View Details
+</button>
+
+<button
+class="add-cart"
+onclick="addToCart(${id})"
+${stock<=0?"disabled":""}
+>
+${stock>0?"Add to Cart":"Out of Stock"}
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}).join("");
+}
+
+
+/* DETAILS */
+
+function openProductDetails(id){
+
+const product=allProducts.find(
+p=>Number(p.id)===Number(id)
+);
+
+if(!product)return;
+
+selectedProduct=product;
+detailQuantity=1;
+
+document.getElementById("shopPage").classList.add("hidden");
+document.getElementById("detailsPage").classList.remove("hidden");
+
+renderProductDetails();
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+}
+
+
+function renderProductDetails(){
+
+const product=selectedProduct;
+
+if(!product)return;
+
+const name=escapeHTML(product.name||"Product");
+const category=escapeHTML(product.category||"");
+const description=escapeHTML(
+product.description||"No description available."
+);
+const image=escapeHTML(product.image||"");
+const price=Number(product.price)||0;
+const discount=Number(product.discount_percent)||0;
+const salePrice=getSalePrice(product);
+const stock=Number(product.stock)||0;
+
+
+document.getElementById("detailsContent").innerHTML=`
+
+<div class="details-grid">
+
+<div class="details-image-wrap">
+
+${
+image
+?
+`
+<img
+src="${image}"
+class="details-image"
+alt="${name}"
+onerror="this.style.display='none'"
+>
+`
+:
+`
+<div class="no-image">
+Product Image
+</div>
+`
+}
+
+${
+discount>0
+?
+`<span class="discount">${discount}% OFF</span>`
+:""
+}
+
+</div>
+
+
+<div class="details-content">
+
+<div class="details-category">
+${category}
+</div>
+
+<h1 class="details-title">
+${name}
+</h1>
+
+
+<div class="details-price">
+
+<span class="details-sale-price">
+₹${salePrice.toFixed(2)}
+</span>
+
+${
+discount>0
+?
+`
+<span class="details-original-price">
+₹${price.toFixed(2)}
+</span>
+
+<span class="details-discount">
+${discount}% OFF
+</span>
+`
+:""
+}
+
+</div>
+
+
+${
+discount>0
+?
+`
+<div class="discount-text">
+You save ₹${(price-salePrice).toFixed(2)}
+</div>
+`
+:""
+}
+
+
+<div class="${
+stock>0
+?"details-stock"
+:"details-stock out-stock"
+}">
+
+${
+stock>0
+?`✓ ${stock} items available`
+:"Out of stock"
+}
+
+</div>
+
+
+<div class="details-description">
+${description}
+</div>
+
+
+${
+stock>0
+?
+`
+
+<div class="quantity-box">
+
+<strong>Quantity:</strong>
+
+<button
+class="qty-btn"
+onclick="changeDetailQuantity(-1)"
+>
+−
+</button>
+
+<span
+class="qty-value"
+id="detailQuantity"
+>
+1
+</span>
+
+<button
+class="qty-btn"
+onclick="changeDetailQuantity(1)"
+>
++
+</button>
+
+</div>
+
+
+<div class="details-actions">
+
+<button
+class="details-cart"
+onclick="addDetailToCart()"
+>
+Add to Cart
+</button>
+
+<button
+class="buy-now"
+onclick="buyNow()"
+>
+Buy Now
+</button>
+
+</div>
+
+`
+:
+`
+<div class="out-stock">
+This product is currently unavailable.
+</div>
+`
+}
+
+</div>
+
+</div>
+`;
+}
+
+
+function changeDetailQuantity(change){
+
+if(!selectedProduct)return;
+
+const stock=Number(selectedProduct.stock)||0;
+
+const newQuantity=detailQuantity+change;
+
+if(newQuantity<1)return;
+
+if(newQuantity>stock){
+
+alert(`Only ${stock} items available.`);
+return;
+}
+
+detailQuantity=newQuantity;
+
+document.getElementById(
+"detailQuantity"
+).textContent=detailQuantity;
+}
+
+
+/* DETAIL CART */
+
+function addDetailToCart(){
+
+if(!selectedProduct)return;
+
+const product=selectedProduct;
+
+const stock=Number(product.stock)||0;
+
+if(stock<=0){
+alert("Product is out of stock.");
+return;
+}
+
+
+const existing=cart.find(
+item=>Number(item.id)===Number(product.id)
+);
+
+
+if(existing){
+
+if(
+existing.quantity+detailQuantity>stock
+){
+
+alert(`Only ${stock} items available.`);
+return;
+}
+
+existing.quantity+=detailQuantity;
+
+}else{
+
+cart.push({
+
+id:Number(product.id),
+name:product.name,
+price:getSalePrice(product),
+quantity:detailQuantity,
+stock:stock
+
+});
+
+}
+
+saveCart();
+
+renderCart();
+
+alert("Product added to cart.");
+
+}
+
+
+function buyNow(){
+
+if(!selectedProduct)return;
+
+const product=selectedProduct;
+
+const stock=Number(product.stock)||0;
+
+if(stock<=0){
+alert("Product is out of stock.");
+return;
+}
+
+addDetailToCart();
+
+openCart();
+}
+
+
+/* BACK */
+
+function showShop(){
+
+document.getElementById("detailsPage").classList.add("hidden");
+document.getElementById("shopPage").classList.remove("hidden");
+
+window.scrollTo({
+top:0,
+behavior:"smooth"
+});
+}
+
+
+/* CART */
 
 function saveCart(){
 
-    localStorage.setItem(
-        "shrivi_cart",
-        JSON.stringify(cart)
-    );
+localStorage.setItem(
+"shrivi_cart",
+JSON.stringify(cart)
+);
 
-    updateCartCount();
+updateCartCount();
 }
 
 
 function addToCart(id){
 
-    const product =
-        allProducts.find(
-            p => Number(p.id) === Number(id)
-        );
+const product=allProducts.find(
+p=>Number(p.id)===Number(id)
+);
 
-    if(!product){
-        return;
-    }
+if(!product)return;
 
-    const stock =
-        Number(product.stock) || 0;
+const stock=Number(product.stock)||0;
 
-    if(stock <= 0){
-        alert("Product is out of stock.");
-        return;
-    }
+if(stock<=0){
+alert("Product is out of stock.");
+return;
+}
 
+const existing=cart.find(
+item=>Number(item.id)===Number(id)
+);
 
-    const existing =
-        cart.find(
-            item =>
-                Number(item.id) === Number(id)
-        );
+if(existing){
 
+if(existing.quantity>=stock){
 
-    if(existing){
+alert(`Only ${stock} items available.`);
+return;
+}
 
-        if(existing.quantity >= stock){
+existing.quantity++;
 
-            alert(
-                `Only ${stock} items available.`
-            );
+}else{
 
-            return;
-        }
+cart.push({
+id:Number(product.id),
+name:product.name,
+price:getSalePrice(product),
+quantity:1,
+stock:stock
+});
 
-        existing.quantity += 1;
+}
 
-    }else{
+saveCart();
 
-        cart.push({
-            id:Number(product.id),
-            name:product.name,
-            price:getSalePrice(product),
-            quantity:1,
-            stock:stock
-        });
-    }
+renderCart();
 
-
-    saveCart();
-
-    renderCart();
-
-    openCart();
+openCart();
 }
 
 
 function updateCartCount(){
 
-    const count =
-        cart.reduce(
-            (total,item) =>
-                total +
-                Number(item.quantity || 0),
-            0
-        );
+const count=cart.reduce(
+(total,item)=>
+total+Number(item.quantity||0),
+0
+);
 
-    document.getElementById(
-        "cartCount"
-    ).textContent = count;
+document.getElementById("cartCount").textContent=count;
 }
 
-
-/* =====================================================
-   RENDER CART
-===================================================== */
 
 function renderCart(){
 
-    const container =
-        document.getElementById(
-            "cartItems"
-        );
+const container=document.getElementById("cartItems");
 
-    if(!cart.length){
+if(!cart.length){
 
-        container.innerHTML = `
-            <div style="
-                text-align:center;
-                padding:50px 10px;
-                color:#777;
-            ">
+container.innerHTML=`
+<div style="text-align:center;padding:50px 10px;color:#777">
+<div style="font-size:45px;margin-bottom:10px">🛒</div>
+<h3>Your cart is empty</h3>
+<p style="margin-top:7px">Add products to continue.</p>
+</div>
+`;
 
-                <div style="
-                    font-size:45px;
-                    margin-bottom:10px;
-                ">
-                    🛒
-                </div>
-
-                <h3>
-                    Your cart is empty
-                </h3>
-
-                <p style="
-                    margin-top:7px;
-                ">
-                    Add products to continue.
-                </p>
-
-            </div>
-        `;
-
-        document.getElementById(
-            "cartTotal"
-        ).textContent = "0.00";
-
-        return;
-    }
-
-
-    container.innerHTML =
-        cart.map(item => {
-
-            const subtotal =
-                Number(item.price) *
-                Number(item.quantity);
-
-
-            return `
-
-                <div class="cart-item">
-
-                    <div class="cart-item-name">
-                        ${escapeHTML(item.name)}
-                    </div>
-
-
-                    <div class="cart-item-row">
-
-                        <div class="qty-controls">
-
-                            <button
-                                class="qty-btn"
-                                onclick="
-                                    changeQuantity(
-                                        ${item.id},
-                                        -1
-                                    )
-                                "
-                            >
-                                −
-                            </button>
-
-                            <strong>
-                                ${item.quantity}
-                            </strong>
-
-                            <button
-                                class="qty-btn"
-                                onclick="
-                                    changeQuantity(
-                                        ${item.id},
-                                        1
-                                    )
-                                "
-                            >
-                                +
-                            </button>
-
-                        </div>
-
-
-                        <strong>
-                            ₹${subtotal.toFixed(2)}
-                        </strong>
-
-                    </div>
-
-
-                    <div
-                        style="
-                            margin-top:7px;
-                        "
-                    >
-
-                        <button
-                            class="remove-btn"
-                            onclick="
-                                removeFromCart(
-                                    ${item.id}
-                                )
-                            "
-                        >
-                            Remove
-                        </button>
-
-                    </div>
-
-                </div>
-
-            `;
-
-        }).join("");
-
-
-    const total =
-        cart.reduce(
-            (sum,item) =>
-                sum +
-                (
-                    Number(item.price) *
-                    Number(item.quantity)
-                ),
-            0
-        );
-
-
-    document.getElementById(
-        "cartTotal"
-    ).textContent =
-        total.toFixed(2);
+document.getElementById("cartTotal").textContent="0.00";
+return;
 }
 
 
-/* =====================================================
-   CHANGE QUANTITY
-===================================================== */
+container.innerHTML=cart.map(item=>{
+
+const subtotal=
+Number(item.price)*Number(item.quantity);
+
+return `
+
+<div class="cart-item">
+
+<div class="cart-item-name">
+${escapeHTML(item.name)}
+</div>
+
+<div class="cart-item-row">
+
+<div class="qty-controls">
+
+<button
+class="cart-qty-btn"
+onclick="changeQuantity(${item.id},-1)"
+>
+−
+</button>
+
+<strong>${item.quantity}</strong>
+
+<button
+class="cart-qty-btn"
+onclick="changeQuantity(${item.id},1)"
+>
++
+</button>
+
+</div>
+
+<strong>
+₹${subtotal.toFixed(2)}
+</strong>
+
+</div>
+
+<button
+class="remove-btn"
+onclick="removeFromCart(${item.id})"
+>
+Remove
+</button>
+
+</div>
+`;
+
+}).join("");
+
+
+const total=cart.reduce(
+(sum,item)=>
+sum+
+Number(item.price)*Number(item.quantity),
+0
+);
+
+document.getElementById("cartTotal").textContent=
+total.toFixed(2);
+}
+
 
 function changeQuantity(id,change){
 
-    const item =
-        cart.find(
-            item =>
-                Number(item.id) === Number(id)
-        );
+const item=cart.find(
+item=>Number(item.id)===Number(id)
+);
 
-    if(!item){
-        return;
-    }
+if(!item)return;
 
+const newQuantity=
+Number(item.quantity)+Number(change);
 
-    const newQuantity =
-        Number(item.quantity) +
-        Number(change);
+if(newQuantity<=0){
 
-
-    if(newQuantity <= 0){
-
-        removeFromCart(id);
-
-        return;
-    }
-
-
-    if(
-        item.stock &&
-        newQuantity > Number(item.stock)
-    ){
-
-        alert(
-            `Only ${item.stock} items available.`
-        );
-
-        return;
-    }
-
-
-    item.quantity =
-        newQuantity;
-
-    saveCart();
-
-    renderCart();
+removeFromCart(id);
+return;
 }
 
+if(
+item.stock&&
+newQuantity>Number(item.stock)
+){
 
-/* =====================================================
-   REMOVE
-===================================================== */
+alert(`Only ${item.stock} items available.`);
+return;
+}
+
+item.quantity=newQuantity;
+
+saveCart();
+renderCart();
+}
+
 
 function removeFromCart(id){
 
-    cart =
-        cart.filter(
-            item =>
-                Number(item.id) !== Number(id)
-        );
+cart=cart.filter(
+item=>Number(item.id)!==Number(id)
+);
 
-    saveCart();
-
-    renderCart();
+saveCart();
+renderCart();
 }
 
 
-/* =====================================================
-   CART OPEN/CLOSE
-===================================================== */
+/* CART OPEN */
 
 function openCart(){
 
-    document
-        .getElementById("cartOverlay")
-        .classList.add("open");
+document
+.getElementById("cartOverlay")
+.classList.add("open");
 
-    renderCart();
+renderCart();
 }
 
 
 function closeCart(){
 
-    document
-        .getElementById("cartOverlay")
-        .classList.remove("open");
+document
+.getElementById("cartOverlay")
+.classList.remove("open");
 }
 
 
 function closeCartOutside(event){
 
-    if(
-        event.target.id ===
-        "cartOverlay"
-    ){
-        closeCart();
-    }
+if(event.target.id==="cartOverlay"){
+closeCart();
+}
 }
 
 
-/* =====================================================
-   CHECKOUT
-===================================================== */
+/* CHECKOUT */
 
 function openCheckout(){
 
-    if(!cart.length){
+if(!cart.length){
 
-        alert(
-            "Your cart is empty."
-        );
+alert("Your cart is empty.");
+return;
+}
 
-        return;
-    }
-
-    document
-        .getElementById("checkoutModal")
-        .classList.add("open");
+document
+.getElementById("checkoutModal")
+.classList.add("open");
 }
 
 
 function closeCheckout(){
 
-    document
-        .getElementById("checkoutModal")
-        .classList.remove("open");
+document
+.getElementById("checkoutModal")
+.classList.remove("open");
 }
 
 
-function showCheckoutMessage(
-    message,
-    type
-){
+function showCheckoutMessage(message,type){
 
-    const box =
-        document.getElementById(
-            "checkoutMessage"
-        );
+const box=document.getElementById(
+"checkoutMessage"
+);
 
-    box.textContent =
-        message;
-
-    box.className =
-        `message ${type}`;
-
-    box.style.display =
-        "block";
+box.textContent=message;
+box.className=`message ${type}`;
+box.style.display="block";
 }
 
 
-/* =====================================================
-   PLACE ORDER
-===================================================== */
+/* ORDER */
 
 async function placeOrder(event){
 
-    event.preventDefault();
+event.preventDefault();
 
-    if(!cart.length){
+if(!cart.length){
 
-        showCheckoutMessage(
-            "Your cart is empty.",
-            "error"
-        );
+showCheckoutMessage(
+"Your cart is empty.",
+"error"
+);
 
-        return;
-    }
-
-
-    const button =
-        document.getElementById(
-            "placeOrderBtn"
-        );
-
-    button.disabled = true;
-    button.textContent =
-        "Placing Order...";
-
-
-    const customerName =
-        document.getElementById(
-            "customerName"
-        ).value.trim();
-
-    const customerPhone =
-        document.getElementById(
-            "customerPhone"
-        ).value.trim();
-
-    const customerAddress =
-        document.getElementById(
-            "customerAddress"
-        ).value.trim();
-
-
-    const total =
-        cart.reduce(
-            (sum,item) =>
-                sum +
-                (
-                    Number(item.price) *
-                    Number(item.quantity)
-                ),
-            0
-        );
-
-
-    const items =
-        cart.map(item => ({
-            product_id:Number(item.id),
-            name:item.name,
-            price:Number(item.price),
-            quantity:Number(item.quantity)
-        }));
-
-
-    try{
-
-        await apiFetch(
-            "/api/orders",
-            {
-                method:"POST",
-
-                body:JSON.stringify({
-
-                    customer_name:
-                        customerName,
-
-                    customer_phone:
-                        customerPhone,
-
-                    customer_address:
-                        customerAddress,
-
-                    total:total,
-
-                    items:items
-                })
-            }
-        );
-
-
-        cart = [];
-
-        saveCart();
-
-        renderCart();
-
-        document.getElementById(
-            "customerName"
-        ).value = "";
-
-        document.getElementById(
-            "customerPhone"
-        ).value = "";
-
-        document.getElementById(
-            "customerAddress"
-        ).value = "";
-
-
-        closeCheckout();
-
-        closeCart();
-
-
-        alert(
-            "Order placed successfully! 🎉"
-        );
-
-
-        await loadProducts();
-
-
-    }catch(error){
-
-        console.error(error);
-
-        showCheckoutMessage(
-            error.message ||
-            "Unable to place order.",
-            "error"
-        );
-
-    }finally{
-
-        button.disabled = false;
-
-        button.textContent =
-            "Place Order";
-    }
+return;
 }
 
 
-/* =====================================================
-   SCROLL
-===================================================== */
+const button=document.getElementById(
+"placeOrderBtn"
+);
+
+button.disabled=true;
+button.textContent="Placing Order...";
+
+
+const customerName=document.getElementById(
+"customerName"
+).value.trim();
+
+const customerPhone=document.getElementById(
+"customerPhone"
+).value.trim();
+
+const customerAddress=document.getElementById(
+"customerAddress"
+).value.trim();
+
+
+const total=cart.reduce(
+(sum,item)=>
+sum+
+Number(item.price)*Number(item.quantity),
+0
+);
+
+
+const items=cart.map(item=>({
+
+product_id:Number(item.id),
+name:item.name,
+price:Number(item.price),
+quantity:Number(item.quantity)
+
+}));
+
+
+try{
+
+await apiFetch(
+"/api/orders",
+{
+method:"POST",
+body:JSON.stringify({
+
+customer_name:customerName,
+customer_phone:customerPhone,
+customer_address:customerAddress,
+total:total,
+items:items
+
+})
+}
+);
+
+
+cart=[];
+
+saveCart();
+renderCart();
+
+document.getElementById("customerName").value="";
+document.getElementById("customerPhone").value="";
+document.getElementById("customerAddress").value="";
+
+closeCheckout();
+closeCart();
+
+alert("Order placed successfully! 🎉");
+
+await loadProducts();
+
+showShop();
+
+}catch(error){
+
+console.error(error);
+
+showCheckoutMessage(
+error.message||"Unable to place order.",
+"error"
+);
+
+}finally{
+
+button.disabled=false;
+button.textContent="Place Order";
+}
+}
+
+
+/* SCROLL */
 
 function scrollToProducts(){
 
-    document
-        .getElementById(
-            "productsSection"
-        )
-        .scrollIntoView({
-            behavior:"smooth"
-        });
+document
+.getElementById("productsSection")
+.scrollIntoView({
+behavior:"smooth"
+});
 }
 
 
-/* =====================================================
-   START
-===================================================== */
+/* START */
 
 document.addEventListener(
-    "DOMContentLoaded",
-    async () => {
+"DOMContentLoaded",
+async()=>{
 
-        updateCartCount();
+updateCartCount();
+renderCart();
+await loadProducts();
 
-        renderCart();
-
-        await loadProducts();
-
-    }
+}
 );
 
 </script>
