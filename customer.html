@@ -18,10 +18,6 @@
       color: #111;
     }
 
-    /* =========================
-       HEADER
-    ========================= */
-
     header {
       background: #111;
       color: white;
@@ -55,11 +51,6 @@
       font-weight: bold;
       border: none;
       cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .cart-button:hover {
-      transform: scale(1.03);
     }
 
     .search {
@@ -76,14 +67,6 @@
       outline: none;
     }
 
-    .search input:focus {
-      box-shadow: 0 0 0 3px rgba(255,255,255,0.15);
-    }
-
-    /* =========================
-       HERO
-    ========================= */
-
     .hero {
       background: white;
       text-align: center;
@@ -99,10 +82,6 @@
       color: #555;
       font-size: 18px;
     }
-
-    /* =========================
-       CATEGORIES
-    ========================= */
 
     .categories {
       max-width: 1100px;
@@ -134,17 +113,7 @@
       white-space: nowrap;
       box-shadow: 0 2px 8px rgba(0,0,0,0.08);
       cursor: pointer;
-      transition: 0.2s;
     }
-
-    .category:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    }
-
-    /* =========================
-       PRODUCTS
-    ========================= */
 
     .products {
       max-width: 1100px;
@@ -163,12 +132,6 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-      transition: 0.2s;
-    }
-
-    .product:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
     }
 
     .product-image {
@@ -210,10 +173,48 @@
       line-height: 1.4;
     }
 
-    .price {
-      font-size: 20px;
-      font-weight: bold;
+    .price-box {
       margin-bottom: 12px;
+    }
+
+    .original-price {
+      color: #777;
+      text-decoration: line-through;
+      font-size: 14px;
+      margin-right: 8px;
+    }
+
+    .sale-price {
+      font-size: 21px;
+      font-weight: bold;
+    }
+
+    .discount-badge {
+      display: inline-block;
+      background: #111;
+      color: white;
+      padding: 4px 7px;
+      border-radius: 5px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .stock {
+      font-size: 13px;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+
+    .in-stock {
+      color: #16803c;
+    }
+
+    .low-stock {
+      color: #b45309;
+    }
+
+    .out-stock {
+      color: #c00;
     }
 
     .add {
@@ -225,11 +226,11 @@
       color: white;
       font-size: 15px;
       cursor: pointer;
-      transition: 0.2s;
     }
 
-    .add:hover {
-      background: #333;
+    .add:disabled {
+      background: #aaa;
+      cursor: not-allowed;
     }
 
     #loading,
@@ -244,10 +245,6 @@
     #errorMessage {
       display: none;
     }
-
-    /* =========================
-       CART
-    ========================= */
 
     #cartPanel {
       display: none;
@@ -280,7 +277,6 @@
       justify-content: center;
       overflow: hidden;
       border-radius: 8px;
-      color: #888;
       flex-shrink: 0;
     }
 
@@ -346,10 +342,6 @@
       margin-bottom: 15px;
     }
 
-    /* =========================
-       CHECKOUT
-    ========================= */
-
     #checkoutSection {
       margin-top: 30px;
       border-top: 1px solid #ddd;
@@ -364,10 +356,6 @@
       border: 1px solid #ccc;
       border-radius: 7px;
       font-size: 15px;
-    }
-
-    #checkoutSection textarea {
-      resize: vertical;
     }
 
     .place-order {
@@ -401,10 +389,6 @@
       text-align: center;
     }
 
-    /* =========================
-       FOOTER
-    ========================= */
-
     footer {
       background: #111;
       color: white;
@@ -413,12 +397,7 @@
       margin-top: 30px;
     }
 
-    /* =========================
-       MOBILE
-    ========================= */
-
     @media (max-width: 800px) {
-
       .product-grid {
         grid-template-columns: repeat(2, 1fr);
       }
@@ -429,47 +408,8 @@
     }
 
     @media (max-width: 500px) {
-
-      header {
-        padding: 12px;
-      }
-
       .logo {
         font-size: 23px;
-      }
-
-      .cart-button {
-        padding: 8px 12px;
-        font-size: 14px;
-      }
-
-      .search {
-        margin-top: 12px;
-      }
-
-      .search input {
-        padding: 13px 16px;
-        font-size: 15px;
-      }
-
-      .hero {
-        padding: 35px 15px;
-      }
-
-      .hero h1 {
-        font-size: 26px;
-      }
-
-      .hero p {
-        font-size: 16px;
-      }
-
-      .categories {
-        margin-top: 20px;
-      }
-
-      .category {
-        padding: 12px 18px;
       }
 
       .product-grid {
@@ -493,13 +433,8 @@
         font-size: 12px;
       }
 
-      .price {
+      .sale-price {
         font-size: 18px;
-      }
-
-      .add {
-        padding: 9px;
-        font-size: 13px;
       }
 
       .cart-item {
@@ -510,11 +445,6 @@
         width: 60px;
         height: 60px;
       }
-
-      .remove {
-        padding: 6px 8px;
-        font-size: 12px;
-      }
     }
   </style>
 </head>
@@ -522,91 +452,47 @@
 <body>
 
 <header>
-
   <div class="top">
+    <div class="logo">SHRIVI</div>
 
-    <div class="logo">
-      SHRIVI
-    </div>
-
-    <button
-      class="cart-button"
-      onclick="openCart()"
-    >
+    <button class="cart-button" onclick="openCart()">
       🛒 Cart (<span id="cartCount">0</span>)
     </button>
-
   </div>
 
   <div class="search">
-
     <input
       type="text"
       id="searchInput"
       placeholder="🔎 Search products..."
       oninput="filterProducts()"
     >
-
   </div>
-
 </header>
 
-
 <section class="hero">
-
-  <h1>
-    Welcome to Shrivi Marketplace
-  </h1>
-
-  <p>
-    Shop your favourite products at great prices.
-  </p>
-
+  <h1>Welcome to Shrivi Marketplace</h1>
+  <p>Shop your favourite products at great prices.</p>
 </section>
 
-
 <section class="categories">
-
   <h2>Categories</h2>
 
   <div class="category-list">
-
-    <div class="category" onclick="filterCategory('All')">
-      All
-    </div>
-
-    <div class="category" onclick="filterCategory('Fashion')">
-      👕 Fashion
-    </div>
-
-    <div class="category" onclick="filterCategory('Electronics')">
-      📱 Electronics
-    </div>
-
-    <div class="category" onclick="filterCategory('Home')">
-      🏠 Home
-    </div>
-
-    <div class="category" onclick="filterCategory('Beauty')">
-      💄 Beauty
-    </div>
-
-    <div class="category" onclick="filterCategory('Grocery')">
-      🛒 Grocery
-    </div>
-
+    <div class="category" onclick="filterCategory('All')">All</div>
+    <div class="category" onclick="filterCategory('Fashion')">👕 Fashion</div>
+    <div class="category" onclick="filterCategory('Electronics')">📱 Electronics</div>
+    <div class="category" onclick="filterCategory('Home')">🏠 Home</div>
+    <div class="category" onclick="filterCategory('Beauty')">💄 Beauty</div>
+    <div class="category" onclick="filterCategory('Grocery')">🛒 Grocery</div>
   </div>
-
 </section>
-
 
 <section class="products">
 
   <h2>Products</h2>
 
-  <div id="loading">
-    Loading products...
-  </div>
+  <div id="loading">Loading products...</div>
 
   <div id="errorMessage">
     Unable to load products.
@@ -616,48 +502,30 @@
     No products available.
   </div>
 
-  <div
-    class="product-grid"
-    id="productGrid"
-  ></div>
+  <div class="product-grid" id="productGrid"></div>
 
 </section>
 
-
-<!-- CART -->
 
 <section id="cartPanel">
 
   <div class="cart-box">
 
-    <button
-      class="close-cart"
-      onclick="closeCart()"
-    >
+    <button class="close-cart" onclick="closeCart()">
       ← Continue Shopping
     </button>
 
-    <h2>
-      Your Cart
-    </h2>
+    <h2>Your Cart</h2>
 
     <div id="cartItems"></div>
 
-    <div
-      class="cart-total"
-      id="cartTotal"
-    >
+    <div class="cart-total" id="cartTotal">
       Total: ₹0
     </div>
 
-
-    <!-- CHECKOUT -->
-
     <div id="checkoutSection">
 
-      <h2>
-        Checkout
-      </h2>
+      <h2>Checkout</h2>
 
       <input
         type="text"
@@ -698,13 +566,8 @@
 
 </section>
 
-
 <footer>
-
-  <p>
-    © 2026 Shrivi Marketplace
-  </p>
-
+  <p>© 2026 Shrivi Marketplace</p>
 </footer>
 
 
@@ -797,10 +660,20 @@ function renderProducts(products) {
 
   products.forEach(product => {
 
+    const originalPrice =
+      Number(product.original_price ?? product.price) || 0;
+
+    const discount =
+      Number(product.discount_percent) || 0;
+
+    const salePrice =
+      Number(product.sale_price ?? originalPrice) || 0;
+
+    const stock =
+      Number(product.stock) || 0;
+
     const card =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     card.className =
       "product";
@@ -818,8 +691,65 @@ function renderProducts(products) {
           onerror="this.style.display='none'; this.parentElement.innerText='Product Image';"
         >
       `;
-
     }
+
+
+    let stockHTML = "";
+
+    if (stock <= 0) {
+
+      stockHTML = `
+        <div class="stock out-stock">
+          ❌ Out of Stock
+        </div>
+      `;
+
+    } else if (stock <= 5) {
+
+      stockHTML = `
+        <div class="stock low-stock">
+          ⚠️ Only ${stock} left
+        </div>
+      `;
+
+    } else {
+
+      stockHTML = `
+        <div class="stock in-stock">
+          ✓ ${stock} available
+        </div>
+      `;
+    }
+
+
+    const priceHTML =
+      discount > 0
+        ? `
+          <div class="price-box">
+
+            <span class="original-price">
+              ₹${originalPrice.toLocaleString("en-IN")}
+            </span>
+
+            <span class="sale-price">
+              ₹${salePrice.toLocaleString("en-IN")}
+            </span>
+
+            <div>
+              <span class="discount-badge">
+                ${discount}% OFF
+              </span>
+            </div>
+
+          </div>
+        `
+        : `
+          <div class="price-box">
+            <span class="sale-price">
+              ₹${salePrice.toLocaleString("en-IN")}
+            </span>
+          </div>
+        `;
 
 
     card.innerHTML = `
@@ -851,17 +781,16 @@ function renderProducts(products) {
             : ""
         }
 
-        <div class="price">
-          ₹${Number(
-            product.price
-          ).toLocaleString("en-IN")}
-        </div>
+        ${priceHTML}
+
+        ${stockHTML}
 
         <button
           class="add"
+          ${stock <= 0 ? "disabled" : ""}
           onclick='addToCart(${JSON.stringify(product)})'
         >
-          Add to Cart
+          ${stock <= 0 ? "Out of Stock" : "Add to Cart"}
         </button>
 
       </div>
@@ -883,43 +812,34 @@ function filterProducts() {
 
   const search =
     document
-      .getElementById(
-        "searchInput"
-      )
+      .getElementById("searchInput")
       .value
       .toLowerCase()
       .trim();
 
 
   const filtered =
-    allProducts.filter(
-      product => {
+    allProducts.filter(product => {
 
-        const matchesSearch =
-          product.name
-            .toLowerCase()
-            .includes(search);
-
-
-        const matchesCategory =
-          selectedCategory ===
-            "All" ||
-          (
-            product.category ||
-            ""
-          )
-            .toLowerCase() ===
-          selectedCategory
-            .toLowerCase();
+      const matchesSearch =
+        String(product.name || "")
+          .toLowerCase()
+          .includes(search);
 
 
-        return (
-          matchesSearch &&
-          matchesCategory
-        );
+      const matchesCategory =
+        selectedCategory === "All" ||
+        String(product.category || "")
+          .toLowerCase() ===
+        selectedCategory.toLowerCase();
 
-      }
-    );
+
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+
+    });
 
 
   renderProducts(filtered);
@@ -945,6 +865,15 @@ function filterCategory(category) {
 
 function addToCart(product) {
 
+  const stock =
+    Number(product.stock) || 0;
+
+  if (stock <= 0) {
+    alert("This product is out of stock.");
+    return;
+  }
+
+
   const existing =
     cart.find(
       item =>
@@ -953,6 +882,17 @@ function addToCart(product) {
 
 
   if (existing) {
+
+    if (
+      existing.quantity >= stock
+    ) {
+      alert(
+        "Only " +
+        stock +
+        " item(s) available."
+      );
+      return;
+    }
 
     existing.quantity++;
 
@@ -965,7 +905,10 @@ function addToCart(product) {
       name: product.name,
 
       price:
-        Number(product.price),
+        Number(
+          product.sale_price ??
+          product.price
+        ),
 
       image:
         product.image || "",
@@ -1001,7 +944,6 @@ function saveCart() {
     "shriviCart",
     JSON.stringify(cart)
   );
-
 }
 
 
@@ -1013,12 +955,8 @@ function updateCartCount() {
 
   const count =
     cart.reduce(
-      (
-        total,
-        item
-      ) =>
-        total +
-        item.quantity,
+      (total, item) =>
+        total + item.quantity,
       0
     );
 
@@ -1041,31 +979,24 @@ function openCart() {
   ).style.display =
     "block";
 
-
   document.querySelector(
     ".products"
   ).style.display =
     "none";
-
 
   document.querySelector(
     ".categories"
   ).style.display =
     "none";
 
-
   document.querySelector(
     ".hero"
   ).style.display =
     "none";
 
-
   renderCart();
 
-  window.scrollTo(
-    0,
-    0
-  );
+  window.scrollTo(0, 0);
 }
 
 
@@ -1080,18 +1011,15 @@ function closeCart() {
   ).style.display =
     "none";
 
-
   document.querySelector(
     ".products"
   ).style.display =
     "block";
 
-
   document.querySelector(
     ".categories"
   ).style.display =
     "block";
-
 
   document.querySelector(
     ".hero"
@@ -1116,10 +1044,8 @@ function renderCart() {
       "cartTotal"
     );
 
-
   container.innerHTML =
     "";
-
 
   if (!cart.length) {
 
@@ -1139,17 +1065,14 @@ function renderCart() {
   cart.forEach(item => {
 
     const itemTotal =
-      item.price *
-      item.quantity;
-
+      Number(item.price) *
+      Number(item.quantity);
 
     total += itemTotal;
 
 
     const div =
-      document.createElement(
-        "div"
-      );
+      document.createElement("div");
 
     div.className =
       "cart-item";
@@ -1162,15 +1085,10 @@ function renderCart() {
 
       imageHTML = `
         <img
-          src="${escapeHTML(
-            item.image
-          )}"
-          alt="${escapeHTML(
-            item.name
-          )}"
+          src="${escapeHTML(item.image)}"
+          alt="${escapeHTML(item.name)}"
         >
       `;
-
     }
 
 
@@ -1183,24 +1101,17 @@ function renderCart() {
       <div class="cart-item-info">
 
         <h3>
-          ${escapeHTML(
-            item.name
-          )}
+          ${escapeHTML(item.name)}
         </h3>
 
         <div class="cart-price">
-          ₹${item.price.toLocaleString(
-            "en-IN"
-          )}
+          ₹${Number(item.price).toLocaleString("en-IN")}
         </div>
 
         <div class="quantity">
 
           <button
-            onclick="changeQuantity(
-              ${item.id},
-              -1
-            )"
+            onclick="changeQuantity(${item.id}, -1)"
           >
             -
           </button>
@@ -1210,10 +1121,7 @@ function renderCart() {
           </span>
 
           <button
-            onclick="changeQuantity(
-              ${item.id},
-              1
-            )"
+            onclick="changeQuantity(${item.id}, 1)"
           >
             +
           </button>
@@ -1224,9 +1132,7 @@ function renderCart() {
 
       <button
         class="remove"
-        onclick="removeFromCart(
-          ${item.id}
-        )"
+        onclick="removeFromCart(${item.id})"
       >
         Remove
       </button>
@@ -1241,9 +1147,7 @@ function renderCart() {
 
   totalElement.innerText =
     "Total: ₹" +
-    total.toLocaleString(
-      "en-IN"
-    );
+    total.toLocaleString("en-IN");
 }
 
 
@@ -1251,10 +1155,7 @@ function renderCart() {
 // CHANGE QUANTITY
 // =========================
 
-function changeQuantity(
-  id,
-  change
-) {
+function changeQuantity(id, change) {
 
   const item =
     cart.find(
@@ -1262,9 +1163,35 @@ function changeQuantity(
         product.id === id
     );
 
-
   if (!item) {
     return;
+  }
+
+
+  if (change > 0) {
+
+    const product =
+      allProducts.find(
+        p =>
+          Number(p.id) ===
+          Number(id)
+      );
+
+    const currentStock =
+      product
+        ? Number(product.stock) || 0
+        : 999999;
+
+    if (
+      item.quantity >= currentStock
+    ) {
+      alert(
+        "Only " +
+        currentStock +
+        " item(s) available."
+      );
+      return;
+    }
   }
 
 
@@ -1279,7 +1206,6 @@ function changeQuantity(
         product =>
           product.id !== id
       );
-
   }
 
 
@@ -1303,7 +1229,6 @@ function removeFromCart(id) {
         product.id !== id
     );
 
-
   saveCart();
 
   updateCartCount();
@@ -1320,25 +1245,19 @@ async function placeOrder() {
 
   const name =
     document
-      .getElementById(
-        "customerName"
-      )
+      .getElementById("customerName")
       .value
       .trim();
 
   const phone =
     document
-      .getElementById(
-        "customerPhone"
-      )
+      .getElementById("customerPhone")
       .value
       .trim();
 
   const address =
     document
-      .getElementById(
-        "customerAddress"
-      )
+      .getElementById("customerAddress")
       .value
       .trim();
 
@@ -1425,13 +1344,12 @@ async function placeOrder() {
                 address,
 
               items:
-                cart,
-
-              total:
-                calculateCartTotal()
+                cart.map(item => ({
+                  id: item.id,
+                  quantity: item.quantity
+                }))
 
             })
-
         }
       );
 
@@ -1529,10 +1447,7 @@ async function placeOrder() {
 function calculateCartTotal() {
 
   return cart.reduce(
-    (
-      total,
-      item
-    ) =>
+    (total, item) =>
       total +
       (
         Number(item.price) *
@@ -1550,9 +1465,7 @@ function calculateCartTotal() {
 function escapeHTML(value) {
 
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
   div.textContent =
     value ?? "";
