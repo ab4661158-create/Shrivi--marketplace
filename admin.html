@@ -110,6 +110,27 @@
             border-top: 1px solid #ddd;
         }
 
+        .price-preview {
+            background: #f5f5f5;
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 8px;
+            font-size: 17px;
+        }
+
+        .price-preview strong {
+            font-size: 22px;
+        }
+
+        .old-price {
+            text-decoration: line-through;
+            margin-right: 10px;
+        }
+
+        .sale-price {
+            font-weight: bold;
+        }
+
         @media (max-width: 600px) {
             .container {
                 padding: 12px;
@@ -201,10 +222,46 @@
             <input
                 type="number"
                 id="productPrice"
-                placeholder="Price"
+                placeholder="Product Price"
                 min="0"
                 step="0.01"
+                oninput="updateSalePrice()"
             >
+
+            <input
+                type="number"
+                id="productStock"
+                placeholder="Stock Quantity"
+                min="0"
+                step="1"
+            >
+
+            <input
+                type="number"
+                id="productDiscount"
+                placeholder="Discount %"
+                min="0"
+                max="100"
+                step="0.01"
+                oninput="updateSalePrice()"
+            >
+
+            <div class="price-preview">
+                <div>
+                    Original Price:
+                    <span id="previewOriginal">₹0.00</span>
+                </div>
+
+                <div>
+                    Discount:
+                    <span id="previewDiscount">0%</span>
+                </div>
+
+                <div style="margin-top:8px;">
+                    Sale Price:
+                    <strong id="previewSale">₹0.00</strong>
+                </div>
+            </div>
 
             <input
                 type="text"
@@ -240,6 +297,34 @@
 
 
 <script>
+
+function updateSalePrice() {
+
+    const price =
+        Number(document.getElementById("productPrice").value) || 0;
+
+    const discount =
+        Number(document.getElementById("productDiscount").value) || 0;
+
+    const safeDiscount =
+        Math.min(Math.max(discount, 0), 100);
+
+    const salePrice =
+        price - (price * safeDiscount / 100);
+
+    const roundedSalePrice =
+        Math.round(salePrice * 100) / 100;
+
+    document.getElementById("previewOriginal").innerText =
+        "₹" + price.toFixed(2);
+
+    document.getElementById("previewDiscount").innerText =
+        safeDiscount + "%";
+
+    document.getElementById("previewSale").innerText =
+        "₹" + roundedSalePrice.toFixed(2);
+}
+
 
 async function login() {
 
@@ -350,6 +435,12 @@ async function addProduct() {
     const price =
         document.getElementById("productPrice").value;
 
+    const stock =
+        document.getElementById("productStock").value;
+
+    const discount =
+        document.getElementById("productDiscount").value;
+
     const category =
         document.getElementById("productCategory").value.trim();
 
@@ -364,6 +455,52 @@ async function addProduct() {
 
         productMessage.innerText =
             "Product name and price are required.";
+
+        return;
+    }
+
+
+    const numericPrice = Number(price);
+
+    const numericStock =
+        stock === "" ? 999999 : Number(stock);
+
+    const numericDiscount =
+        discount === "" ? 0 : Number(discount);
+
+
+    if (
+        !Number.isFinite(numericPrice) ||
+        numericPrice < 0
+    ) {
+
+        productMessage.innerText =
+            "Enter a valid product price.";
+
+        return;
+    }
+
+
+    if (
+        !Number.isInteger(numericStock) ||
+        numericStock < 0
+    ) {
+
+        productMessage.innerText =
+            "Stock must be a whole number 0 or greater.";
+
+        return;
+    }
+
+
+    if (
+        !Number.isFinite(numericDiscount) ||
+        numericDiscount < 0 ||
+        numericDiscount > 100
+    ) {
+
+        productMessage.innerText =
+            "Discount must be between 0 and 100.";
 
         return;
     }
@@ -386,10 +523,18 @@ async function addProduct() {
             body: JSON.stringify({
 
                 name: name,
-                price: Number(price),
+
+                price: numericPrice,
+
                 category: category,
+
                 image: image,
-                description: description
+
+                description: description,
+
+                stock: numericStock,
+
+                discount_percent: numericDiscount
 
             })
 
@@ -412,6 +557,12 @@ async function addProduct() {
             document.getElementById("productPrice").value =
                 "";
 
+            document.getElementById("productStock").value =
+                "";
+
+            document.getElementById("productDiscount").value =
+                "";
+
             document.getElementById("productCategory").value =
                 "";
 
@@ -421,6 +572,8 @@ async function addProduct() {
             document.getElementById("productDescription").value =
                 "";
 
+
+            updateSalePrice();
 
             loadDashboard();
 
