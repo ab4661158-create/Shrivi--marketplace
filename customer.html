@@ -1,498 +1,591 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shrivi Marketplace</title>
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background: #f5f5f5;
-      color: #111;
-    }
-
-    header {
-      background: #111;
-      color: white;
-      padding: 12px 15px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    }
-
-    .top {
-      max-width: 1200px;
-      margin: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 15px;
-    }
-
-    .logo {
-      font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 2px;
-    }
-
-    .cart-button {
-      background: white;
-      color: #111;
-      padding: 11px 18px;
-      border-radius: 20px;
-      font-weight: bold;
-      border: none;
-      cursor: pointer;
-    }
-
-    .search {
-      max-width: 850px;
-      margin: 12px auto 2px;
-    }
-
-    .search input {
-      width: 100%;
-      padding: 15px 18px;
-      border: none;
-      border-radius: 25px;
-      font-size: 16px;
-      outline: none;
-    }
-
-    .hero {
-      background: white;
-      text-align: center;
-      padding: 55px 20px;
-    }
-
-    .hero h1 {
-      font-size: 38px;
-      margin-bottom: 12px;
-    }
-
-    .hero p {
-      color: #555;
-      font-size: 18px;
-    }
-
-    .categories {
-      max-width: 1100px;
-      margin: 25px auto;
-      padding: 0 15px;
-    }
-
-    .categories h2,
-    .products h2 {
-      margin-bottom: 15px;
-    }
-
-    .category-list {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 5px;
-      scrollbar-width: none;
-    }
-
-    .category-list::-webkit-scrollbar {
-      display: none;
-    }
-
-    .category {
-      background: white;
-      padding: 15px 22px;
-      border-radius: 10px;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      cursor: pointer;
-    }
-
-    .products {
-      max-width: 1100px;
-      margin: 30px auto;
-      padding: 0 15px 40px;
-    }
-
-    .product-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-    }
-
-    .product {
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-    }
-
-    .product-image {
-      height: 220px;
-      background: #eee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #888;
-      font-size: 18px;
-      overflow: hidden;
-    }
-
-    .product-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .product-info {
-      padding: 15px;
-    }
-
-    .product-info h3 {
-      margin-bottom: 8px;
-      font-size: 18px;
-    }
-
-    .category-name {
-      color: #777;
-      font-size: 14px;
-      margin-bottom: 8px;
-    }
-
-    .description {
-      color: #555;
-      font-size: 14px;
-      margin-bottom: 10px;
-      line-height: 1.4;
-    }
-
-    .price-box {
-      margin-bottom: 12px;
-    }
-
-    .original-price {
-      color: #777;
-      text-decoration: line-through;
-      font-size: 14px;
-      margin-right: 8px;
-    }
-
-    .sale-price {
-      font-size: 21px;
-      font-weight: bold;
-    }
-
-    .discount-badge {
-      display: inline-block;
-      background: #111;
-      color: white;
-      padding: 4px 7px;
-      border-radius: 5px;
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .stock {
-      font-size: 13px;
-      margin-bottom: 10px;
-      font-weight: bold;
-    }
-
-    .in-stock {
-      color: #16803c;
-    }
-
-    .low-stock {
-      color: #b45309;
-    }
-
-    .out-stock {
-      color: #c00;
-    }
-
-    .add {
-      width: 100%;
-      padding: 11px;
-      border: none;
-      border-radius: 8px;
-      background: #111;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .add:disabled {
-      background: #aaa;
-      cursor: not-allowed;
-    }
-
-    #loading,
-    #noProducts,
-    #errorMessage {
-      text-align: center;
-      padding: 25px;
-      font-weight: bold;
-    }
-
-    #noProducts,
-    #errorMessage {
-      display: none;
-    }
-
-    #cartPanel {
-      display: none;
-      max-width: 900px;
-      margin: 25px auto;
-      padding: 20px;
-    }
-
-    .cart-box {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px #ddd;
-    }
-
-    .cart-item {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px 0;
-      border-bottom: 1px solid #ddd;
-    }
-
-    .cart-item-image {
-      width: 80px;
-      height: 80px;
-      background: #eee;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border-radius: 8px;
-      flex-shrink: 0;
-    }
-
-    .cart-item-image img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .cart-item-info {
-      flex: 1;
-    }
-
-    .cart-item-info h3 {
-      margin-bottom: 5px;
-    }
-
-    .cart-price {
-      font-weight: bold;
-    }
-
-    .quantity {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .quantity button {
-      width: 30px;
-      height: 30px;
-      padding: 0;
-      border: none;
-      border-radius: 5px;
-      background: #111;
-      color: white;
-      cursor: pointer;
-    }
-
-    .remove {
-      background: #ddd;
-      color: #111;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .cart-total {
-      text-align: right;
-      font-size: 22px;
-      font-weight: bold;
-      margin-top: 20px;
-    }
-
-    .close-cart {
-      background: #111;
-      color: white;
-      border: none;
-      padding: 10px 15px;
-      border-radius: 7px;
-      cursor: pointer;
-      margin-bottom: 15px;
-    }
-
-    #checkoutSection {
-      margin-top: 30px;
-      border-top: 1px solid #ddd;
-      padding-top: 25px;
-    }
-
-    #checkoutSection input,
-    #checkoutSection textarea {
-      width: 100%;
-      padding: 13px;
-      margin-top: 12px;
-      border: 1px solid #ccc;
-      border-radius: 7px;
-      font-size: 15px;
-    }
-
-    .place-order {
-      width: 100%;
-      padding: 13px;
-      margin-top: 15px;
-      background: #111;
-      color: white;
-      border: none;
-      border-radius: 7px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .place-order:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    #orderMessage {
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    .success-box {
-      background: #f0fff4;
-      border: 1px solid #b7e4c7;
-      padding: 20px;
-      border-radius: 10px;
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    footer {
-      background: #111;
-      color: white;
-      text-align: center;
-      padding: 25px;
-      margin-top: 30px;
-    }
-
-    @media (max-width: 800px) {
-      .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .hero h1 {
-        font-size: 30px;
-      }
-    }
-
-    @media (max-width: 500px) {
-      .logo {
-        font-size: 23px;
-      }
-
-      .product-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-      }
-
-      .product-image {
-        height: 150px;
-      }
-
-      .product-info {
-        padding: 10px;
-      }
-
-      .product-info h3 {
-        font-size: 15px;
-      }
-
-      .description {
-        font-size: 12px;
-      }
-
-      .sale-price {
-        font-size: 18px;
-      }
-
-      .cart-item {
-        align-items: flex-start;
-      }
-
-      .cart-item-image {
-        width: 60px;
-        height: 60px;
-      }
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Shrivi Marketplace</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:#f5f5f5;
+  color:#111;
+}
+
+header{
+  background:#111;
+  color:white;
+  padding:12px 15px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 2px 10px rgba(0,0,0,.2);
+}
+
+.top{
+  max-width:1200px;
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
+}
+
+.logo{
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:2px;
+}
+
+.cart-button{
+  background:white;
+  color:#111;
+  padding:11px 18px;
+  border-radius:20px;
+  font-weight:bold;
+  border:none;
+  cursor:pointer;
+}
+
+.search{
+  max-width:850px;
+  margin:12px auto 2px;
+}
+
+.search input{
+  width:100%;
+  padding:15px 18px;
+  border:none;
+  border-radius:25px;
+  font-size:16px;
+  outline:none;
+}
+
+.hero{
+  background:white;
+  text-align:center;
+  padding:55px 20px;
+}
+
+.hero h1{
+  font-size:38px;
+  margin-bottom:12px;
+}
+
+.hero p{
+  color:#555;
+  font-size:18px;
+}
+
+.categories{
+  max-width:1100px;
+  margin:25px auto;
+  padding:0 15px;
+}
+
+.categories h2,
+.products h2{
+  margin-bottom:15px;
+}
+
+.category-list{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  padding-bottom:5px;
+  scrollbar-width:none;
+}
+
+.category-list::-webkit-scrollbar{
+  display:none;
+}
+
+.category{
+  background:white;
+  padding:15px 22px;
+  border-radius:10px;
+  white-space:nowrap;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+  cursor:pointer;
+}
+
+.products{
+  max-width:1100px;
+  margin:30px auto;
+  padding:0 15px 40px;
+}
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+}
+
+.product{
+  background:white;
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+}
+
+.product-image{
+  height:220px;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#888;
+  overflow:hidden;
+}
+
+.product-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.product-info{
+  padding:15px;
+}
+
+.product-info h3{
+  margin-bottom:8px;
+  font-size:18px;
+}
+
+.category-name{
+  color:#777;
+  font-size:14px;
+  margin-bottom:8px;
+}
+
+.description{
+  color:#555;
+  font-size:14px;
+  margin-bottom:10px;
+  line-height:1.4;
+}
+
+.price-box{
+  margin-bottom:12px;
+}
+
+.original-price{
+  color:#777;
+  text-decoration:line-through;
+  font-size:14px;
+  margin-right:7px;
+}
+
+.sale-price{
+  font-size:20px;
+  font-weight:bold;
+}
+
+.discount-badge{
+  display:inline-block;
+  margin-left:6px;
+  padding:4px 7px;
+  border-radius:5px;
+  background:#111;
+  color:white;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.stock{
+  font-size:13px;
+  margin-bottom:10px;
+  font-weight:bold;
+}
+
+.in-stock{
+  color:#167a3d;
+}
+
+.low-stock{
+  color:#b35a00;
+}
+
+.out-stock{
+  color:#c62828;
+}
+
+.add{
+  width:100%;
+  padding:11px;
+  border:none;
+  border-radius:8px;
+  background:#111;
+  color:white;
+  font-size:15px;
+  cursor:pointer;
+}
+
+.add:disabled{
+  background:#aaa;
+  cursor:not-allowed;
+}
+
+#loading,
+#noProducts,
+#errorMessage{
+  text-align:center;
+  padding:25px;
+  font-weight:bold;
+}
+
+#noProducts,
+#errorMessage{
+  display:none;
+}
+
+/* CART */
+
+#cartPanel{
+  display:none;
+  max-width:900px;
+  margin:25px auto;
+  padding:20px;
+}
+
+.cart-box{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 2px 10px #ddd;
+}
+
+.cart-item{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:15px 0;
+  border-bottom:1px solid #ddd;
+}
+
+.cart-item-image{
+  width:80px;
+  height:80px;
+  background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  border-radius:8px;
+  color:#888;
+  flex-shrink:0;
+}
+
+.cart-item-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.cart-item-info{
+  flex:1;
+}
+
+.cart-item-info h3{
+  margin-bottom:5px;
+}
+
+.cart-price{
+  font-weight:bold;
+}
+
+.cart-original{
+  color:#777;
+  text-decoration:line-through;
+  font-size:13px;
+  margin-right:5px;
+}
+
+.quantity{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-top:8px;
+}
+
+.quantity button{
+  width:30px;
+  height:30px;
+  padding:0;
+  border:none;
+  border-radius:5px;
+  background:#111;
+  color:white;
+  cursor:pointer;
+}
+
+.quantity button:disabled{
+  background:#aaa;
+}
+
+.remove{
+  background:#ddd;
+  color:#111;
+  border:none;
+  padding:8px 12px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.cart-total{
+  text-align:right;
+  font-size:22px;
+  font-weight:bold;
+  margin-top:20px;
+}
+
+.close-cart{
+  background:#111;
+  color:white;
+  border:none;
+  padding:10px 15px;
+  border-radius:7px;
+  cursor:pointer;
+  margin-bottom:15px;
+}
+
+/* CHECKOUT */
+
+#checkoutSection{
+  margin-top:30px;
+  border-top:1px solid #ddd;
+  padding-top:25px;
+}
+
+#checkoutSection input,
+#checkoutSection textarea{
+  width:100%;
+  padding:13px;
+  margin-top:12px;
+  border:1px solid #ccc;
+  border-radius:7px;
+  font-size:15px;
+}
+
+#checkoutSection textarea{
+  resize:vertical;
+}
+
+.place-order{
+  width:100%;
+  padding:13px;
+  margin-top:15px;
+  background:#111;
+  color:white;
+  border:none;
+  border-radius:7px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+.place-order:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+#orderMessage{
+  margin-top:15px;
+  font-weight:bold;
+}
+
+.success-box{
+  background:#f0fff4;
+  border:1px solid #b7e4c7;
+  padding:20px;
+  border-radius:10px;
+  margin-top:20px;
+  text-align:center;
+}
+
+footer{
+  background:#111;
+  color:white;
+  text-align:center;
+  padding:25px;
+  margin-top:30px;
+}
+
+@media(max-width:800px){
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .hero h1{
+    font-size:30px;
+  }
+}
+
+@media(max-width:500px){
+
+  .logo{
+    font-size:23px;
+  }
+
+  .cart-button{
+    padding:8px 12px;
+    font-size:14px;
+  }
+
+  .hero{
+    padding:35px 15px;
+  }
+
+  .hero h1{
+    font-size:26px;
+  }
+
+  .hero p{
+    font-size:16px;
+  }
+
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+  }
+
+  .product-image{
+    height:150px;
+  }
+
+  .product-info{
+    padding:10px;
+  }
+
+  .product-info h3{
+    font-size:15px;
+  }
+
+  .description{
+    font-size:12px;
+  }
+
+  .sale-price{
+    font-size:18px;
+  }
+
+  .add{
+    padding:9px;
+    font-size:13px;
+  }
+
+  .cart-item{
+    align-items:flex-start;
+  }
+
+  .cart-item-image{
+    width:60px;
+    height:60px;
+  }
+
+  .remove{
+    padding:6px 8px;
+    font-size:12px;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <header>
-  <div class="top">
-    <div class="logo">SHRIVI</div>
 
-    <button class="cart-button" onclick="openCart()">
+  <div class="top">
+
+    <div class="logo">
+      SHRIVI
+    </div>
+
+    <button
+      class="cart-button"
+      onclick="openCart()"
+    >
       🛒 Cart (<span id="cartCount">0</span>)
     </button>
+
   </div>
 
   <div class="search">
+
     <input
       type="text"
       id="searchInput"
       placeholder="🔎 Search products..."
       oninput="filterProducts()"
     >
+
   </div>
+
 </header>
 
+
 <section class="hero">
-  <h1>Welcome to Shrivi Marketplace</h1>
-  <p>Shop your favourite products at great prices.</p>
+
+  <h1>
+    Welcome to Shrivi Marketplace
+  </h1>
+
+  <p>
+    Shop your favourite products at great prices.
+  </p>
+
 </section>
 
+
 <section class="categories">
+
   <h2>Categories</h2>
 
   <div class="category-list">
-    <div class="category" onclick="filterCategory('All')">All</div>
-    <div class="category" onclick="filterCategory('Fashion')">👕 Fashion</div>
-    <div class="category" onclick="filterCategory('Electronics')">📱 Electronics</div>
-    <div class="category" onclick="filterCategory('Home')">🏠 Home</div>
-    <div class="category" onclick="filterCategory('Beauty')">💄 Beauty</div>
-    <div class="category" onclick="filterCategory('Grocery')">🛒 Grocery</div>
+
+    <div class="category" onclick="filterCategory('All')">
+      All
+    </div>
+
+    <div class="category" onclick="filterCategory('Fashion')">
+      👕 Fashion
+    </div>
+
+    <div class="category" onclick="filterCategory('Electronics')">
+      📱 Electronics
+    </div>
+
+    <div class="category" onclick="filterCategory('Home')">
+      🏠 Home
+    </div>
+
+    <div class="category" onclick="filterCategory('Beauty')">
+      💄 Beauty
+    </div>
+
+    <div class="category" onclick="filterCategory('Grocery')">
+      🛒 Grocery
+    </div>
+
   </div>
+
 </section>
+
 
 <section class="products">
 
   <h2>Products</h2>
 
-  <div id="loading">Loading products...</div>
+  <div id="loading">
+    Loading products...
+  </div>
 
   <div id="errorMessage">
     Unable to load products.
@@ -502,7 +595,10 @@
     No products available.
   </div>
 
-  <div class="product-grid" id="productGrid"></div>
+  <div
+    class="product-grid"
+    id="productGrid"
+  ></div>
 
 </section>
 
@@ -511,7 +607,10 @@
 
   <div class="cart-box">
 
-    <button class="close-cart" onclick="closeCart()">
+    <button
+      class="close-cart"
+      onclick="closeCart()"
+    >
       ← Continue Shopping
     </button>
 
@@ -519,7 +618,10 @@
 
     <div id="cartItems"></div>
 
-    <div class="cart-total" id="cartTotal">
+    <div
+      class="cart-total"
+      id="cartTotal"
+    >
       Total: ₹0
     </div>
 
@@ -566,8 +668,13 @@
 
 </section>
 
+
 <footer>
-  <p>© 2026 Shrivi Marketplace</p>
+
+  <p>
+    © 2026 Shrivi Marketplace
+  </p>
+
 </footer>
 
 
@@ -587,7 +694,7 @@ let cart =
 // LOAD PRODUCTS
 // =========================
 
-async function loadProducts() {
+async function loadProducts(){
 
   const loading =
     document.getElementById("loading");
@@ -595,12 +702,12 @@ async function loadProducts() {
   const errorMessage =
     document.getElementById("errorMessage");
 
-  try {
+  try{
 
     const response =
       await fetch("/api/products");
 
-    if (!response.ok) {
+    if(!response.ok){
       throw new Error("Failed to load products");
     }
 
@@ -612,7 +719,9 @@ async function loadProducts() {
 
     renderProducts(allProducts);
 
-  } catch (error) {
+    syncCartWithProducts();
+
+  }catch(error){
 
     console.error(
       "Products error:",
@@ -632,21 +741,17 @@ async function loadProducts() {
 // RENDER PRODUCTS
 // =========================
 
-function renderProducts(products) {
+function renderProducts(products){
 
   const grid =
-    document.getElementById(
-      "productGrid"
-    );
+    document.getElementById("productGrid");
 
   const noProducts =
-    document.getElementById(
-      "noProducts"
-    );
+    document.getElementById("noProducts");
 
   grid.innerHTML = "";
 
-  if (!products.length) {
+  if(!products.length){
 
     noProducts.style.display =
       "block";
@@ -660,18 +765,6 @@ function renderProducts(products) {
 
   products.forEach(product => {
 
-    const originalPrice =
-      Number(product.original_price ?? product.price) || 0;
-
-    const discount =
-      Number(product.discount_percent) || 0;
-
-    const salePrice =
-      Number(product.sale_price ?? originalPrice) || 0;
-
-    const stock =
-      Number(product.stock) || 0;
-
     const card =
       document.createElement("div");
 
@@ -679,16 +772,34 @@ function renderProducts(products) {
       "product";
 
 
+    const originalPrice =
+      Number(product.original_price ?? product.price ?? 0);
+
+    const salePrice =
+      Number(
+        product.sale_price ??
+        originalPrice
+      );
+
+    const discount =
+      Number(
+        product.discount_percent || 0
+      );
+
+    const stock =
+      Number(product.stock || 0);
+
+
     let imageHTML =
       "Product Image";
 
-    if (product.image) {
+    if(product.image){
 
       imageHTML = `
         <img
           src="${escapeHTML(product.image)}"
           alt="${escapeHTML(product.name)}"
-          onerror="this.style.display='none'; this.parentElement.innerText='Product Image';"
+          onerror="this.style.display='none';this.parentElement.innerText='Product Image';"
         >
       `;
     }
@@ -696,7 +807,7 @@ function renderProducts(products) {
 
     let stockHTML = "";
 
-    if (stock <= 0) {
+    if(stock <= 0){
 
       stockHTML = `
         <div class="stock out-stock">
@@ -704,7 +815,7 @@ function renderProducts(products) {
         </div>
       `;
 
-    } else if (stock <= 5) {
+    }else if(stock <= 5){
 
       stockHTML = `
         <div class="stock low-stock">
@@ -712,7 +823,7 @@ function renderProducts(products) {
         </div>
       `;
 
-    } else {
+    }else{
 
       stockHTML = `
         <div class="stock in-stock">
@@ -722,34 +833,40 @@ function renderProducts(products) {
     }
 
 
-    const priceHTML =
-      discount > 0
-        ? `
-          <div class="price-box">
+    let priceHTML = "";
 
-            <span class="original-price">
-              ₹${originalPrice.toLocaleString("en-IN")}
-            </span>
+    if(discount > 0){
 
-            <span class="sale-price">
-              ₹${salePrice.toLocaleString("en-IN")}
-            </span>
+      priceHTML = `
+        <div class="price-box">
 
-            <div>
-              <span class="discount-badge">
-                ${discount}% OFF
-              </span>
-            </div>
+          <span class="original-price">
+            ₹${originalPrice.toLocaleString("en-IN")}
+          </span>
 
-          </div>
-        `
-        : `
-          <div class="price-box">
-            <span class="sale-price">
-              ₹${salePrice.toLocaleString("en-IN")}
-            </span>
-          </div>
-        `;
+          <span class="sale-price">
+            ₹${salePrice.toLocaleString("en-IN")}
+          </span>
+
+          <span class="discount-badge">
+            ${discount}% OFF
+          </span>
+
+        </div>
+      `;
+
+    }else{
+
+      priceHTML = `
+        <div class="price-box">
+
+          <span class="sale-price">
+            ₹${salePrice.toLocaleString("en-IN")}
+          </span>
+
+        </div>
+      `;
+    }
 
 
     card.innerHTML = `
@@ -766,19 +883,18 @@ function renderProducts(products) {
 
         <div class="category-name">
           ${escapeHTML(
-            product.category ||
-            "General"
+            product.category || "General"
           )}
         </div>
 
         ${
           product.description
-            ? `<div class="description">
-                ${escapeHTML(
-                  product.description
-                )}
-               </div>`
-            : ""
+          ? `
+            <div class="description">
+              ${escapeHTML(product.description)}
+            </div>
+          `
+          : ""
         }
 
         ${priceHTML}
@@ -788,88 +904,47 @@ function renderProducts(products) {
         <button
           class="add"
           ${stock <= 0 ? "disabled" : ""}
-          onclick='addToCart(${JSON.stringify(product)})'
+          onclick="addToCartById(${Number(product.id)})"
         >
-          ${stock <= 0 ? "Out of Stock" : "Add to Cart"}
+          ${
+            stock <= 0
+            ? "Out of Stock"
+            : "Add to Cart"
+          }
         </button>
 
       </div>
     `;
 
-
     grid.appendChild(card);
 
   });
-
 }
 
 
 // =========================
-// SEARCH
+// ADD PRODUCT
 // =========================
 
-function filterProducts() {
+function addToCartById(id){
 
-  const search =
-    document
-      .getElementById("searchInput")
-      .value
-      .toLowerCase()
-      .trim();
+  const product =
+    allProducts.find(
+      item =>
+        Number(item.id) === Number(id)
+    );
 
-
-  const filtered =
-    allProducts.filter(product => {
-
-      const matchesSearch =
-        String(product.name || "")
-          .toLowerCase()
-          .includes(search);
-
-
-      const matchesCategory =
-        selectedCategory === "All" ||
-        String(product.category || "")
-          .toLowerCase() ===
-        selectedCategory.toLowerCase();
-
-
-      return (
-        matchesSearch &&
-        matchesCategory
-      );
-
-    });
-
-
-  renderProducts(filtered);
-}
-
-
-// =========================
-// CATEGORY
-// =========================
-
-function filterCategory(category) {
-
-  selectedCategory =
-    category;
-
-  filterProducts();
-}
-
-
-// =========================
-// ADD TO CART
-// =========================
-
-function addToCart(product) {
+  if(!product){
+    return;
+  }
 
   const stock =
-    Number(product.stock) || 0;
+    Number(product.stock || 0);
 
-  if (stock <= 0) {
+  if(stock <= 0){
+
     alert("This product is out of stock.");
+
     return;
   }
 
@@ -877,38 +952,61 @@ function addToCart(product) {
   const existing =
     cart.find(
       item =>
-        item.id === product.id
+        Number(item.id) === Number(id)
     );
 
 
-  if (existing) {
+  if(existing){
 
-    if (
+    if(
       existing.quantity >= stock
-    ) {
+    ){
+
       alert(
-        "Only " +
-        stock +
-        " item(s) available."
+        "You cannot add more than available stock."
       );
+
       return;
     }
 
     existing.quantity++;
 
-  } else {
+  }else{
+
+    const originalPrice =
+      Number(
+        product.original_price ??
+        product.price ??
+        0
+      );
+
+    const salePrice =
+      Number(
+        product.sale_price ??
+        originalPrice
+      );
 
     cart.push({
 
-      id: product.id,
+      id:
+        Number(product.id),
 
-      name: product.name,
+      name:
+        product.name,
 
       price:
+        salePrice,
+
+      original_price:
+        originalPrice,
+
+      discount_percent:
         Number(
-          product.sale_price ??
-          product.price
+          product.discount_percent || 0
         ),
+
+      stock:
+        stock,
 
       image:
         product.image || "",
@@ -916,7 +1014,8 @@ function addToCart(product) {
       category:
         product.category || "",
 
-      quantity: 1
+      quantity:
+        1
 
     });
 
@@ -935,10 +1034,136 @@ function addToCart(product) {
 
 
 // =========================
+// SYNC CART
+// =========================
+
+function syncCartWithProducts(){
+
+  cart =
+    cart.filter(item => {
+
+      const product =
+        allProducts.find(
+          p =>
+            Number(p.id) ===
+            Number(item.id)
+        );
+
+      if(!product){
+        return false;
+      }
+
+      const stock =
+        Number(product.stock || 0);
+
+      if(stock <= 0){
+        return false;
+      }
+
+      if(item.quantity > stock){
+        item.quantity = stock;
+      }
+
+      item.price =
+        Number(
+          product.sale_price ??
+          product.price ??
+          0
+        );
+
+      item.original_price =
+        Number(
+          product.original_price ??
+          product.price ??
+          0
+        );
+
+      item.discount_percent =
+        Number(
+          product.discount_percent || 0
+        );
+
+      item.stock =
+        stock;
+
+      return item.quantity > 0;
+
+    });
+
+  saveCart();
+
+  updateCartCount();
+}
+
+
+// =========================
+// SEARCH
+// =========================
+
+function filterProducts(){
+
+  const search =
+    document
+      .getElementById("searchInput")
+      .value
+      .toLowerCase()
+      .trim();
+
+
+  const filtered =
+    allProducts.filter(product => {
+
+      const name =
+        String(
+          product.name || ""
+        ).toLowerCase();
+
+      const category =
+        String(
+          product.category || ""
+        ).toLowerCase();
+
+      const matchesSearch =
+        name.includes(search) ||
+        category.includes(search);
+
+
+      const matchesCategory =
+        selectedCategory === "All" ||
+        category ===
+          selectedCategory.toLowerCase();
+
+
+      return (
+        matchesSearch &&
+        matchesCategory
+      );
+
+    });
+
+
+  renderProducts(filtered);
+}
+
+
+// =========================
+// CATEGORY
+// =========================
+
+function filterCategory(category){
+
+  selectedCategory =
+    category;
+
+  filterProducts();
+}
+
+
+// =========================
 // SAVE CART
 // =========================
 
-function saveCart() {
+function saveCart(){
 
   localStorage.setItem(
     "shriviCart",
@@ -951,15 +1176,15 @@ function saveCart() {
 // CART COUNT
 // =========================
 
-function updateCartCount() {
+function updateCartCount(){
 
   const count =
     cart.reduce(
-      (total, item) =>
-        total + item.quantity,
+      (total,item) =>
+        total +
+        Number(item.quantity || 0),
       0
     );
-
 
   document.getElementById(
     "cartCount"
@@ -972,7 +1197,7 @@ function updateCartCount() {
 // OPEN CART
 // =========================
 
-function openCart() {
+function openCart(){
 
   document.getElementById(
     "cartPanel"
@@ -996,7 +1221,7 @@ function openCart() {
 
   renderCart();
 
-  window.scrollTo(0, 0);
+  window.scrollTo(0,0);
 }
 
 
@@ -1004,7 +1229,7 @@ function openCart() {
 // CLOSE CART
 // =========================
 
-function closeCart() {
+function closeCart(){
 
   document.getElementById(
     "cartPanel"
@@ -1025,6 +1250,16 @@ function closeCart() {
     ".hero"
   ).style.display =
     "block";
+
+  document.getElementById(
+    "checkoutSection"
+  ).style.display =
+    "block";
+
+  document.getElementById(
+    "orderMessage"
+  ).innerText =
+    "";
 }
 
 
@@ -1032,7 +1267,7 @@ function closeCart() {
 // RENDER CART
 // =========================
 
-function renderCart() {
+function renderCart(){
 
   const container =
     document.getElementById(
@@ -1044,10 +1279,11 @@ function renderCart() {
       "cartTotal"
     );
 
-  container.innerHTML =
-    "";
 
-  if (!cart.length) {
+  container.innerHTML = "";
+
+
+  if(!cart.length){
 
     container.innerHTML =
       "<p style='padding:20px 0;'>Your cart is empty.</p>";
@@ -1081,7 +1317,7 @@ function renderCart() {
     let imageHTML =
       "Image";
 
-    if (item.image) {
+    if(item.image){
 
       imageHTML = `
         <img
@@ -1090,6 +1326,10 @@ function renderCart() {
         >
       `;
     }
+
+
+    const stock =
+      Number(item.stock || 0);
 
 
     div.innerHTML = `
@@ -1105,13 +1345,29 @@ function renderCart() {
         </h3>
 
         <div class="cart-price">
-          ₹${Number(item.price).toLocaleString("en-IN")}
+
+          ${
+            Number(item.discount_percent) > 0
+            ? `
+              <span class="cart-original">
+                ₹${Number(
+                  item.original_price
+                ).toLocaleString("en-IN")}
+              </span>
+            `
+            : ""
+          }
+
+          ₹${Number(
+            item.price
+          ).toLocaleString("en-IN")}
+
         </div>
 
         <div class="quantity">
 
           <button
-            onclick="changeQuantity(${item.id}, -1)"
+            onclick="changeQuantity(${item.id},-1)"
           >
             -
           </button>
@@ -1121,7 +1377,8 @@ function renderCart() {
           </span>
 
           <button
-            onclick="changeQuantity(${item.id}, 1)"
+            onclick="changeQuantity(${item.id},1)"
+            ${item.quantity >= stock ? "disabled" : ""}
           >
             +
           </button>
@@ -1147,7 +1404,8 @@ function renderCart() {
 
   totalElement.innerText =
     "Total: ₹" +
-    total.toLocaleString("en-IN");
+    Math.round(total * 100) / 100
+      .toLocaleString("en-IN");
 }
 
 
@@ -1155,56 +1413,56 @@ function renderCart() {
 // CHANGE QUANTITY
 // =========================
 
-function changeQuantity(id, change) {
+function changeQuantity(id,change){
 
   const item =
     cart.find(
       product =>
-        product.id === id
+        Number(product.id) === Number(id)
     );
 
-  if (!item) {
+  if(!item){
     return;
   }
 
 
-  if (change > 0) {
+  const product =
+    allProducts.find(
+      p =>
+        Number(p.id) === Number(id)
+    );
 
-    const product =
-      allProducts.find(
-        p =>
-          Number(p.id) ===
-          Number(id)
-      );
 
-    const currentStock =
-      product
-        ? Number(product.stock) || 0
-        : 999999;
+  const stock =
+    product
+    ? Number(product.stock || 0)
+    : Number(item.stock || 0);
 
-    if (
-      item.quantity >= currentStock
-    ) {
+
+  if(change > 0){
+
+    if(item.quantity >= stock){
+
       alert(
         "Only " +
-        currentStock +
+        stock +
         " item(s) available."
       );
+
       return;
     }
   }
 
 
-  item.quantity +=
-    change;
+  item.quantity += change;
 
 
-  if (item.quantity <= 0) {
+  if(item.quantity <= 0){
 
     cart =
       cart.filter(
         product =>
-          product.id !== id
+          Number(product.id) !== Number(id)
       );
   }
 
@@ -1221,12 +1479,12 @@ function changeQuantity(id, change) {
 // REMOVE
 // =========================
 
-function removeFromCart(id) {
+function removeFromCart(id){
 
   cart =
     cart.filter(
       product =>
-        product.id !== id
+        Number(product.id) !== Number(id)
     );
 
   saveCart();
@@ -1241,7 +1499,7 @@ function removeFromCart(id) {
 // PLACE ORDER
 // =========================
 
-async function placeOrder() {
+async function placeOrder(){
 
   const name =
     document
@@ -1275,7 +1533,7 @@ async function placeOrder() {
   message.innerText = "";
 
 
-  if (!cart.length) {
+  if(!cart.length){
 
     message.innerText =
       "Your cart is empty.";
@@ -1284,7 +1542,7 @@ async function placeOrder() {
   }
 
 
-  if (!name) {
+  if(!name){
 
     message.innerText =
       "Please enter your name.";
@@ -1293,7 +1551,7 @@ async function placeOrder() {
   }
 
 
-  if (!/^[0-9]{10}$/.test(phone)) {
+  if(!/^[0-9]{10}$/.test(phone)){
 
     message.innerText =
       "Please enter a valid 10-digit mobile number.";
@@ -1302,7 +1560,7 @@ async function placeOrder() {
   }
 
 
-  if (!address) {
+  if(!address){
 
     message.innerText =
       "Please enter your delivery address.";
@@ -1311,22 +1569,39 @@ async function placeOrder() {
   }
 
 
-  button.disabled =
-    true;
+  button.disabled = true;
 
   button.innerText =
     "Placing Order...";
 
 
-  try {
+  try{
+
+    /*
+      IMPORTANT:
+      Backend server.js verifies the real
+      price, discount and stock.
+    */
+
+    const items =
+      cart.map(item => ({
+
+        id:
+          Number(item.id),
+
+        quantity:
+          Number(item.quantity)
+
+      }));
+
 
     const response =
       await fetch(
         "/api/orders",
         {
-          method: "POST",
+          method:"POST",
 
-          headers: {
+          headers:{
             "Content-Type":
               "application/json"
           },
@@ -1344,10 +1619,7 @@ async function placeOrder() {
                 address,
 
               items:
-                cart.map(item => ({
-                  id: item.id,
-                  quantity: item.quantity
-                }))
+                items
 
             })
         }
@@ -1358,7 +1630,7 @@ async function placeOrder() {
       await response.json();
 
 
-    if (!response.ok) {
+    if(!response.ok){
 
       throw new Error(
         data.error ||
@@ -1420,7 +1692,7 @@ async function placeOrder() {
       "none";
 
 
-  } catch (error) {
+  }catch(error){
 
     console.error(
       "Order error:",
@@ -1441,28 +1713,10 @@ async function placeOrder() {
 
 
 // =========================
-// CART TOTAL
-// =========================
-
-function calculateCartTotal() {
-
-  return cart.reduce(
-    (total, item) =>
-      total +
-      (
-        Number(item.price) *
-        Number(item.quantity)
-      ),
-    0
-  );
-}
-
-
-// =========================
 // HTML SAFETY
 // =========================
 
-function escapeHTML(value) {
+function escapeHTML(value){
 
   const div =
     document.createElement("div");
