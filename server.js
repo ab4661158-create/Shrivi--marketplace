@@ -95,9 +95,7 @@ app.post("/api/login", async (req, res) => {
           });
         }
 
-        res.json({
-          ok: true
-        });
+        res.json({ ok: true });
       });
     }
 
@@ -126,14 +124,12 @@ app.post("/api/logout", (req, res) => {
       });
     }
 
-    res.json({
-      ok: true
-    });
+    res.json({ ok: true });
   });
 });
 
 // =========================
-// CHECK LOGIN
+// LOGIN CHECK
 // =========================
 
 app.get("/api/me", (req, res) => {
@@ -164,7 +160,7 @@ function requireAdmin(req, res, next) {
 }
 
 // =========================
-// PRODUCT HELPERS
+// HELPERS
 // =========================
 
 function calculateSalePrice(price, discountPercent) {
@@ -198,7 +194,7 @@ function validStock(value) {
 }
 
 // =========================
-// PRODUCTS - PUBLIC
+// PUBLIC PRODUCTS
 // =========================
 
 app.get("/api/products", async (req, res) => {
@@ -219,18 +215,18 @@ app.get("/api/products", async (req, res) => {
     `);
 
     const products = result.rows.map((product) => {
-      const originalPrice = Number(product.price) || 0;
-      const discountPercent =
+      const price = Number(product.price) || 0;
+      const discount =
         Number(product.discount_percent) || 0;
 
       return {
         ...product,
-        price: originalPrice,
-        original_price: originalPrice,
-        discount_percent: discountPercent,
+        price,
+        original_price: price,
+        discount_percent: discount,
         sale_price: calculateSalePrice(
-          originalPrice,
-          discountPercent
+          price,
+          discount
         ),
         stock: Number(product.stock) || 0
       };
@@ -248,7 +244,7 @@ app.get("/api/products", async (req, res) => {
 });
 
 // =========================
-// ADD PRODUCT - ADMIN
+// ADD PRODUCT
 // =========================
 
 app.post("/api/products", requireAdmin, async (req, res) => {
@@ -266,8 +262,7 @@ app.post("/api/products", requireAdmin, async (req, res) => {
     const numericPrice = Number(price);
 
     const numericStock =
-      stock === undefined ||
-      stock === ""
+      stock === undefined || stock === ""
         ? 999999
         : Number(stock);
 
@@ -306,16 +301,9 @@ app.post("/api/products", requireAdmin, async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO products
-       (
-         name,
-         price,
-         category,
-         image,
-         description,
-         stock,
-         discount_percent
-       )
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       (name, price, category, image, description,
+        stock, discount_percent)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
        RETURNING *`,
       [
         name.trim(),
@@ -351,7 +339,158 @@ app.post("/api/products", requireAdmin, async (req, res) => {
 });
 
 // =========================
-// CREATE ORDER - SECURE
+// EDIT PRODUCT
+// =========================
+
+app.put("/api/products/:id", requireAdmin, async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    const {
+      name,
+      price,
+      category,
+      image,
+      description,
+      stock,
+      discount_percent
+    } = req.body || {};
+
+    const numericPrice = Number(price);
+    const numericStock = Number(stock);
+    const numericDiscount = Number(discount_percent);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return res.status(400).json({
+        error: "Invalid product ID"
+      });
+    }
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({
+        error: "Product name is required"
+      });
+    }
+
+    if (
+      !Number.isFinite(numericPrice) ||
+      numericPrice < 0
+    ) {
+      return res.status(400).json({
+        error: "Valid price is required"
+      });
+    }
+
+    if (!validStock(numericStock)) {
+      return res.status(400).json({
+        error: "Stock must be a whole number 0 or greater"
+      });
+    }
+
+    if (!validDiscount(numericDiscount)) {
+      return res.status(400).json({
+        error: "Discount must be between 0 and 100"
+      });
+    }
+
+    const result = await pool.query(
+      `UPDATE products
+       SET
+         name = $1,
+         price = $2,
+         category = $3,
+         image = $4,
+         description = $5,
+         stock = $6,
+         discount_percent = $7
+       WHERE id = $8
+       RETURNING *`,
+      [
+        name.trim(),
+        numericPrice,
+        category || null,
+        image || null,
+        description || null,
+        numericStock,
+        numericDiscount,
+        id
+      ]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({
+        error: "Product not found"
+      });
+    }
+
+    const product = result.rows[0];
+
+    res.json({
+      ok: true,
+      product: {
+        ...product,
+        sale_price: calculateSalePrice(
+          product.price,
+          product.discount_percent
+        )
+      }
+    });
+
+  } catch (error) {
+    console.error("Product update error:", error);
+
+    res.status(500).json({
+      error: "Failed to update product"
+    });
+  }
+});
+
+// =========================
+// DELETE PRODUCT
+// =========================
+
+app.delete(
+  "/api/products/:id",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          error: "Invalid product ID"
+        });
+      }
+
+      const result = await pool.query(
+        `DELETE FROM products
+         WHERE id = $1
+         RETURNING id`,
+        [id]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({
+          error: "Product not found"
+        });
+      }
+
+      res.json({
+        ok: true
+      });
+
+    } catch (error) {
+      console.error("Product delete error:", error);
+
+      res.status(500).json({
+        error: "Failed to delete product"
+      });
+    }
+  }
+);
+
+// =========================
+// CREATE ORDER
 // =========================
 
 app.post("/api/orders", async (req, res) => {
@@ -399,7 +538,6 @@ app.post("/api/orders", async (req, res) => {
       });
     }
 
-    // Combine duplicate product IDs safely
     const quantityMap = new Map();
 
     for (const item of items) {
@@ -429,17 +567,16 @@ app.post("/api/orders", async (req, res) => {
 
     await client.query("BEGIN");
 
-    // Lock products while checking stock.
     const productResult = await client.query(
       `SELECT
-         id,
-         name,
-         price,
-         category,
-         image,
-         description,
-         stock,
-         discount_percent
+        id,
+        name,
+        price,
+        category,
+        image,
+        description,
+        stock,
+        discount_percent
        FROM products
        WHERE id = ANY($1::int[])
        FOR UPDATE`,
@@ -523,7 +660,6 @@ app.post("/api/orders", async (req, res) => {
     finalTotal =
       Math.round(finalTotal * 100) / 100;
 
-    // Reduce stock only after every item passed validation.
     for (const id of productIds) {
       const quantity =
         quantityMap.get(id);
@@ -546,7 +682,7 @@ app.post("/api/orders", async (req, res) => {
          total,
          status
        )
-       VALUES ($1, $2, $3, $4, $5, $6)
+       VALUES ($1,$2,$3,$4,$5,$6)
        RETURNING *`,
       [
         name,
@@ -569,17 +705,9 @@ app.post("/api/orders", async (req, res) => {
 
     try {
       await client.query("ROLLBACK");
-    } catch (rollbackError) {
-      console.error(
-        "Rollback error:",
-        rollbackError
-      );
-    }
+    } catch {}
 
-    console.error(
-      "Order create error:",
-      error
-    );
+    console.error("Order create error:", error);
 
     res.status(500).json({
       error: "Failed to create order"
@@ -612,7 +740,119 @@ app.get("/api/orders", requireAdmin, async (req, res) => {
 });
 
 // =========================
-// DATABASE TABLES
+// UPDATE ORDER STATUS
+// =========================
+
+app.patch(
+  "/api/orders/:id/status",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
+      const status =
+        String(req.body?.status || "")
+          .trim()
+          .toLowerCase();
+
+      const allowedStatuses = [
+        "pending",
+        "confirmed",
+        "shipped",
+        "delivered",
+        "cancelled"
+      ];
+
+      if (!Number.isInteger(id) || id <= 0) {
+        return res.status(400).json({
+          error: "Invalid order ID"
+        });
+      }
+
+      if (!allowedStatuses.includes(status)) {
+        return res.status(400).json({
+          error: "Invalid order status"
+        });
+      }
+
+      const result = await pool.query(
+        `UPDATE orders
+         SET status = $1
+         WHERE id = $2
+         RETURNING *`,
+        [status, id]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({
+          error: "Order not found"
+        });
+      }
+
+      res.json({
+        ok: true,
+        order: result.rows[0]
+      });
+
+    } catch (error) {
+      console.error(
+        "Order status error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Failed to update order status"
+      });
+    }
+  }
+);
+
+// =========================
+// DASHBOARD
+// =========================
+
+app.get(
+  "/api/dashboard",
+  requireAdmin,
+  async (req, res) => {
+    try {
+      const products = await pool.query(
+        "SELECT COUNT(*) AS count FROM products"
+      );
+
+      const orders = await pool.query(
+        "SELECT COUNT(*) AS count FROM orders"
+      );
+
+      const sellers = await pool.query(
+        "SELECT COUNT(*) AS count FROM sellers"
+      );
+
+      res.json({
+        products:
+          Number(products.rows[0].count),
+
+        orders:
+          Number(orders.rows[0].count),
+
+        sellers:
+          Number(sellers.rows[0].count)
+      });
+
+    } catch (error) {
+      console.error(
+        "Dashboard error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Database error"
+      });
+    }
+  }
+);
+
+// =========================
+// DATABASE
 // =========================
 
 async function initializeDatabase() {
@@ -629,15 +869,16 @@ async function initializeDatabase() {
     )
   `);
 
-  // Safe migration for existing products
   await pool.query(`
     ALTER TABLE products
-    ADD COLUMN IF NOT EXISTS stock INTEGER NOT NULL DEFAULT 999999
+    ADD COLUMN IF NOT EXISTS stock
+    INTEGER NOT NULL DEFAULT 999999
   `);
 
   await pool.query(`
     ALTER TABLE products
-    ADD COLUMN IF NOT EXISTS discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0
+    ADD COLUMN IF NOT EXISTS discount_percent
+    NUMERIC(5,2) NOT NULL DEFAULT 0
   `);
 
   await pool.query(`
@@ -648,8 +889,6 @@ async function initializeDatabase() {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-
-  // Safe updates for existing orders table
 
   await pool.query(`
     ALTER TABLE orders
@@ -680,62 +919,15 @@ async function initializeDatabase() {
     )
   `);
 
-  console.log(
-    "SHRIVI database tables ready"
-  );
+  console.log("SHRIVI database tables ready");
 }
 
 // =========================
-// DASHBOARD
-// =========================
-
-app.get("/api/dashboard", requireAdmin, async (req, res) => {
-  try {
-
-    const products = await pool.query(
-      "SELECT COUNT(*) AS count FROM products"
-    );
-
-    const orders = await pool.query(
-      "SELECT COUNT(*) AS count FROM orders"
-    );
-
-    const sellers = await pool.query(
-      "SELECT COUNT(*) AS count FROM sellers"
-    );
-
-    res.json({
-      products:
-        Number(products.rows[0].count),
-
-      orders:
-        Number(orders.rows[0].count),
-
-      sellers:
-        Number(sellers.rows[0].count)
-    });
-
-  } catch (error) {
-
-    console.error(
-      "Dashboard error:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Database error"
-    });
-  }
-});
-
-// =========================
-// DATABASE CONNECTION
+// START DATABASE
 // =========================
 
 async function startDatabase() {
-
   try {
-
     await pool.query("SELECT NOW()");
 
     console.log(
@@ -745,7 +937,6 @@ async function startDatabase() {
     await initializeDatabase();
 
   } catch (error) {
-
     console.error(
       "PostgreSQL connection error:",
       error.message
