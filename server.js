@@ -7,6 +7,10 @@ const { Pool } = require("pg");
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// =========================
+// DATABASE
+// =========================
+
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -14,36 +18,73 @@ const pool = new Pool({
   }
 });
 
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+// =========================
+// ADMIN
+// =========================
+
+const ADMIN_USER =
+  process.env.ADMIN_USER || "admin";
+
+const ADMIN_PASSWORD =
+  process.env.ADMIN_PASSWORD;
 
 let ADMIN_HASH = null;
 
 (async () => {
-  if (!ADMIN_PASSWORD) {
-    console.error("ADMIN_PASSWORD environment variable is missing");
-    return;
-  }
+  try {
+    if (!ADMIN_PASSWORD) {
+      console.error(
+        "ADMIN_PASSWORD environment variable is missing"
+      );
+      return;
+    }
 
-  ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    ADMIN_HASH =
+      await bcrypt.hash(
+        ADMIN_PASSWORD,
+        10
+      );
+
+  } catch (error) {
+    console.error(
+      "Admin password hash error:",
+      error
+    );
+  }
 })();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// =========================
+// MIDDLEWARE
+// =========================
 
-app.set("trust proxy", 1);
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true
+  })
+);
+
+app.set(
+  "trust proxy",
+  1
+);
 
 app.use(
   session({
     secret:
-      process.env.SESSION_SECRET || "shrivi-session-secret-2026",
+      process.env.SESSION_SECRET ||
+      "shrivi-session-secret-2026",
+
     resave: false,
+
     saveUninitialized: false,
+
     cookie: {
       httpOnly: true,
       secure: true,
       sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge:
+        24 * 60 * 60 * 1000
     }
   })
 );
@@ -53,129 +94,216 @@ app.use(
 // =========================
 
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html"));
+  res.sendFile(
+    path.join(
+      __dirname,
+      "admin.html"
+    )
+  );
 });
 
 app.get("/shop", (req, res) => {
-  res.sendFile(path.join(__dirname, "customer.html"));
+  res.sendFile(
+    path.join(
+      __dirname,
+      "customer.html"
+    )
+  );
 });
 
 // =========================
 // LOGIN
 // =========================
 
-app.post("/api/login", async (req, res) => {
-  try {
-    const { username, password } = req.body || {};
+app.post(
+  "/api/login",
+  async (req, res) => {
 
-    if (!ADMIN_HASH) {
-      return res.status(500).json({
-        error: "Admin login is not configured"
+    try {
+
+      const {
+        username,
+        password
+      } = req.body || {};
+
+      if (!ADMIN_HASH) {
+        return res.status(500).json({
+          error:
+            "Admin login is not configured"
+        });
+      }
+
+      const validUser =
+        username === ADMIN_USER;
+
+      const validPassword =
+        await bcrypt.compare(
+          password || "",
+          ADMIN_HASH
+        );
+
+      if (
+        validUser &&
+        validPassword
+      ) {
+
+        req.session.admin = {
+          username: ADMIN_USER
+        };
+
+        return req.session.save(
+          (err) => {
+
+            if (err) {
+              console.error(
+                "Session save error:",
+                err
+              );
+
+              return res
+                .status(500)
+                .json({
+                  error:
+                    "Session error"
+                });
+            }
+
+            res.json({
+              ok: true
+            });
+
+          }
+        );
+      }
+
+      res.status(401).json({
+        error:
+          "Invalid username or password"
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Login error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Login error"
       });
     }
-
-    const validUser = username === ADMIN_USER;
-
-    const validPassword = await bcrypt.compare(
-      password || "",
-      ADMIN_HASH
-    );
-
-    if (validUser && validPassword) {
-      req.session.admin = {
-        username: ADMIN_USER
-      };
-
-      return req.session.save((err) => {
-        if (err) {
-          console.error("Session save error:", err);
-
-          return res.status(500).json({
-            error: "Session error"
-          });
-        }
-
-        res.json({ ok: true });
-      });
-    }
-
-    res.status(401).json({
-      error: "Invalid username or password"
-    });
-
-  } catch (error) {
-    console.error("Login error:", error);
-
-    res.status(500).json({
-      error: "Login error"
-    });
   }
-});
+);
 
 // =========================
 // LOGOUT
 // =========================
 
-app.post("/api/logout", (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      return res.status(500).json({
-        error: "Logout error"
+app.post(
+  "/api/logout",
+  (req, res) => {
+
+    req.session.destroy(
+      (err) => {
+
+        if (err) {
+          return res
+            .status(500)
+            .json({
+              error:
+                "Logout error"
+            });
+        }
+
+        res.json({
+          ok: true
+        });
+
+      }
+    );
+  }
+);
+
+// =========================
+// CURRENT ADMIN
+// =========================
+
+app.get(
+  "/api/me",
+  (req, res) => {
+
+    if (req.session.admin) {
+
+      return res.json({
+        loggedIn: true,
+        username:
+          req.session.admin.username
       });
     }
 
-    res.json({ ok: true });
-  });
-});
-
-// =========================
-// LOGIN CHECK
-// =========================
-
-app.get("/api/me", (req, res) => {
-  if (req.session.admin) {
-    return res.json({
-      loggedIn: true,
-      username: req.session.admin.username
+    res.status(401).json({
+      loggedIn: false
     });
   }
-
-  res.status(401).json({
-    loggedIn: false
-  });
-});
+);
 
 // =========================
 // ADMIN SECURITY
 // =========================
 
-function requireAdmin(req, res, next) {
+function requireAdmin(
+  req,
+  res,
+  next
+) {
+
   if (!req.session.admin) {
-    return res.status(401).json({
-      error: "Admin login required"
-    });
+
+    return res
+      .status(401)
+      .json({
+        error:
+          "Admin login required"
+      });
   }
 
   next();
 }
 
 // =========================
-// HELPERS
+// PRODUCT HELPERS
 // =========================
 
-function calculateSalePrice(price, discountPercent) {
-  const originalPrice = Number(price) || 0;
-  const discount = Number(discountPercent) || 0;
+function calculateSalePrice(
+  price,
+  discountPercent
+) {
+
+  const originalPrice =
+    Number(price) || 0;
+
+  const discount =
+    Number(discountPercent) || 0;
 
   const salePrice =
     originalPrice -
-    (originalPrice * discount) / 100;
+    (
+      originalPrice *
+      discount
+    ) /
+      100;
 
-  return Math.round(salePrice * 100) / 100;
+  return Math.round(
+    salePrice * 100
+  ) / 100;
 }
 
-function validDiscount(value) {
-  const discount = Number(value);
+function validDiscount(
+  value
+) {
+
+  const discount =
+    Number(value);
 
   return (
     Number.isFinite(discount) &&
@@ -184,8 +312,12 @@ function validDiscount(value) {
   );
 }
 
-function validStock(value) {
-  const stock = Number(value);
+function validStock(
+  value
+) {
+
+  const stock =
+    Number(value);
 
   return (
     Number.isInteger(stock) &&
@@ -197,253 +329,683 @@ function validStock(value) {
 // PUBLIC PRODUCTS
 // =========================
 
-app.get("/api/products", async (req, res) => {
-  try {
-    const result = await pool.query(`
-      SELECT
-        id,
+app.get(
+  "/api/products",
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            name,
+            price,
+            category,
+            image,
+            description,
+            stock,
+            discount_percent,
+            created_at
+          FROM products
+          ORDER BY id DESC
+        `);
+
+      const products =
+        result.rows.map(
+          (product) => {
+
+            const originalPrice =
+              Number(
+                product.price
+              ) || 0;
+
+            const discountPercent =
+              Number(
+                product.discount_percent
+              ) || 0;
+
+            return {
+              ...product,
+
+              price:
+                originalPrice,
+
+              original_price:
+                originalPrice,
+
+              discount_percent:
+                discountPercent,
+
+              sale_price:
+                calculateSalePrice(
+                  originalPrice,
+                  discountPercent
+                ),
+
+              stock:
+                Number(
+                  product.stock
+                ) || 0
+            };
+          }
+        );
+
+      res.json(products);
+
+    } catch (error) {
+
+      console.error(
+        "Products fetch error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch products"
+      });
+    }
+  }
+);
+
+// =========================
+// ADMIN PRODUCTS
+// =========================
+
+app.get(
+  "/api/admin/products",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const result =
+        await pool.query(`
+          SELECT
+            id,
+            name,
+            price,
+            category,
+            image,
+            description,
+            stock,
+            discount_percent,
+            created_at
+          FROM products
+          ORDER BY id DESC
+        `);
+
+      const products =
+        result.rows.map(
+          (product) => {
+
+            const price =
+              Number(
+                product.price
+              ) || 0;
+
+            const discount =
+              Number(
+                product.discount_percent
+              ) || 0;
+
+            return {
+              ...product,
+
+              price,
+
+              original_price:
+                price,
+
+              discount_percent:
+                discount,
+
+              sale_price:
+                calculateSalePrice(
+                  price,
+                  discount
+                ),
+
+              stock:
+                Number(
+                  product.stock
+                ) || 0
+            };
+          }
+        );
+
+      res.json(products);
+
+    } catch (error) {
+
+      console.error(
+        "Admin products error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch admin products"
+      });
+    }
+  }
+);
+
+// =========================
+// ADD PRODUCT
+// =========================
+
+app.post(
+  "/api/products",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const {
         name,
         price,
         category,
         image,
         description,
         stock,
-        discount_percent,
-        created_at
-      FROM products
-      ORDER BY id DESC
-    `);
+        discount_percent
+      } = req.body || {};
 
-    const products = result.rows.map((product) => {
-      const price = Number(product.price) || 0;
-      const discount =
-        Number(product.discount_percent) || 0;
+      const numericPrice =
+        Number(price);
 
-      return {
-        ...product,
-        price,
-        original_price: price,
-        discount_percent: discount,
-        sale_price: calculateSalePrice(
-          price,
-          discount
-        ),
-        stock: Number(product.stock) || 0
-      };
-    });
+      const numericStock =
+        stock === undefined ||
+        stock === ""
+          ? 999999
+          : Number(stock);
 
-    res.json(products);
+      const numericDiscount =
+        discount_percent === undefined ||
+        discount_percent === ""
+          ? 0
+          : Number(
+              discount_percent
+            );
 
-  } catch (error) {
-    console.error("Products fetch error:", error);
+      if (
+        !name ||
+        !name.trim()
+      ) {
 
-    res.status(500).json({
-      error: "Failed to fetch products"
-    });
-  }
-});
-
-// =========================
-// ADD PRODUCT
-// =========================
-
-app.post("/api/products", requireAdmin, async (req, res) => {
-  try {
-    const {
-      name,
-      price,
-      category,
-      image,
-      description,
-      stock,
-      discount_percent
-    } = req.body || {};
-
-    const numericPrice = Number(price);
-
-    const numericStock =
-      stock === undefined || stock === ""
-        ? 999999
-        : Number(stock);
-
-    const numericDiscount =
-      discount_percent === undefined ||
-      discount_percent === ""
-        ? 0
-        : Number(discount_percent);
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({
-        error: "Product name is required"
-      });
-    }
-
-    if (
-      !Number.isFinite(numericPrice) ||
-      numericPrice < 0
-    ) {
-      return res.status(400).json({
-        error: "Valid product price is required"
-      });
-    }
-
-    if (!validStock(numericStock)) {
-      return res.status(400).json({
-        error: "Stock must be a whole number 0 or greater"
-      });
-    }
-
-    if (!validDiscount(numericDiscount)) {
-      return res.status(400).json({
-        error: "Discount must be between 0 and 100"
-      });
-    }
-
-    const result = await pool.query(
-      `INSERT INTO products
-       (name, price, category, image, description,
-        stock, discount_percent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
-       RETURNING *`,
-      [
-        name.trim(),
-        numericPrice,
-        category || null,
-        image || null,
-        description || null,
-        numericStock,
-        numericDiscount
-      ]
-    );
-
-    const product = result.rows[0];
-
-    res.status(201).json({
-      ok: true,
-      product: {
-        ...product,
-        sale_price: calculateSalePrice(
-          product.price,
-          product.discount_percent
-        )
+        return res
+          .status(400)
+          .json({
+            error:
+              "Product name is required"
+          });
       }
-    });
 
-  } catch (error) {
-    console.error("Product add error:", error);
+      if (
+        !Number.isFinite(
+          numericPrice
+        ) ||
+        numericPrice < 0
+      ) {
 
-    res.status(500).json({
-      error: "Failed to add product"
-    });
+        return res
+          .status(400)
+          .json({
+            error:
+              "Valid product price is required"
+          });
+      }
+
+      if (
+        !validStock(
+          numericStock
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Stock must be a whole number 0 or greater"
+          });
+      }
+
+      if (
+        !validDiscount(
+          numericDiscount
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Discount must be between 0 and 100"
+          });
+      }
+
+      const result =
+        await pool.query(
+          `INSERT INTO products
+          (
+            name,
+            price,
+            category,
+            image,
+            description,
+            stock,
+            discount_percent
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6,$7)
+          RETURNING *`,
+          [
+            name.trim(),
+            numericPrice,
+            category || null,
+            image || null,
+            description || null,
+            numericStock,
+            numericDiscount
+          ]
+        );
+
+      const product =
+        result.rows[0];
+
+      res.status(201).json({
+        ok: true,
+
+        product: {
+          ...product,
+
+          sale_price:
+            calculateSalePrice(
+              product.price,
+              product.discount_percent
+            )
+        }
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Product add error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to add product"
+      });
+    }
   }
-});
+);
 
 // =========================
 // EDIT PRODUCT
 // =========================
 
-app.put("/api/products/:id", requireAdmin, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
+app.put(
+  "/api/products/:id",
+  requireAdmin,
+  async (req, res) => {
 
-    const {
-      name,
-      price,
-      category,
-      image,
-      description,
-      stock,
-      discount_percent
-    } = req.body || {};
+    try {
 
-    const numericPrice = Number(price);
-    const numericStock = Number(stock);
-    const numericDiscount = Number(discount_percent);
+      const id =
+        Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "Invalid product ID"
-      });
-    }
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
 
-    if (!name || !name.trim()) {
-      return res.status(400).json({
-        error: "Product name is required"
-      });
-    }
-
-    if (
-      !Number.isFinite(numericPrice) ||
-      numericPrice < 0
-    ) {
-      return res.status(400).json({
-        error: "Valid price is required"
-      });
-    }
-
-    if (!validStock(numericStock)) {
-      return res.status(400).json({
-        error: "Stock must be a whole number 0 or greater"
-      });
-    }
-
-    if (!validDiscount(numericDiscount)) {
-      return res.status(400).json({
-        error: "Discount must be between 0 and 100"
-      });
-    }
-
-    const result = await pool.query(
-      `UPDATE products
-       SET
-         name = $1,
-         price = $2,
-         category = $3,
-         image = $4,
-         description = $5,
-         stock = $6,
-         discount_percent = $7
-       WHERE id = $8
-       RETURNING *`,
-      [
-        name.trim(),
-        numericPrice,
-        category || null,
-        image || null,
-        description || null,
-        numericStock,
-        numericDiscount,
-        id
-      ]
-    );
-
-    if (!result.rows.length) {
-      return res.status(404).json({
-        error: "Product not found"
-      });
-    }
-
-    const product = result.rows[0];
-
-    res.json({
-      ok: true,
-      product: {
-        ...product,
-        sale_price: calculateSalePrice(
-          product.price,
-          product.discount_percent
-        )
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid product ID"
+          });
       }
-    });
 
-  } catch (error) {
-    console.error("Product update error:", error);
+      const {
+        name,
+        price,
+        category,
+        image,
+        description,
+        stock,
+        discount_percent
+      } = req.body || {};
 
-    res.status(500).json({
-      error: "Failed to update product"
-    });
+      const numericPrice =
+        Number(price);
+
+      const numericStock =
+        Number(stock);
+
+      const numericDiscount =
+        Number(
+          discount_percent
+        );
+
+      if (
+        !name ||
+        !name.trim()
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Product name is required"
+          });
+      }
+
+      if (
+        !Number.isFinite(
+          numericPrice
+        ) ||
+        numericPrice < 0
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Valid product price is required"
+          });
+      }
+
+      if (
+        !validStock(
+          numericStock
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Stock must be a whole number 0 or greater"
+          });
+      }
+
+      if (
+        !validDiscount(
+          numericDiscount
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Discount must be between 0 and 100"
+          });
+      }
+
+      const result =
+        await pool.query(
+          `UPDATE products
+           SET
+             name = $1,
+             price = $2,
+             category = $3,
+             image = $4,
+             description = $5,
+             stock = $6,
+             discount_percent = $7
+           WHERE id = $8
+           RETURNING *`,
+          [
+            name.trim(),
+            numericPrice,
+            category || null,
+            image || null,
+            description || null,
+            numericStock,
+            numericDiscount,
+            id
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found"
+          });
+      }
+
+      const product =
+        result.rows[0];
+
+      res.json({
+        ok: true,
+
+        product: {
+          ...product,
+
+          sale_price:
+            calculateSalePrice(
+              product.price,
+              product.discount_percent
+            )
+        }
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Product update error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to update product"
+      });
+    }
   }
-});
+);
+
+// =========================
+// UPDATE STOCK ONLY
+// =========================
+
+app.patch(
+  "/api/products/:id/stock",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const id =
+        Number(req.params.id);
+
+      const stock =
+        Number(
+          req.body?.stock
+        );
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid product ID"
+          });
+      }
+
+      if (
+        !validStock(stock)
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Stock must be a whole number 0 or greater"
+          });
+      }
+
+      const result =
+        await pool.query(
+          `UPDATE products
+           SET stock = $1
+           WHERE id = $2
+           RETURNING *`,
+          [
+            stock,
+            id
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found"
+          });
+      }
+
+      res.json({
+        ok: true,
+        product:
+          result.rows[0]
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Stock update error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to update stock"
+      });
+    }
+  }
+);
+
+// =========================
+// UPDATE DISCOUNT ONLY
+// =========================
+
+app.patch(
+  "/api/products/:id/discount",
+  requireAdmin,
+  async (req, res) => {
+
+    try {
+
+      const id =
+        Number(req.params.id);
+
+      const discount =
+        Number(
+          req.body?.discount_percent
+        );
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid product ID"
+          });
+      }
+
+      if (
+        !validDiscount(
+          discount
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Discount must be between 0 and 100"
+          });
+      }
+
+      const result =
+        await pool.query(
+          `UPDATE products
+           SET discount_percent = $1
+           WHERE id = $2
+           RETURNING *`,
+          [
+            discount,
+            id
+          ]
+        );
+
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found"
+          });
+      }
+
+      const product =
+        result.rows[0];
+
+      res.json({
+        ok: true,
+
+        product: {
+          ...product,
+
+          sale_price:
+            calculateSalePrice(
+              product.price,
+              product.discount_percent
+            )
+        }
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Discount update error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to update discount"
+      });
+    }
+  }
+);
 
 // =========================
 // DELETE PRODUCT
@@ -453,37 +1015,65 @@ app.delete(
   "/api/products/:id",
   requireAdmin,
   async (req, res) => {
-    try {
-      const id = Number(req.params.id);
 
-      if (!Number.isInteger(id) || id <= 0) {
-        return res.status(400).json({
-          error: "Invalid product ID"
-        });
+    try {
+
+      const id =
+        Number(req.params.id);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid product ID"
+          });
       }
 
-      const result = await pool.query(
-        `DELETE FROM products
-         WHERE id = $1
-         RETURNING id`,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `DELETE FROM products
+           WHERE id = $1
+           RETURNING id,name`,
+          [id]
+        );
 
-      if (!result.rows.length) {
-        return res.status(404).json({
-          error: "Product not found"
-        });
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Product not found"
+          });
       }
 
       res.json({
-        ok: true
+        ok: true,
+
+        message:
+          "Product deleted successfully",
+
+        product:
+          result.rows[0]
       });
 
     } catch (error) {
-      console.error("Product delete error:", error);
+
+      console.error(
+        "Product delete error:",
+        error
+      );
 
       res.status(500).json({
-        error: "Failed to delete product"
+        error:
+          "Failed to delete product"
       });
     }
   }
@@ -493,469 +1083,427 @@ app.delete(
 // CREATE ORDER
 // =========================
 
-app.post("/api/orders", async (req, res) => {
-  const client = await pool.connect();
+app.post(
+  "/api/orders",
+  async (req, res) => {
 
-  try {
-    const {
-      customer_name,
-      customer_phone,
-      customer_address,
-      items
-    } = req.body || {};
+    const client =
+      await pool.connect();
 
-    if (
-      !customer_name ||
-      !customer_phone ||
-      !customer_address ||
-      !Array.isArray(items) ||
-      items.length === 0
-    ) {
-      return res.status(400).json({
-        error: "Customer details and cart items are required"
-      });
-    }
+    try {
 
-    const name = String(customer_name).trim();
-    const phone = String(customer_phone).trim();
-    const address = String(customer_address).trim();
-
-    if (!name) {
-      return res.status(400).json({
-        error: "Customer name is required"
-      });
-    }
-
-    if (!/^[0-9]{10}$/.test(phone)) {
-      return res.status(400).json({
-        error: "Valid 10-digit mobile number is required"
-      });
-    }
-
-    if (!address) {
-      return res.status(400).json({
-        error: "Delivery address is required"
-      });
-    }
-
-    const quantityMap = new Map();
-
-    for (const item of items) {
-      const id = Number(item && item.id);
-      const quantity = Number(item && item.quantity);
+      const {
+        customer_name,
+        customer_phone,
+        customer_address,
+        items
+      } = req.body || {};
 
       if (
-        !Number.isInteger(id) ||
-        id <= 0 ||
-        !Number.isInteger(quantity) ||
-        quantity <= 0 ||
-        quantity > 999
+        !customer_name ||
+        !customer_phone ||
+        !customer_address ||
+        !Array.isArray(items) ||
+        items.length === 0
       ) {
-        return res.status(400).json({
-          error: "Invalid cart item"
-        });
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Customer details and cart items are required"
+          });
       }
 
-      quantityMap.set(
-        id,
-        (quantityMap.get(id) || 0) + quantity
-      );
-    }
+      const name =
+        String(
+          customer_name
+        ).trim();
 
-    const productIds =
-      Array.from(quantityMap.keys());
+      const phone =
+        String(
+          customer_phone
+        ).trim();
 
-    await client.query("BEGIN");
+      const address =
+        String(
+          customer_address
+        ).trim();
 
-    const productResult = await client.query(
-      `SELECT
-        id,
-        name,
-        price,
-        category,
-        image,
-        description,
-        stock,
-        discount_percent
-       FROM products
-       WHERE id = ANY($1::int[])
-       FOR UPDATE`,
-      [productIds]
-    );
+      if (!name) {
 
-    if (
-      productResult.rows.length !==
-      productIds.length
-    ) {
-      await client.query("ROLLBACK");
-
-      return res.status(400).json({
-        error: "One or more products are no longer available"
-      });
-    }
-
-    const productsById = new Map();
-
-    for (const product of productResult.rows) {
-      productsById.set(
-        Number(product.id),
-        product
-      );
-    }
-
-    let finalTotal = 0;
-    const verifiedItems = [];
-
-    for (const id of productIds) {
-      const product =
-        productsById.get(id);
-
-      const quantity =
-        quantityMap.get(id);
-
-      const stock =
-        Number(product.stock) || 0;
-
-      if (stock < quantity) {
-        await client.query("ROLLBACK");
-
-        return res.status(400).json({
-          error:
-            `${product.name} has only ${stock} item(s) available`
-        });
+        return res
+          .status(400)
+          .json({
+            error:
+              "Customer name is required"
+          });
       }
 
-      const originalPrice =
-        Number(product.price) || 0;
+      if (
+        !/^[0-9]{10}$/.test(phone)
+      ) {
 
-      const discountPercent =
-        Number(product.discount_percent) || 0;
+        return res
+          .status(400)
+          .json({
+            error:
+              "Valid 10-digit mobile number is required"
+          });
+      }
 
-      const salePrice =
-        calculateSalePrice(
-          originalPrice,
-          discountPercent
+      if (!address) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Delivery address is required"
+          });
+      }
+
+      // Combine duplicate IDs
+      const quantityMap =
+        new Map();
+
+      for (
+        const item of items
+      ) {
+
+        const id =
+          Number(
+            item &&
+            item.id
+          );
+
+        const quantity =
+          Number(
+            item &&
+            item.quantity
+          );
+
+        if (
+          !Number.isInteger(id) ||
+          id <= 0 ||
+          !Number.isInteger(quantity) ||
+          quantity <= 0 ||
+          quantity > 999
+        ) {
+
+          return res
+            .status(400)
+            .json({
+              error:
+                "Invalid cart item"
+            });
+        }
+
+        const oldQuantity =
+          quantityMap.get(id) ||
+          0;
+
+        const newQuantity =
+          oldQuantity +
+          quantity;
+
+        if (
+          newQuantity > 999
+        ) {
+
+          return res
+            .status(400)
+            .json({
+              error:
+                "Invalid cart quantity"
+            });
+        }
+
+        quantityMap.set(
+          id,
+          newQuantity
+        );
+      }
+
+      const productIds =
+        Array.from(
+          quantityMap.keys()
         );
 
-      const itemTotal =
+      await client.query(
+        "BEGIN"
+      );
+
+      const productResult =
+        await client.query(
+          `SELECT
+             id,
+             name,
+             price,
+             category,
+             image,
+             description,
+             stock,
+             discount_percent
+           FROM products
+           WHERE id = ANY($1::int[])
+           FOR UPDATE`,
+          [productIds]
+        );
+
+      if (
+        productResult.rows.length !==
+        productIds.length
+      ) {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "One or more products are no longer available"
+          });
+      }
+
+      const productsById =
+        new Map();
+
+      for (
+        const product of
+          productResult.rows
+      ) {
+
+        productsById.set(
+          Number(product.id),
+          product
+        );
+      }
+
+      let finalTotal = 0;
+
+      const verifiedItems = [];
+
+      for (
+        const id of productIds
+      ) {
+
+        const product =
+          productsById.get(id);
+
+        const quantity =
+          quantityMap.get(id);
+
+        const stock =
+          Number(
+            product.stock
+          ) || 0;
+
+        if (
+          stock < quantity
+        ) {
+
+          await client.query(
+            "ROLLBACK"
+          );
+
+          return res
+            .status(400)
+            .json({
+              error:
+                `${product.name} has only ${stock} item(s) available`
+            });
+        }
+
+        const originalPrice =
+          Number(
+            product.price
+          ) || 0;
+
+        const discountPercent =
+          Number(
+            product.discount_percent
+          ) || 0;
+
+        const salePrice =
+          calculateSalePrice(
+            originalPrice,
+            discountPercent
+          );
+
+        const itemTotal =
+          Math.round(
+            salePrice *
+            quantity *
+            100
+          ) / 100;
+
+        finalTotal +=
+          itemTotal;
+
+        verifiedItems.push({
+
+          id:
+            Number(product.id),
+
+          name:
+            product.name,
+
+          category:
+            product.category ||
+            "",
+
+          image:
+            product.image ||
+            "",
+
+          quantity,
+
+          original_price:
+            originalPrice,
+
+          discount_percent:
+            discountPercent,
+
+          price:
+            salePrice,
+
+          item_total:
+            itemTotal
+        });
+      }
+
+      finalTotal =
         Math.round(
-          salePrice * quantity * 100
+          finalTotal * 100
         ) / 100;
 
-      finalTotal += itemTotal;
+      // Reduce stock
+      for (
+        const id of productIds
+      ) {
 
-      verifiedItems.push({
-        id: Number(product.id),
-        name: product.name,
-        category: product.category || "",
-        image: product.image || "",
-        quantity,
-        original_price: originalPrice,
-        discount_percent: discountPercent,
-        price: salePrice,
-        item_total: itemTotal
-      });
-    }
+        const quantity =
+          quantityMap.get(id);
 
-    finalTotal =
-      Math.round(finalTotal * 100) / 100;
+        await client.query(
+          `UPDATE products
+           SET stock = stock - $1
+           WHERE id = $2`,
+          [
+            quantity,
+            id
+          ]
+        );
+      }
 
-    for (const id of productIds) {
-      const quantity =
-        quantityMap.get(id);
+      const orderResult =
+        await client.query(
+          `INSERT INTO orders
+          (
+            customer_name,
+            customer_phone,
+            customer_address,
+            items,
+            total,
+            status
+          )
+          VALUES
+          ($1,$2,$3,$4,$5,$6)
+          RETURNING *`,
+          [
+            name,
+            phone,
+            address,
+            JSON.stringify(
+              verifiedItems
+            ),
+            finalTotal,
+            "pending"
+          ]
+        );
 
       await client.query(
-        `UPDATE products
-         SET stock = stock - $1
-         WHERE id = $2`,
-        [quantity, id]
-      );
-    }
-
-    const orderResult = await client.query(
-      `INSERT INTO orders
-       (
-         customer_name,
-         customer_phone,
-         customer_address,
-         items,
-         total,
-         status
-       )
-       VALUES ($1,$2,$3,$4,$5,$6)
-       RETURNING *`,
-      [
-        name,
-        phone,
-        address,
-        JSON.stringify(verifiedItems),
-        finalTotal,
-        "pending"
-      ]
-    );
-
-    await client.query("COMMIT");
-
-    res.status(201).json({
-      ok: true,
-      order: orderResult.rows[0]
-    });
-
-  } catch (error) {
-
-    try {
-      await client.query("ROLLBACK");
-    } catch {}
-
-    console.error("Order create error:", error);
-
-    res.status(500).json({
-      error: "Failed to create order"
-    });
-
-  } finally {
-    client.release();
-  }
-});
-// =========================
-// PRODUCT MANAGEMENT - ADMIN
-// =========================
-
-// UPDATE PRODUCT
-app.put("/api/products/:id", requireAdmin, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "Invalid product ID"
-      });
-    }
-
-    const {
-      name,
-      price,
-      category,
-      image,
-      description,
-      stock,
-      discount_percent
-    } = req.body || {};
-
-    const numericPrice = Number(price);
-    const numericStock = Number(stock);
-    const numericDiscount = Number(discount_percent);
-
-    if (!name || !name.trim()) {
-      return res.status(400).json({
-        error: "Product name is required"
-      });
-    }
-
-    if (
-      !Number.isFinite(numericPrice) ||
-      numericPrice < 0
-    ) {
-      return res.status(400).json({
-        error: "Valid product price is required"
-      });
-    }
-
-    if (!validStock(numericStock)) {
-      return res.status(400).json({
-        error: "Stock must be a whole number 0 or greater"
-      });
-    }
-
-    if (!validDiscount(numericDiscount)) {
-      return res.status(400).json({
-        error: "Discount must be between 0 and 100"
-      });
-    }
-
-    const result = await pool.query(
-      `UPDATE products
-       SET
-         name = $1,
-         price = $2,
-         category = $3,
-         image = $4,
-         description = $5,
-         stock = $6,
-         discount_percent = $7
-       WHERE id = $8
-       RETURNING *`,
-      [
-        name.trim(),
-        numericPrice,
-        category || null,
-        image || null,
-        description || null,
-        numericStock,
-        numericDiscount,
-        id
-      ]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        error: "Product not found"
-      });
-    }
-
-    const product = result.rows[0];
-
-    res.json({
-      ok: true,
-      product: {
-        ...product,
-        sale_price: calculateSalePrice(
-          product.price,
-          product.discount_percent
-        )
-      }
-    });
-
-  } catch (error) {
-    console.error(
-      "Product update error:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Failed to update product"
-    });
-  }
-});
-
-
-// DELETE PRODUCT
-app.delete(
-  "/api/products/:id",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const id = Number(req.params.id);
-
-      if (!Number.isInteger(id) || id <= 0) {
-        return res.status(400).json({
-          error: "Invalid product ID"
-        });
-      }
-
-      const result = await pool.query(
-        `DELETE FROM products
-         WHERE id = $1
-         RETURNING id, name`,
-        [id]
+        "COMMIT"
       );
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({
-          error: "Product not found"
-        });
-      }
-
-      res.json({
+      res.status(201).json({
         ok: true,
-        message: "Product deleted successfully",
-        product: result.rows[0]
+
+        order:
+          orderResult.rows[0]
       });
 
     } catch (error) {
+
+      try {
+
+        await client.query(
+          "ROLLBACK"
+        );
+
+      } catch (
+        rollbackError
+      ) {
+
+        console.error(
+          "Rollback error:",
+          rollbackError
+        );
+      }
+
       console.error(
-        "Product delete error:",
+        "Order create error:",
         error
       );
 
       res.status(500).json({
-        error: "Failed to delete product"
+        error:
+          "Failed to create order"
       });
+
+    } finally {
+
+      client.release();
     }
   }
 );
 
-
-// ADMIN PRODUCT LIST
-app.get(
-  "/api/admin/products",
-  requireAdmin,
-  async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT
-          id,
-          name,
-          price,
-          category,
-          image,
-          description,
-          stock,
-          discount_percent,
-          created_at
-        FROM products
-        ORDER BY id DESC
-      `);
-
-      const products = result.rows.map(
-        (product) => {
-          const originalPrice =
-            Number(product.price) || 0;
-
-          const discountPercent =
-            Number(product.discount_percent) || 0;
-
-          return {
-            ...product,
-            price: originalPrice,
-            original_price: originalPrice,
-            discount_percent:
-              discountPercent,
-            sale_price:
-              calculateSalePrice(
-                originalPrice,
-                discountPercent
-              ),
-            stock:
-              Number(product.stock) || 0
-          };
-        }
-      );
-
-      res.json(products);
-
-    } catch (error) {
-      console.error(
-        "Admin products fetch error:",
-        error
-      );
-
-      res.status(500).json({
-        error: "Failed to fetch admin products"
-      });
-    }
-  }
-);
 // =========================
 // ADMIN ORDERS
 // =========================
 
-app.get("/api/orders", requireAdmin, async (req, res) => {
-  try {
-    const result = await pool.query(
-      "SELECT * FROM orders ORDER BY id DESC"
-    );
+app.get(
+  "/api/orders",
+  requireAdmin,
+  async (req, res) => {
 
-    res.json(result.rows);
+    try {
 
-  } catch (error) {
-    console.error("Orders fetch error:", error);
+      const result =
+        await pool.query(
+          "SELECT * FROM orders ORDER BY id DESC"
+        );
 
-    res.status(500).json({
-      error: "Failed to fetch orders"
-    });
+      res.json(
+        result.rows
+      );
+
+    } catch (error) {
+
+      console.error(
+        "Orders fetch error:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to fetch orders"
+      });
+    }
   }
-});
+);
 
 // =========================
 // UPDATE ORDER STATUS
@@ -965,64 +1513,187 @@ app.patch(
   "/api/orders/:id/status",
   requireAdmin,
   async (req, res) => {
+
     try {
-      const id = Number(req.params.id);
+
+      const id =
+        Number(req.params.id);
+
       const status =
-        String(req.body?.status || "")
+        String(
+          req.body?.status ||
+          ""
+        )
           .trim()
           .toLowerCase();
 
       const allowedStatuses = [
         "pending",
         "confirmed",
+        "packed",
         "shipped",
         "delivered",
         "cancelled"
       ];
 
-      if (!Number.isInteger(id) || id <= 0) {
-        return res.status(400).json({
-          error: "Invalid order ID"
-        });
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid order ID"
+          });
       }
 
-      if (!allowedStatuses.includes(status)) {
-        return res.status(400).json({
-          error: "Invalid order status"
-        });
+      if (
+        !allowedStatuses.includes(
+          status
+        )
+      ) {
+
+        return res
+          .status(400)
+          .json({
+            error:
+              "Invalid order status"
+          });
       }
 
-      const result = await pool.query(
-        `UPDATE orders
-         SET status = $1
-         WHERE id = $2
-         RETURNING *`,
-        [status, id]
-      );
+      const result =
+        await pool.query(
+          `UPDATE orders
+           SET status = $1
+           WHERE id = $2
+           RETURNING *`,
+          [
+            status,
+            id
+          ]
+        );
 
-      if (!result.rows.length) {
-        return res.status(404).json({
-          error: "Order not found"
-        });
+      if (
+        result.rows.length === 0
+      ) {
+
+        return res
+          .status(404)
+          .json({
+            error:
+              "Order not found"
+          });
       }
 
       res.json({
         ok: true,
-        order: result.rows[0]
+
+        order:
+          result.rows[0]
       });
 
     } catch (error) {
+
       console.error(
         "Order status error:",
         error
       );
 
       res.status(500).json({
-        error: "Failed to update order status"
+        error:
+          "Failed to update order status"
       });
     }
   }
 );
+
+// =========================
+// DATABASE TABLES
+// =========================
+
+async function initializeDatabase(){
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS products (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      price NUMERIC(10,2)
+        NOT NULL DEFAULT 0,
+      category TEXT,
+      image TEXT,
+      description TEXT,
+      created_at
+        TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS
+    stock INTEGER
+    NOT NULL DEFAULT 999999
+  `);
+
+  await pool.query(`
+    ALTER TABLE products
+    ADD COLUMN IF NOT EXISTS
+    discount_percent NUMERIC(5,2)
+    NOT NULL DEFAULT 0
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      status TEXT DEFAULT 'pending',
+      total NUMERIC(10,2) DEFAULT 0,
+      created_at
+        TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS
+    customer_name TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS
+    customer_phone TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS
+    customer_address TEXT
+  `);
+
+  await pool.query(`
+    ALTER TABLE orders
+    ADD COLUMN IF NOT EXISTS
+    items JSONB
+  `);
+
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sellers (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      email TEXT,
+      created_at
+        TIMESTAMP
+        DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  console.log(
+    "SHRIVI database tables ready"
+  );
+}
 
 // =========================
 // DASHBOARD
@@ -1032,121 +1703,68 @@ app.get(
   "/api/dashboard",
   requireAdmin,
   async (req, res) => {
+
     try {
-      const products = await pool.query(
-        "SELECT COUNT(*) AS count FROM products"
-      );
 
-      const orders = await pool.query(
-        "SELECT COUNT(*) AS count FROM orders"
-      );
+      const products =
+        await pool.query(
+          "SELECT COUNT(*) AS count FROM products"
+        );
 
-      const sellers = await pool.query(
-        "SELECT COUNT(*) AS count FROM sellers"
-      );
+      const orders =
+        await pool.query(
+          "SELECT COUNT(*) AS count FROM orders"
+        );
+
+      const sellers =
+        await pool.query(
+          "SELECT COUNT(*) AS count FROM sellers"
+        );
 
       res.json({
+
         products:
-          Number(products.rows[0].count),
+          Number(
+            products.rows[0].count
+          ),
 
         orders:
-          Number(orders.rows[0].count),
+          Number(
+            orders.rows[0].count
+          ),
 
         sellers:
-          Number(sellers.rows[0].count)
+          Number(
+            sellers.rows[0].count
+          )
       });
 
     } catch (error) {
+
       console.error(
         "Dashboard error:",
         error
       );
 
       res.status(500).json({
-        error: "Database error"
+        error:
+          "Database error"
       });
     }
   }
 );
 
 // =========================
-// DATABASE
+// DATABASE CONNECTION
 // =========================
 
-async function initializeDatabase() {
+async function startDatabase(){
 
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS products (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      price NUMERIC(10,2) NOT NULL DEFAULT 0,
-      category TEXT,
-      image TEXT,
-      description TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  await pool.query(`
-    ALTER TABLE products
-    ADD COLUMN IF NOT EXISTS stock
-    INTEGER NOT NULL DEFAULT 999999
-  `);
-
-  await pool.query(`
-    ALTER TABLE products
-    ADD COLUMN IF NOT EXISTS discount_percent
-    NUMERIC(5,2) NOT NULL DEFAULT 0
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS orders (
-      id SERIAL PRIMARY KEY,
-      status TEXT DEFAULT 'pending',
-      total NUMERIC(10,2) DEFAULT 0,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  await pool.query(`
-    ALTER TABLE orders
-    ADD COLUMN IF NOT EXISTS customer_name TEXT
-  `);
-
-  await pool.query(`
-    ALTER TABLE orders
-    ADD COLUMN IF NOT EXISTS customer_phone TEXT
-  `);
-
-  await pool.query(`
-    ALTER TABLE orders
-    ADD COLUMN IF NOT EXISTS customer_address TEXT
-  `);
-
-  await pool.query(`
-    ALTER TABLE orders
-    ADD COLUMN IF NOT EXISTS items JSONB
-  `);
-
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS sellers (
-      id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT,
-      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
-  `);
-
-  console.log("SHRIVI database tables ready");
-}
-
-// =========================
-// START DATABASE
-// =========================
-
-async function startDatabase() {
   try {
-    await pool.query("SELECT NOW()");
+
+    await pool.query(
+      "SELECT NOW()"
+    );
 
     console.log(
       "SHRIVI PostgreSQL connected successfully"
@@ -1155,6 +1773,7 @@ async function startDatabase() {
     await initializeDatabase();
 
   } catch (error) {
+
     console.error(
       "PostgreSQL connection error:",
       error.message
@@ -1168,8 +1787,13 @@ startDatabase();
 // START SERVER
 // =========================
 
-app.listen(PORT, () => {
-  console.log(
-    `SHRIVI server running on port ${PORT}`
-  );
-});
+app.listen(
+  PORT,
+  () => {
+
+    console.log(
+      `SHRIVI server running on port ${PORT}`
+    );
+
+  }
+);
