@@ -1,6 +1,7 @@
 {
   "name": "Shrivi — Fashion Marketplace",
   "short_name": "Shrivi",
+  "id": "shrivi-marketplace",
   "description": "Shrivi Fashion Marketplace — discover fashion, jewellery and accessories from independent sellers.",
   "start_url": "/",
   "scope": "/",
