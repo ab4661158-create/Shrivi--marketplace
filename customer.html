@@ -19,7 +19,13 @@ body{
   color:#222;
 }
 
-/* HEADER */
+button,input,textarea{
+  font-family:inherit;
+}
+
+/* =========================
+   HEADER
+========================= */
 
 .header{
   background:#131921;
@@ -76,7 +82,9 @@ body{
   font-size:18px;
 }
 
-/* NAV */
+/* =========================
+   NAV
+========================= */
 
 .nav{
   background:#232f3e;
@@ -96,7 +104,9 @@ body{
   text-decoration:underline;
 }
 
-/* HERO */
+/* =========================
+   HERO
+========================= */
 
 .hero{
   margin:15px auto;
@@ -131,7 +141,9 @@ body{
   cursor:pointer;
 }
 
-/* CATEGORY */
+/* =========================
+   CATEGORIES
+========================= */
 
 .categories{
   max-width:1400px;
@@ -164,7 +176,9 @@ body{
   color:white;
 }
 
-/* PRODUCTS */
+/* =========================
+   PRODUCTS
+========================= */
 
 .products-section{
   max-width:1400px;
@@ -223,6 +237,9 @@ body{
 
 .product-info{
   padding:14px;
+  display:flex;
+  flex-direction:column;
+  flex:1;
 }
 
 .product-name{
@@ -275,6 +292,28 @@ body{
   color:#c62828;
 }
 
+.product-actions{
+  margin-top:auto;
+  padding-top:8px;
+}
+
+.view-btn{
+  width:100%;
+  border:1px solid #131921;
+  background:white;
+  color:#131921;
+  padding:10px;
+  border-radius:20px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.view-btn:hover{
+  background:#131921;
+  color:white;
+}
+
 .add-btn{
   width:100%;
   border:0;
@@ -289,12 +328,15 @@ body{
   background:#f7ca00;
 }
 
-.add-btn:disabled{
+.add-btn:disabled,
+.view-btn:disabled{
   background:#ddd;
   cursor:not-allowed;
 }
 
-/* LOADING */
+/* =========================
+   LOADING / EMPTY
+========================= */
 
 .loading{
   text-align:center;
@@ -306,9 +348,12 @@ body{
   text-align:center;
   padding:50px;
   color:#666;
+  grid-column:1/-1;
 }
 
-/* CART */
+/* =========================
+   CART
+========================= */
 
 .overlay{
   position:fixed;
@@ -427,7 +472,9 @@ body{
   cursor:pointer;
 }
 
-/* MODAL */
+/* =========================
+   MODALS
+========================= */
 
 .modal-overlay{
   position:fixed;
@@ -446,7 +493,7 @@ body{
 
 .modal{
   background:white;
-  width:min(600px,100%);
+  width:min(650px,100%);
   max-height:90vh;
   overflow-y:auto;
   border-radius:10px;
@@ -508,7 +555,56 @@ body{
   border-radius:6px;
 }
 
-/* TRACKING */
+/* =========================
+   PRODUCT DETAILS
+========================= */
+
+.detail-image{
+  width:100%;
+  max-height:350px;
+  object-fit:contain;
+  border-radius:8px;
+  background:#f5f5f5;
+}
+
+.detail-title{
+  font-size:26px;
+  margin:12px 0;
+}
+
+.detail-description{
+  color:#555;
+  line-height:1.6;
+  margin:15px 0;
+}
+
+.detail-price{
+  font-size:28px;
+  font-weight:bold;
+}
+
+.detail-original{
+  text-decoration:line-through;
+  color:#777;
+  margin-left:8px;
+}
+
+.detail-discount{
+  color:#087f23;
+  font-weight:bold;
+  margin-left:8px;
+}
+
+.detail-stock{
+  padding:10px;
+  background:#f7f7f7;
+  border-radius:6px;
+  margin:15px 0;
+}
+
+/* =========================
+   TRACKING
+========================= */
 
 .tracking-box{
   display:flex;
@@ -545,7 +641,9 @@ body{
   text-transform:capitalize;
 }
 
-/* FOOTER */
+/* =========================
+   FOOTER
+========================= */
 
 footer{
   background:#131921;
@@ -560,7 +658,9 @@ footer h2{
   margin-bottom:10px;
 }
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media(max-width:800px){
 
@@ -618,6 +718,10 @@ footer h2{
   .sale-price{
     font-size:17px;
   }
+
+  .detail-title{
+    font-size:22px;
+  }
 }
 
 @media(max-width:430px){
@@ -633,13 +737,20 @@ footer h2{
   .hero h1{
     font-size:26px;
   }
+
+  .tracking-box{
+    flex-direction:column;
+  }
+
 }
 </style>
 </head>
 
 <body>
 
-<!-- HEADER -->
+<!-- =========================
+     HEADER
+========================= -->
 
 <header class="header">
 
@@ -654,6 +765,7 @@ footer h2{
   </div>
 
   <div class="search-box">
+
     <input
       id="searchInput"
       type="text"
@@ -664,6 +776,7 @@ footer h2{
     <button onclick="searchProducts()">
       🔍
     </button>
+
   </div>
 
   <button
@@ -684,7 +797,9 @@ footer h2{
 </header>
 
 
-<!-- NAV -->
+<!-- =========================
+     NAVIGATION
+========================= -->
 
 <nav class="nav">
 
@@ -719,7 +834,9 @@ footer h2{
 </nav>
 
 
-<!-- HERO -->
+<!-- =========================
+     HERO
+========================= -->
 
 <section class="hero">
 
@@ -733,11 +850,13 @@ footer h2{
   </p>
 
   <button
-    onclick="document
-      .getElementById('products')
-      .scrollIntoView({
-        behavior:'smooth'
-      })"
+    onclick="
+      document
+        .getElementById('products')
+        .scrollIntoView({
+          behavior:'smooth'
+        })
+    "
   >
     Shop Now
   </button>
@@ -745,11 +864,15 @@ footer h2{
 </section>
 
 
-<!-- CATEGORIES -->
+<!-- =========================
+     CATEGORIES
+========================= -->
 
 <section class="categories">
 
-  <h2>Shop by Category</h2>
+  <h2>
+    Shop by Category
+  </h2>
 
   <div class="category-list">
 
@@ -807,7 +930,9 @@ footer h2{
 </section>
 
 
-<!-- PRODUCTS -->
+<!-- =========================
+     PRODUCTS
+========================= -->
 
 <section
   class="products-section"
@@ -849,7 +974,9 @@ footer h2{
 </section>
 
 
-<!-- CART -->
+<!-- =========================
+     CART
+========================= -->
 
 <div
   id="cartOverlay"
@@ -905,7 +1032,44 @@ footer h2{
 </div>
 
 
-<!-- CHECKOUT MODAL -->
+<!-- =========================
+     PRODUCT DETAILS
+========================= -->
+
+<div
+  id="productModal"
+  class="modal-overlay"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>
+        Product Details
+      </h2>
+
+      <button
+        class="modal-close"
+        onclick="closeProductDetails()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="productDetails"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     CHECKOUT
+========================= -->
 
 <div
   id="checkoutModal"
@@ -1001,7 +1165,9 @@ footer h2{
 </div>
 
 
-<!-- ORDER TRACKING -->
+<!-- =========================
+     ORDER TRACKING
+========================= -->
 
 <div
   id="trackingModal"
@@ -1051,7 +1217,9 @@ footer h2{
 </div>
 
 
-<!-- SUCCESS -->
+<!-- =========================
+     SUCCESS
+========================= -->
 
 <div
   id="successModal"
@@ -1085,7 +1253,9 @@ footer h2{
 </div>
 
 
-<!-- FOOTER -->
+<!-- =========================
+     FOOTER
+========================= -->
 
 <footer>
 
@@ -1190,9 +1360,17 @@ async function loadProducts(){
 
     grid.innerHTML = `
       <div class="empty">
-        <h3>Unable to load products</h3>
-        <p>Please refresh the page.</p>
+
+        <h3>
+          Unable to load products
+        </h3>
+
+        <p>
+          Please refresh the page.
+        </p>
+
         <br>
+
         <button
           onclick="loadProducts()"
           style="
@@ -1200,10 +1378,12 @@ async function loadProducts(){
             border:0;
             background:#ff9900;
             border-radius:5px;
+            cursor:pointer;
           "
         >
           Try Again
         </button>
+
       </div>
     `;
 
@@ -1227,8 +1407,15 @@ function renderProducts(){
 
     grid.innerHTML = `
       <div class="empty">
-        <h3>No products found</h3>
-        <p>Try another search or category.</p>
+
+        <h3>
+          No products found
+        </h3>
+
+        <p>
+          Try another search or category.
+        </p>
+
       </div>
     `;
 
@@ -1389,21 +1576,32 @@ function productCard(product){
 
         ${stockHtml}
 
-        <button
-          class="add-btn"
-          ${
-            stock <= 0
-              ? "disabled"
-              : ""
-          }
-          onclick="addToCart(${id})"
-        >
-          ${
-            stock > 0
-              ? "🛒 Add to Cart"
-              : "Out of Stock"
-          }
-        </button>
+        <div class="product-actions">
+
+          <button
+            class="view-btn"
+            onclick="viewProduct(${id})"
+          >
+            👁️ View Details
+          </button>
+
+          <button
+            class="add-btn"
+            ${
+              stock <= 0
+                ? "disabled"
+                : ""
+            }
+            onclick="addToCart(${id})"
+          >
+            ${
+              stock > 0
+                ? "🛒 Add to Cart"
+                : "Out of Stock"
+            }
+          </button>
+
+        </div>
 
       </div>
 
@@ -1488,35 +1686,16 @@ function filterCategory(category){
 
     });
 
-  const categoryElements =
-    document.querySelectorAll(
-      ".category"
-    );
-
-  categoryElements.forEach(element => {
-
-    if(
-      element.textContent
-        .trim()
-        .toLowerCase()
-        .includes(
-          String(category)
-            .toLowerCase()
-        )
-    ){
-
-      element.classList.add(
-        "active"
-      );
-
-    }
-
-  });
-
   if(
     !category ||
     category === "all"
   ){
+
+    document
+      .querySelector(
+        ".category"
+      )
+      ?.classList.add("active");
 
     filteredProducts =
       [...allProducts];
@@ -1527,6 +1706,27 @@ function filterCategory(category){
       String(category)
         .trim()
         .toLowerCase();
+
+    document
+      .querySelectorAll(".category")
+      .forEach(element => {
+
+        const text =
+          element.textContent
+            .trim()
+            .toLowerCase();
+
+        if(
+          text.includes(wanted)
+        ){
+
+          element.classList.add(
+            "active"
+          );
+
+        }
+
+      });
 
     filteredProducts =
       allProducts.filter(
@@ -1552,6 +1752,245 @@ function filterCategory(category){
   }
 
   renderProducts();
+
+}
+
+
+/* =========================
+   PRODUCT DETAILS
+========================= */
+
+function viewProduct(id){
+
+  const product =
+    allProducts.find(
+      item =>
+        Number(item.id) ===
+        Number(id)
+    );
+
+  if(!product){
+
+    alert("Product not found.");
+
+    return;
+  }
+
+  const name =
+    escapeHtml(
+      product.name || "Product"
+    );
+
+  const description =
+    escapeHtml(
+      product.description ||
+      "No description available."
+    );
+
+  const category =
+    escapeHtml(
+      product.category || "General"
+    );
+
+  const seller =
+    escapeHtml(
+      product.seller_name || "Shrivi"
+    );
+
+  const image =
+    product.image || "";
+
+  const price =
+    Number(product.price) || 0;
+
+  const discount =
+    Number(product.discount_percent) || 0;
+
+  const salePrice =
+    Number(product.sale_price) ||
+    calculatePrice(
+      price,
+      discount
+    );
+
+  const stock =
+    Number(product.stock) || 0;
+
+  let imageHtml;
+
+  if(image){
+
+    imageHtml = `
+      <img
+        class="detail-image"
+        src="${escapeAttribute(image)}"
+        alt="${name}"
+        onerror="
+          this.style.display='none';
+          document.getElementById('detailFallback').style.display='flex';
+        "
+      >
+
+      <div
+        id="detailFallback"
+        style="
+          display:none;
+          height:300px;
+          align-items:center;
+          justify-content:center;
+          background:#eee;
+          font-size:70px;
+        "
+      >
+        🛍️
+      </div>
+    `;
+
+  }else{
+
+    imageHtml = `
+      <div
+        style="
+          height:300px;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:#eee;
+          font-size:70px;
+          border-radius:8px;
+        "
+      >
+        🛍️
+      </div>
+    `;
+
+  }
+
+  document.getElementById(
+    "productDetails"
+  ).innerHTML = `
+
+    ${imageHtml}
+
+    <div
+      style="
+        margin-top:18px;
+      "
+    >
+
+      <div
+        style="
+          font-size:13px;
+          color:#777;
+        "
+      >
+        ${category}
+      </div>
+
+      <h2 class="detail-title">
+        ${name}
+      </h2>
+
+      <p
+        style="
+          color:#666;
+          margin-bottom:12px;
+        "
+      >
+        Sold by:
+        <strong>
+          ${seller}
+        </strong>
+      </p>
+
+      <div>
+
+        <span class="detail-price">
+          ₹${formatMoney(salePrice)}
+        </span>
+
+        ${
+          discount > 0
+            ? `
+              <span class="detail-original">
+                ₹${formatMoney(price)}
+              </span>
+
+              <span class="detail-discount">
+                ${discount}% OFF
+              </span>
+            `
+            : ""
+        }
+
+      </div>
+
+      <div class="detail-stock">
+
+        ${
+          stock > 0
+            ? `✓ ${stock} available`
+            : `✕ Out of stock`
+        }
+
+      </div>
+
+      <h3>
+        Description
+      </h3>
+
+      <p class="detail-description">
+        ${description}
+      </p>
+
+      <button
+        ${
+          stock <= 0
+            ? "disabled"
+            : ""
+        }
+        onclick="
+          addToCart(${Number(id)});
+          closeProductDetails();
+          openCart();
+        "
+        style="
+          width:100%;
+          padding:14px;
+          border:0;
+          background:#ffd814;
+          border-radius:6px;
+          font-weight:bold;
+          cursor:pointer;
+          font-size:16px;
+        "
+      >
+        ${
+          stock > 0
+            ? "🛒 Add to Cart"
+            : "Out of Stock"
+        }
+      </button>
+
+    </div>
+  `;
+
+  document
+    .getElementById(
+      "productModal"
+    )
+    .classList.add("show");
+
+}
+
+
+function closeProductDetails(){
+
+  document
+    .getElementById(
+      "productModal"
+    )
+    .classList.remove("show");
 
 }
 
@@ -1614,6 +2053,7 @@ function addToCart(id){
   }else{
 
     cart.push({
+
       id:
         Number(product.id),
 
@@ -1681,7 +2121,9 @@ function updateCartCount(){
     );
 
   document
-    .getElementById("cartCount")
+    .getElementById(
+      "cartCount"
+    )
     .textContent = count;
 
 }
@@ -1737,11 +2179,19 @@ function renderCart(){
 
     container.innerHTML = `
       <div class="empty">
+
         <div style="font-size:50px;">
           🛒
         </div>
-        <h3>Your cart is empty</h3>
-        <p>Add some products to continue.</p>
+
+        <h3>
+          Your cart is empty
+        </h3>
+
+        <p>
+          Add some products to continue.
+        </p>
+
       </div>
     `;
 
@@ -1763,11 +2213,10 @@ function renderCart(){
       )
       .join("");
 
-  const total =
-    getCartTotal();
-
   totalElement.textContent =
-    `Total: ₹${formatMoney(total)}`;
+    `Total: ₹${formatMoney(
+      getCartTotal()
+    )}`;
 
 }
 
@@ -1823,10 +2272,12 @@ function cartItemHtml(item,index){
         <div class="qty">
 
           <button
-            onclick="changeQuantity(
-              ${index},
-              -1
-            )"
+            onclick="
+              changeQuantity(
+                ${index},
+                -1
+              )
+            "
           >
             −
           </button>
@@ -1836,10 +2287,12 @@ function cartItemHtml(item,index){
           </strong>
 
           <button
-            onclick="changeQuantity(
-              ${index},
-              1
-            )"
+            onclick="
+              changeQuantity(
+                ${index},
+                1
+              )
+            "
           >
             +
           </button>
@@ -1848,7 +2301,9 @@ function cartItemHtml(item,index){
 
         <button
           class="remove"
-          onclick="removeFromCart(${index})"
+          onclick="
+            removeFromCart(${index})
+          "
         >
           Remove
         </button>
@@ -2000,7 +2455,9 @@ function openCheckout(){
       <strong>
         ${itemCount} item(s)
       </strong>
+
       <br>
+
       Order Total:
       <strong>
         ₹${formatMoney(total)}
@@ -2077,7 +2534,9 @@ async function placeOrder(event){
 
   }
 
-  if(!/^[0-9]{10}$/.test(phone)){
+  if(
+    !/^[0-9]{10}$/.test(phone)
+  ){
 
     alert(
       "Please enter a valid 10-digit mobile number."
@@ -2179,6 +2638,7 @@ async function placeOrder(event){
         "successContent"
       )
       .innerHTML = `
+
         <div
           style="
             font-size:55px;
@@ -2189,7 +2649,8 @@ async function placeOrder(event){
         </div>
 
         <h3>
-          Thank you, ${escapeHtml(name)}!
+          Thank you,
+          ${escapeHtml(name)}!
         </h3>
 
         <p style="margin:12px 0;">
@@ -2204,6 +2665,7 @@ async function placeOrder(event){
             margin:15px 0;
           "
         >
+
           <strong>
             Order ID
           </strong>
@@ -2226,14 +2688,13 @@ async function placeOrder(event){
           ₹${formatMoney(
             Number(order.total) || 0
           )}
+
         </div>
 
         <button
           onclick="
             closeSuccess();
-            openTracking(
-              ${order.id}
-            );
+            openTracking(${order.id});
           "
           style="
             padding:12px 20px;
@@ -2246,6 +2707,7 @@ async function placeOrder(event){
         >
           Track Order
         </button>
+
       `;
 
     document
@@ -2337,7 +2799,10 @@ async function trackOrder(){
       "trackingResult"
     );
 
-  if(!Number.isInteger(id) || id <= 0){
+  if(
+    !Number.isInteger(id) ||
+    id <= 0
+  ){
 
     result.innerHTML = `
       <p style="color:#c62828;">
@@ -2349,12 +2814,11 @@ async function trackOrder(){
 
   }
 
-  result.innerHTML =
-    `
-      <div class="loading">
-        Loading order...
-      </div>
-    `;
+  result.innerHTML = `
+    <div class="loading">
+      Loading order...
+    </div>
+  `;
 
   try{
 
@@ -2381,6 +2845,7 @@ async function trackOrder(){
         : [];
 
     result.innerHTML = `
+
       <div class="order-result">
 
         <h3>
@@ -2391,7 +2856,8 @@ async function trackOrder(){
 
         <div class="status">
           ${escapeHtml(
-            data.status || "pending"
+            data.status ||
+            "pending"
           )}
         </div>
 
@@ -2417,26 +2883,35 @@ async function trackOrder(){
             items.length
               ? items
                   .map(item => `
+
                     <div
                       style="
                         padding:7px 0;
                         border-bottom:1px solid #ddd;
                       "
                     >
+
                       ${escapeHtml(
-                        item.name || "Product"
+                        item.name ||
+                        "Product"
                       )}
+
                       ×
+
                       ${Number(
                         item.quantity || 0
                       )}
+
                       —
+
                       ₹${formatMoney(
                         Number(
                           item.item_total
                         ) || 0
                       )}
+
                     </div>
+
                   `)
                   .join("")
               : "No item details"
@@ -2454,11 +2929,13 @@ async function trackOrder(){
         </small>
 
       </div>
+
     `;
 
   }catch(error){
 
     result.innerHTML = `
+
       <div
         style="
           color:#c62828;
@@ -2467,11 +2944,14 @@ async function trackOrder(){
           border-radius:6px;
         "
       >
+
         ${escapeHtml(
           error.message ||
           "Unable to track order"
         )}
+
       </div>
+
     `;
 
   }
@@ -2608,12 +3088,10 @@ document.addEventListener(
     ){
 
       closeCart();
-
       closeCheckout();
-
       closeTracking();
-
       closeSuccess();
+      closeProductDetails();
 
     }
 
