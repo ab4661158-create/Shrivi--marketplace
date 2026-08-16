@@ -1,13 +1,13 @@
 {
-  "name": "Shrivi Marketplace",
+  "name": "Shrivi — Fashion Marketplace",
   "short_name": "Shrivi",
-  "description": "Shop products online on Shrivi Marketplace.",
-  "start_url": "/shop",
+  "description": "Shrivi Fashion Marketplace — discover fashion, jewellery and accessories from independent sellers.",
+  "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ff6b00",
   "orientation": "portrait",
+  "background_color": "#ffffff",
+  "theme_color": "#111111",
   "icons": [
     {
       "src": "/icon-192.png",
