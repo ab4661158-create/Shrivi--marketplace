@@ -62,6 +62,10 @@ app.get("/shop", (req, res) => {
   res.sendFile(path.join(__dirname, "customer.html"));
 });
 
+app.get("/app", (req, res) => {
+  res.sendFile(path.join(__dirname, "app-v2.html"));
+});
+
 app.get("/seller", (req, res) => {
   res.sendFile(path.join(__dirname, "seller.html"));
 });
