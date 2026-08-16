@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Shrivi Marketplace</title>
 
 <style>
@@ -18,365 +19,461 @@ body{
   color:#222;
 }
 
-header{
-  background:#111827;
+/* HEADER */
+
+.header{
+  background:#131921;
   color:white;
+  padding:12px 18px;
+  display:flex;
+  align-items:center;
+  gap:18px;
   position:sticky;
   top:0;
   z-index:1000;
 }
 
-.topbar{
-  max-width:1400px;
-  margin:auto;
-  padding:14px 20px;
-  display:flex;
-  align-items:center;
-  gap:18px;
-}
-
 .logo{
   font-size:28px;
-  font-weight:800;
+  font-weight:bold;
+  color:#ff9900;
   white-space:nowrap;
+  cursor:pointer;
 }
 
-.search{
+.search-box{
   flex:1;
   display:flex;
+  max-width:800px;
 }
 
-.search input{
+.search-box input{
   width:100%;
-  padding:13px 16px;
-  border:none;
+  padding:12px;
+  border:0;
   outline:none;
-  border-radius:7px 0 0 7px;
-  font-size:15px;
+  font-size:16px;
 }
 
-.search button{
-  border:none;
-  background:#f59e0b;
-  padding:0 20px;
-  border-radius:0 7px 7px 0;
+.search-box button{
+  width:55px;
+  border:0;
+  background:#febd69;
   cursor:pointer;
-  font-weight:bold;
+  font-size:20px;
 }
 
 .header-btn{
-  background:transparent;
+  background:none;
+  border:0;
   color:white;
-  border:1px solid #4b5563;
-  padding:10px 13px;
-  border-radius:7px;
   cursor:pointer;
+  font-size:15px;
   white-space:nowrap;
 }
 
 .cart-btn{
-  position:relative;
+  font-size:18px;
 }
 
-.cart-count{
-  position:absolute;
-  top:-8px;
-  right:-8px;
-  background:#ef4444;
+/* NAV */
+
+.nav{
+  background:#232f3e;
   color:white;
-  border-radius:50%;
-  width:21px;
-  height:21px;
-  font-size:12px;
   display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.categories{
-  background:white;
-  border-bottom:1px solid #ddd;
+  gap:25px;
+  padding:11px 18px;
   overflow-x:auto;
 }
 
-.category-row{
-  max-width:1400px;
-  margin:auto;
-  display:flex;
-  gap:10px;
-  padding:12px 20px;
-}
-
-.category{
-  border:1px solid #ddd;
-  background:white;
-  padding:9px 17px;
-  border-radius:20px;
+.nav span{
   cursor:pointer;
   white-space:nowrap;
 }
 
-.category.active,
-.category:hover{
-  background:#111827;
-  color:white;
+.nav span:hover{
+  text-decoration:underline;
 }
 
+/* HERO */
+
 .hero{
+  margin:15px auto;
   max-width:1400px;
-  margin:20px auto;
-  padding:40px 30px;
-  border-radius:15px;
-  background:linear-gradient(135deg,#111827,#374151);
+  min-height:250px;
+  border-radius:8px;
+  padding:45px 35px;
+  background:linear-gradient(
+    135deg,
+    #111827,
+    #374151
+  );
   color:white;
 }
 
 .hero h1{
-  font-size:38px;
-  margin-bottom:10px;
+  font-size:40px;
+  margin-bottom:12px;
 }
 
 .hero p{
-  color:#d1d5db;
-  font-size:17px;
+  font-size:18px;
+  margin-bottom:22px;
 }
 
-.container{
+.hero button{
+  background:#ff9900;
+  border:0;
+  padding:13px 25px;
+  border-radius:5px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+/* CATEGORY */
+
+.categories{
   max-width:1400px;
-  margin:auto;
-  padding:0 20px 40px;
+  margin:20px auto;
+  padding:0 15px;
 }
 
-.section-head{
+.categories h2{
+  margin-bottom:12px;
+}
+
+.category-list{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+}
+
+.category{
+  background:white;
+  padding:12px 20px;
+  border-radius:25px;
+  border:1px solid #ddd;
+  cursor:pointer;
+  white-space:nowrap;
+}
+
+.category:hover,
+.category.active{
+  background:#131921;
+  color:white;
+}
+
+/* PRODUCTS */
+
+.products-section{
+  max-width:1400px;
+  margin:20px auto;
+  padding:0 15px;
+}
+
+.products-header{
   display:flex;
   justify-content:space-between;
   align-items:center;
-  margin:25px 0 15px;
+  margin-bottom:15px;
 }
 
-.section-head h2{
-  font-size:24px;
-}
-
-.sort{
-  padding:9px;
-  border:1px solid #ccc;
-  border-radius:7px;
-}
-
-.products{
+.products-grid{
   display:grid;
-  grid-template-columns:repeat(5,1fr);
+  grid-template-columns:
+    repeat(auto-fill,minmax(220px,1fr));
   gap:18px;
 }
 
 .product{
   background:white;
-  border-radius:10px;
+  border-radius:8px;
   overflow:hidden;
-  border:1px solid #e5e7eb;
+  box-shadow:0 1px 5px rgba(0,0,0,.12);
   transition:.2s;
-  cursor:pointer;
+  display:flex;
+  flex-direction:column;
 }
 
 .product:hover{
   transform:translateY(-3px);
-  box-shadow:0 7px 20px rgba(0,0,0,.1);
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
 }
 
-.product-img{
-  width:100%;
-  height:240px;
-  object-fit:cover;
+.product-image{
+  height:250px;
   background:#eee;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
 }
 
-.product-body{
-  padding:13px;
+.product-image img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+}
+
+.no-image{
+  font-size:55px;
+  color:#bbb;
+}
+
+.product-info{
+  padding:14px;
 }
 
 .product-name{
+  font-size:17px;
   font-weight:bold;
   min-height:42px;
+  margin-bottom:7px;
 }
 
 .seller{
   font-size:12px;
   color:#777;
-  margin:6px 0;
+  margin-bottom:8px;
 }
 
-.price{
-  font-size:20px;
+.price-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.sale-price{
+  font-size:21px;
   font-weight:bold;
 }
 
-.original{
-  color:#888;
+.original-price{
   text-decoration:line-through;
+  color:#777;
   font-size:13px;
-  margin-left:5px;
 }
 
 .discount{
-  color:#16a34a;
+  color:#087f23;
   font-size:13px;
-  margin-left:5px;
+  font-weight:bold;
 }
 
 .stock{
-  font-size:12px;
-  margin:7px 0;
+  font-size:13px;
+  margin:8px 0;
+}
+
+.in-stock{
+  color:#087f23;
+}
+
+.out-stock{
+  color:#c62828;
 }
 
 .add-btn{
   width:100%;
+  border:0;
+  background:#ffd814;
   padding:10px;
-  border:none;
-  border-radius:6px;
-  background:#f59e0b;
+  border-radius:20px;
   cursor:pointer;
   font-weight:bold;
 }
 
+.add-btn:hover{
+  background:#f7ca00;
+}
+
 .add-btn:disabled{
-  background:#ccc;
+  background:#ddd;
   cursor:not-allowed;
+}
+
+/* LOADING */
+
+.loading{
+  text-align:center;
+  padding:50px;
+  font-size:18px;
 }
 
 .empty{
   text-align:center;
   padding:50px;
-  color:#777;
-  grid-column:1/-1;
+  color:#666;
 }
 
-/* MODAL */
+/* CART */
 
-.modal{
-  display:none;
+.overlay{
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.6);
+  background:rgba(0,0,0,.55);
+  display:none;
   z-index:2000;
-  align-items:center;
-  justify-content:center;
-  padding:15px;
 }
 
-.modal.show{
-  display:flex;
+.overlay.show{
+  display:block;
 }
 
-.modal-box{
+.cart{
+  position:absolute;
+  right:0;
+  top:0;
+  height:100%;
+  width:min(450px,100%);
   background:white;
-  width:100%;
-  max-width:650px;
-  max-height:90vh;
-  overflow:auto;
-  border-radius:12px;
-  padding:22px;
-  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+
+.cart-header{
+  background:#131921;
+  color:white;
+  padding:17px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .close{
-  position:absolute;
-  right:15px;
-  top:12px;
-  border:none;
+  border:0;
   background:none;
+  color:white;
   font-size:25px;
   cursor:pointer;
 }
 
-.modal-product{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:20px;
-}
-
-.modal-product img{
-  width:100%;
-  height:320px;
-  object-fit:cover;
-  border-radius:8px;
-}
-
-.modal-product h2{
-  margin-bottom:10px;
-}
-
-.big-price{
-  font-size:28px;
-  font-weight:bold;
-  margin:15px 0;
-}
-
-.primary{
-  width:100%;
-  padding:13px;
-  border:none;
-  background:#111827;
-  color:white;
-  border-radius:7px;
-  cursor:pointer;
-  margin-top:10px;
+.cart-items{
+  flex:1;
+  overflow-y:auto;
+  padding:15px;
 }
 
 .cart-item{
   display:flex;
-  gap:12px;
-  border-bottom:1px solid #ddd;
+  gap:10px;
   padding:12px 0;
+  border-bottom:1px solid #ddd;
 }
 
 .cart-item img{
-  width:70px;
-  height:80px;
+  width:75px;
+  height:75px;
   object-fit:cover;
   border-radius:5px;
 }
 
-.cart-info{
+.cart-item-info{
   flex:1;
+}
+
+.cart-item-name{
+  font-weight:bold;
+  margin-bottom:5px;
+}
+
+.cart-price{
+  font-weight:bold;
 }
 
 .qty{
   display:flex;
   align-items:center;
   gap:8px;
-  margin-top:7px;
+  margin-top:8px;
 }
 
 .qty button{
   width:28px;
   height:28px;
-  border:1px solid #ccc;
+  border:1px solid #aaa;
   background:white;
   cursor:pointer;
 }
 
 .remove{
-  color:#dc2626;
-  border:none;
+  color:#c62828;
+  border:0;
   background:none;
+  cursor:pointer;
+  margin-top:5px;
+}
+
+.cart-footer{
+  padding:17px;
+  border-top:1px solid #ddd;
+}
+
+.cart-total{
+  font-size:21px;
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.checkout-btn{
+  width:100%;
+  padding:13px;
+  border:0;
+  background:#ff9900;
+  border-radius:5px;
+  font-weight:bold;
   cursor:pointer;
 }
 
-.total{
-  font-size:22px;
-  font-weight:bold;
-  text-align:right;
-  margin:18px 0;
+/* MODAL */
+
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:3000;
+  padding:15px;
+}
+
+.modal-overlay.show{
+  display:flex;
+}
+
+.modal{
+  background:white;
+  width:min(600px,100%);
+  max-height:90vh;
+  overflow-y:auto;
+  border-radius:10px;
+  padding:22px;
+}
+
+.modal-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.modal-close{
+  border:0;
+  background:none;
+  font-size:25px;
+  cursor:pointer;
 }
 
 .form-group{
-  margin-bottom:13px;
+  margin-bottom:14px;
 }
 
 .form-group label{
   display:block;
-  margin-bottom:5px;
+  margin-bottom:6px;
   font-weight:bold;
 }
 
@@ -384,9 +481,9 @@ header{
 .form-group textarea{
   width:100%;
   padding:11px;
-  border:1px solid #ccc;
-  border-radius:6px;
-  outline:none;
+  border:1px solid #bbb;
+  border-radius:5px;
+  font-size:15px;
 }
 
 .form-group textarea{
@@ -394,111 +491,147 @@ header{
   resize:vertical;
 }
 
-.message{
+.place-order{
+  width:100%;
+  padding:13px;
+  background:#ff9900;
+  border:0;
+  border-radius:5px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.order-summary{
+  background:#f7f7f7;
   padding:12px;
-  border-radius:7px;
-  margin:10px 0;
-  display:none;
+  margin-bottom:15px;
+  border-radius:6px;
 }
 
-.success{
-  background:#dcfce7;
-  color:#166534;
-}
+/* TRACKING */
 
-.error{
-  background:#fee2e2;
-  color:#991b1b;
-}
-
-.track-box{
+.tracking-box{
   display:flex;
-  gap:8px;
+  gap:10px;
+  margin-bottom:15px;
 }
 
-.track-box input{
+.tracking-box input{
   flex:1;
   padding:11px;
-  border:1px solid #ccc;
-  border-radius:6px;
 }
 
-.track-box button{
-  padding:11px 16px;
-  border:none;
-  background:#111827;
+.tracking-box button{
+  padding:11px 18px;
+  background:#131921;
   color:white;
-  border-radius:6px;
+  border:0;
+  cursor:pointer;
 }
+
+.order-result{
+  padding:15px;
+  background:#f5f5f5;
+  border-radius:7px;
+}
+
+.status{
+  display:inline-block;
+  padding:7px 12px;
+  border-radius:20px;
+  background:#e8f5e9;
+  color:#087f23;
+  font-weight:bold;
+  text-transform:capitalize;
+}
+
+/* FOOTER */
 
 footer{
-  background:#111827;
+  background:#131921;
   color:white;
+  margin-top:40px;
   padding:35px 20px;
-  margin-top:30px;
+  text-align:center;
 }
 
-.footer-inner{
-  max-width:1400px;
-  margin:auto;
-  display:flex;
-  justify-content:space-between;
-  gap:20px;
+footer h2{
+  color:#ff9900;
+  margin-bottom:10px;
 }
 
-@media(max-width:1100px){
-  .products{
-    grid-template-columns:repeat(4,1fr);
-  }
-}
+/* RESPONSIVE */
 
 @media(max-width:800px){
-  .topbar{
+
+  .header{
     flex-wrap:wrap;
-  }
-
-  .logo{
-    width:100%;
-  }
-
-  .search{
-    order:2;
-    width:100%;
-  }
-
-  .products{
-    grid-template-columns:repeat(3,1fr);
-  }
-
-  .modal-product{
-    grid-template-columns:1fr;
-  }
-}
-
-@media(max-width:550px){
-  .products{
-    grid-template-columns:repeat(2,1fr);
     gap:10px;
   }
 
-  .product-img{
-    height:190px;
+  .logo{
+    font-size:24px;
   }
 
-  .hero{
-    padding:25px 20px;
-  }
-
-  .hero h1{
-    font-size:28px;
+  .search-box{
+    order:3;
+    flex-basis:100%;
+    max-width:none;
   }
 
   .header-btn{
-    padding:8px;
+    font-size:13px;
   }
 
-  .footer-inner{
-    flex-direction:column;
+  .hero{
+    margin:10px;
+    min-height:210px;
+    padding:30px 22px;
+  }
+
+  .hero h1{
+    font-size:30px;
+  }
+
+  .hero p{
+    font-size:15px;
+  }
+
+  .products-grid{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+
+  .product-image{
+    height:190px;
+  }
+
+  .product-info{
+    padding:10px;
+  }
+
+  .product-name{
+    font-size:14px;
+  }
+
+  .sale-price{
+    font-size:17px;
+  }
+}
+
+@media(max-width:430px){
+
+  .products-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .product-image{
+    height:160px;
+  }
+
+  .hero h1{
+    font-size:26px;
   }
 }
 </style>
@@ -506,702 +639,1024 @@ footer{
 
 <body>
 
-<header>
-  <div class="topbar">
+<!-- HEADER -->
 
-    <div class="logo">SHRIVI</div>
+<header class="header">
 
-    <div class="search">
-      <input
-        id="searchInput"
-        type="search"
-        placeholder="Search products..."
-      >
-      <button onclick="searchProducts()">Search</button>
-    </div>
-
-    <button class="header-btn" onclick="openTrack()">
-      Track Order
-    </button>
-
-    <button class="header-btn cart-btn" onclick="openCart()">
-      🛒 Cart
-      <span class="cart-count" id="cartCount">0</span>
-    </button>
-
+  <div
+    class="logo"
+    onclick="window.scrollTo({
+      top:0,
+      behavior:'smooth'
+    })"
+  >
+    SHRIVI
   </div>
+
+  <div class="search-box">
+    <input
+      id="searchInput"
+      type="text"
+      placeholder="Search products..."
+      autocomplete="off"
+    >
+
+    <button onclick="searchProducts()">
+      🔍
+    </button>
+  </div>
+
+  <button
+    class="header-btn"
+    onclick="openTracking()"
+  >
+    📦 Orders
+  </button>
+
+  <button
+    class="header-btn cart-btn"
+    onclick="openCart()"
+  >
+    🛒 Cart
+    <span id="cartCount">0</span>
+  </button>
+
 </header>
 
-<div class="categories">
-  <div class="category-row" id="categoryRow">
-    <button class="category active" onclick="selectCategory('All',this)">
-      All
-    </button>
-  </div>
-</div>
+
+<!-- NAV -->
+
+<nav class="nav">
+
+  <span onclick="filterCategory('all')">
+    All
+  </span>
+
+  <span onclick="filterCategory('Fashion')">
+    Fashion
+  </span>
+
+  <span onclick="filterCategory('Women')">
+    Women
+  </span>
+
+  <span onclick="filterCategory('Men')">
+    Men
+  </span>
+
+  <span onclick="filterCategory('Kids')">
+    Kids
+  </span>
+
+  <span onclick="filterCategory('Electronics')">
+    Electronics
+  </span>
+
+  <span onclick="filterCategory('Home')">
+    Home
+  </span>
+
+</nav>
+
+
+<!-- HERO -->
 
 <section class="hero">
-  <div class="container">
-    <h1>Welcome to Shrivi Marketplace</h1>
-    <p>Shop fashion, lifestyle and products from trusted sellers.</p>
-  </div>
+
+  <h1>
+    Welcome to Shrivi
+  </h1>
+
+  <p>
+    Discover products from trusted sellers
+    at great prices.
+  </p>
+
+  <button
+    onclick="document
+      .getElementById('products')
+      .scrollIntoView({
+        behavior:'smooth'
+      })"
+  >
+    Shop Now
+  </button>
+
 </section>
 
-<main class="container">
 
-  <div class="section-head">
-    <h2 id="productTitle">All Products</h2>
+<!-- CATEGORIES -->
 
-    <select class="sort" id="sortSelect" onchange="renderProducts()">
-      <option value="latest">Latest</option>
-      <option value="low">Price: Low to High</option>
-      <option value="high">Price: High to Low</option>
-      <option value="discount">Best Discount</option>
-    </select>
+<section class="categories">
+
+  <h2>Shop by Category</h2>
+
+  <div class="category-list">
+
+    <div
+      class="category active"
+      onclick="filterCategory('all')"
+    >
+      All
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Fashion')"
+    >
+      👗 Fashion
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Women')"
+    >
+      👩 Women
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Men')"
+    >
+      👨 Men
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Kids')"
+    >
+      🧒 Kids
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Electronics')"
+    >
+      📱 Electronics
+    </div>
+
+    <div
+      class="category"
+      onclick="filterCategory('Home')"
+    >
+      🏠 Home
+    </div>
+
   </div>
 
-  <div id="message" class="message"></div>
-
-  <div class="products" id="products">
-    <div class="empty">Loading products...</div>
-  </div>
-
-</main>
-
-<footer>
-  <div class="footer-inner">
-    <div>
-      <h2>SHRIVI</h2>
-      <p>India's growing marketplace.</p>
-    </div>
-
-    <div>
-      <p>Customer Support</p>
-      <p>Track Order</p>
-      <p>Shopping Cart</p>
-    </div>
-  </div>
-</footer>
+</section>
 
 
-<!-- PRODUCT MODAL -->
+<!-- PRODUCTS -->
 
-<div class="modal" id="productModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('productModal')">×</button>
-    <div id="productDetails"></div>
-  </div>
-</div>
+<section
+  class="products-section"
+  id="products"
+>
 
+  <div class="products-header">
 
-<!-- CART MODAL -->
-
-<div class="modal" id="cartModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('cartModal')">×</button>
-
-    <h2>Your Cart</h2>
-
-    <div id="cartItems"></div>
-
-    <div class="total">
-      Total: ₹<span id="cartTotal">0</span>
-    </div>
-
-    <button class="primary" onclick="openCheckout()">
-      Proceed to Checkout
-    </button>
-  </div>
-</div>
-
-
-<!-- CHECKOUT -->
-
-<div class="modal" id="checkoutModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('checkoutModal')">×</button>
-
-    <h2>Delivery Details</h2>
-
-    <div id="checkoutMessage" class="message"></div>
-
-    <div class="form-group">
-      <label>Name</label>
-      <input id="customerName" placeholder="Your name">
-    </div>
-
-    <div class="form-group">
-      <label>Mobile Number</label>
-      <input
-        id="customerPhone"
-        maxlength="10"
-        inputmode="numeric"
-        placeholder="10 digit mobile number"
-      >
-    </div>
-
-    <div class="form-group">
-      <label>Delivery Address</label>
-      <textarea
-        id="customerAddress"
-        placeholder="Full delivery address"
-      ></textarea>
-    </div>
-
-    <div class="total">
-      Payable: ₹<span id="checkoutTotal">0</span>
-    </div>
+    <h2>
+      Latest Products
+    </h2>
 
     <button
-      class="primary"
-      id="placeOrderBtn"
-      onclick="placeOrder()"
+      onclick="loadProducts()"
+      style="
+        padding:8px 14px;
+        border:1px solid #aaa;
+        background:white;
+        border-radius:5px;
+        cursor:pointer;
+      "
     >
-      Place Order
+      ↻ Refresh
     </button>
+
   </div>
-</div>
 
+  <div
+    id="productsGrid"
+    class="products-grid"
+  >
 
-<!-- ORDER SUCCESS -->
-
-<div class="modal" id="successModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('successModal')">×</button>
-
-    <h2>🎉 Order Placed!</h2>
-
-    <br>
-
-    <p>Your order has been successfully placed.</p>
-
-    <br>
-
-    <h3>
-      Order ID:
-      <span id="successOrderId"></span>
-    </h3>
-
-    <br>
-
-    <button class="primary" onclick="closeModal('successModal');openTrack();">
-      Track Order
-    </button>
-  </div>
-</div>
-
-
-<!-- TRACK ORDER -->
-
-<div class="modal" id="trackModal">
-  <div class="modal-box">
-    <button class="close" onclick="closeModal('trackModal')">×</button>
-
-    <h2>Track Your Order</h2>
-
-    <br>
-
-    <div class="track-box">
-      <input
-        id="trackId"
-        placeholder="Enter Order ID"
-      >
-      <button onclick="trackOrder()">Track</button>
+    <div class="loading">
+      Loading products...
     </div>
 
-    <div id="trackingResult"></div>
   </div>
+
+</section>
+
+
+<!-- CART -->
+
+<div
+  id="cartOverlay"
+  class="overlay"
+  onclick="closeCart(event)"
+>
+
+  <div
+    class="cart"
+    onclick="event.stopPropagation()"
+  >
+
+    <div class="cart-header">
+
+      <h2>
+        🛒 Your Cart
+      </h2>
+
+      <button
+        class="close"
+        onclick="closeCart()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="cartItems"
+      class="cart-items"
+    ></div>
+
+    <div class="cart-footer">
+
+      <div
+        id="cartTotal"
+        class="cart-total"
+      >
+        Total: ₹0
+      </div>
+
+      <button
+        class="checkout-btn"
+        onclick="openCheckout()"
+      >
+        Proceed to Checkout
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
+
+
+<!-- CHECKOUT MODAL -->
+
+<div
+  id="checkoutModal"
+  class="modal-overlay"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>
+        Checkout
+      </h2>
+
+      <button
+        class="modal-close"
+        onclick="closeCheckout()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="checkoutSummary"
+      class="order-summary"
+    ></div>
+
+    <form
+      id="checkoutForm"
+      onsubmit="placeOrder(event)"
+    >
+
+      <div class="form-group">
+
+        <label>
+          Full Name
+        </label>
+
+        <input
+          id="customerName"
+          required
+          maxlength="100"
+          placeholder="Enter your name"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label>
+          Mobile Number
+        </label>
+
+        <input
+          id="customerPhone"
+          required
+          maxlength="10"
+          inputmode="numeric"
+          pattern="[0-9]{10}"
+          placeholder="10 digit mobile number"
+        >
+
+      </div>
+
+      <div class="form-group">
+
+        <label>
+          Delivery Address
+        </label>
+
+        <textarea
+          id="customerAddress"
+          required
+          maxlength="500"
+          placeholder="Enter complete delivery address"
+        ></textarea>
+
+      </div>
+
+      <button
+        id="placeOrderBtn"
+        class="place-order"
+        type="submit"
+      >
+        Place Order
+      </button>
+
+    </form>
+
+  </div>
+
+</div>
+
+
+<!-- ORDER TRACKING -->
+
+<div
+  id="trackingModal"
+  class="modal-overlay"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>
+        📦 Track Order
+      </h2>
+
+      <button
+        class="modal-close"
+        onclick="closeTracking()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div class="tracking-box">
+
+      <input
+        id="trackingId"
+        type="number"
+        min="1"
+        placeholder="Enter Order ID"
+      >
+
+      <button
+        onclick="trackOrder()"
+      >
+        Track
+      </button>
+
+    </div>
+
+    <div
+      id="trackingResult"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- SUCCESS -->
+
+<div
+  id="successModal"
+  class="modal-overlay"
+>
+
+  <div class="modal">
+
+    <div class="modal-header">
+
+      <h2>
+        🎉 Order Placed
+      </h2>
+
+      <button
+        class="modal-close"
+        onclick="closeSuccess()"
+      >
+        ×
+      </button>
+
+    </div>
+
+    <div
+      id="successContent"
+      style="text-align:center;"
+    ></div>
+
+  </div>
+
+</div>
+
+
+<!-- FOOTER -->
+
+<footer>
+
+  <h2>
+    SHRIVI
+  </h2>
+
+  <p>
+    Your marketplace for everyday shopping.
+  </p>
+
+  <br>
+
+  <p>
+    © 2026 Shrivi Marketplace
+  </p>
+
+</footer>
 
 
 <script>
 
-let products = [];
+/* =========================
+   STATE
+========================= */
+
+let allProducts = [];
 let filteredProducts = [];
-let cart = JSON.parse(
-  localStorage.getItem("shrivi_cart") || "[]"
+
+let cart =
+  JSON.parse(
+    localStorage.getItem("shrivi_cart") || "[]"
+  );
+
+
+/* =========================
+   INITIAL LOAD
+========================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    loadProducts();
+
+    updateCartCount();
+
+    document
+      .getElementById("searchInput")
+      .addEventListener(
+        "input",
+        searchProducts
+      );
+
+  }
 );
 
-let selectedCategory = "All";
 
-
-// ================================
-// LOAD PRODUCTS
-// ================================
+/* =========================
+   LOAD PRODUCTS
+========================= */
 
 async function loadProducts(){
 
-  const box = document.getElementById("products");
+  const grid =
+    document.getElementById(
+      "productsGrid"
+    );
+
+  grid.innerHTML =
+    '<div class="loading">Loading products...</div>';
 
   try{
 
-    const response = await fetch("/api/products");
+    const response =
+      await fetch("/api/products");
 
     if(!response.ok){
-      throw new Error("Products API failed");
+
+      throw new Error(
+        "Failed to load products"
+      );
+
     }
 
-    products = await response.json();
+    const data =
+      await response.json();
 
-    buildCategories();
+    allProducts =
+      Array.isArray(data)
+        ? data
+        : [];
+
+    filteredProducts =
+      [...allProducts];
 
     renderProducts();
-
-    updateCartCount();
 
   }catch(error){
 
     console.error(error);
 
-    box.innerHTML = `
+    grid.innerHTML = `
       <div class="empty">
-        Unable to load products.
-        Please refresh the page.
+        <h3>Unable to load products</h3>
+        <p>Please refresh the page.</p>
+        <br>
+        <button
+          onclick="loadProducts()"
+          style="
+            padding:10px 20px;
+            border:0;
+            background:#ff9900;
+            border-radius:5px;
+          "
+        >
+          Try Again
+        </button>
       </div>
     `;
+
   }
+
 }
 
 
-// ================================
-// CATEGORIES
-// ================================
-
-function buildCategories(){
-
-  const row =
-    document.getElementById("categoryRow");
-
-  const categories = [
-    ...new Set(
-      products
-        .map(p => p.category)
-        .filter(Boolean)
-    )
-  ];
-
-  row.innerHTML = `
-    <button
-      class="category active"
-      onclick="selectCategory('All',this)"
-    >
-      All
-    </button>
-  `;
-
-  categories.forEach(category => {
-
-    const button =
-      document.createElement("button");
-
-    button.className = "category";
-
-    button.textContent = category;
-
-    button.onclick = () =>
-      selectCategory(category,button);
-
-    row.appendChild(button);
-  });
-}
-
-
-function selectCategory(category,button){
-
-  selectedCategory = category;
-
-  document
-    .querySelectorAll(".category")
-    .forEach(x => x.classList.remove("active"));
-
-  button.classList.add("active");
-
-  document.getElementById("productTitle")
-    .textContent =
-      category === "All"
-      ? "All Products"
-      : category;
-
-  renderProducts();
-}
-
-
-// ================================
-// SEARCH
-// ================================
-
-function searchProducts(){
-
-  renderProducts();
-
-  window.scrollTo({
-    top:350,
-    behavior:"smooth"
-  });
-}
-
-
-document
-  .getElementById("searchInput")
-  .addEventListener("input",renderProducts);
-
-
-// ================================
-// RENDER PRODUCTS
-// ================================
+/* =========================
+   RENDER PRODUCTS
+========================= */
 
 function renderProducts(){
 
-  const search =
-    document.getElementById("searchInput")
-      .value
-      .trim()
-      .toLowerCase();
-
-  const sort =
-    document.getElementById("sortSelect").value;
-
-  filteredProducts =
-    products.filter(product => {
-
-      const categoryMatch =
-        selectedCategory === "All" ||
-        product.category === selectedCategory;
-
-      const text =
-        `${product.name || ""}
-         ${product.category || ""}
-         ${product.description || ""}
-         ${product.seller_name || ""}`
-        .toLowerCase();
-
-      const searchMatch =
-        !search || text.includes(search);
-
-      return categoryMatch && searchMatch;
-    });
-
-
-  if(sort === "low"){
-    filteredProducts.sort(
-      (a,b) => salePrice(a)-salePrice(b)
+  const grid =
+    document.getElementById(
+      "productsGrid"
     );
-  }
-
-  if(sort === "high"){
-    filteredProducts.sort(
-      (a,b) => salePrice(b)-salePrice(a)
-    );
-  }
-
-  if(sort === "discount"){
-    filteredProducts.sort(
-      (a,b) =>
-        Number(b.discount_percent || 0) -
-        Number(a.discount_percent || 0)
-    );
-  }
-
-
-  const box =
-    document.getElementById("products");
 
   if(!filteredProducts.length){
 
-    box.innerHTML = `
+    grid.innerHTML = `
       <div class="empty">
-        No products found.
+        <h3>No products found</h3>
+        <p>Try another search or category.</p>
       </div>
     `;
 
     return;
   }
 
-
-  box.innerHTML =
+  grid.innerHTML =
     filteredProducts
-      .map(product => productCard(product))
+      .map(productCard)
       .join("");
+
 }
 
-
-// ================================
-// PRICE
-// ================================
-
-function salePrice(product){
-
-  if(product.sale_price !== undefined){
-    return Number(product.sale_price);
-  }
-
-  const price =
-    Number(product.price) || 0;
-
-  const discount =
-    Number(product.discount_percent) || 0;
-
-  return Math.round(
-    (price - price * discount / 100) * 100
-  ) / 100;
-}
-
-
-// ================================
-// PRODUCT CARD
-// ================================
 
 function productCard(product){
 
+  const id =
+    Number(product.id);
+
+  const name =
+    escapeHtml(
+      product.name || "Product"
+    );
+
+  const category =
+    escapeHtml(
+      product.category || ""
+    );
+
+  const seller =
+    escapeHtml(
+      product.seller_name || "Shrivi"
+    );
+
+  const image =
+    product.image || "";
+
   const price =
     Number(product.price) || 0;
 
-  const sale =
-    salePrice(product);
-
   const discount =
-    Number(product.discount_percent) || 0;
+    Number(
+      product.discount_percent
+    ) || 0;
+
+  const salePrice =
+    Number(
+      product.sale_price
+    ) ||
+    calculatePrice(
+      price,
+      discount
+    );
 
   const stock =
     Number(product.stock) || 0;
 
-  const image =
-    product.image ||
-    "https://via.placeholder.com/500x500?text=Shrivi";
+  let imageHtml;
 
+  if(image){
 
-  return `
-    <div
-      class="product"
-      onclick="openProduct(${product.id})"
-    >
-
+    imageHtml = `
       <img
-        class="product-img"
-        src="${escapeHtml(image)}"
-        alt="${escapeHtml(product.name || "Product")}"
-        onerror="this.src='https://via.placeholder.com/500x500?text=Shrivi'"
+        src="${escapeAttribute(image)}"
+        alt="${name}"
+        loading="lazy"
+        onerror="
+          this.style.display='none';
+          this.nextElementSibling.style.display='block';
+        "
       >
 
-      <div class="product-body">
+      <div
+        class="no-image"
+        style="display:none;"
+      >
+        🛍️
+      </div>
+    `;
+
+  }else{
+
+    imageHtml = `
+      <div class="no-image">
+        🛍️
+      </div>
+    `;
+
+  }
+
+  const stockHtml =
+    stock > 0
+      ? `
+        <div class="stock in-stock">
+          ✓ ${stock} available
+        </div>
+      `
+      : `
+        <div class="stock out-stock">
+          ✕ Out of stock
+        </div>
+      `;
+
+  return `
+    <article class="product">
+
+      <div class="product-image">
+        ${imageHtml}
+      </div>
+
+      <div class="product-info">
 
         <div class="product-name">
-          ${escapeHtml(product.name || "Product")}
+          ${name}
         </div>
 
         <div class="seller">
-          Sold by ${escapeHtml(product.seller_name || "Shrivi")}
+          Sold by: ${seller}
         </div>
 
-        <div>
+        ${
+          category
+            ? `
+              <div
+                style="
+                  font-size:12px;
+                  color:#555;
+                  margin-bottom:7px;
+                "
+              >
+                ${category}
+              </div>
+            `
+            : ""
+        }
 
-          <span class="price">
-            ₹${sale.toFixed(0)}
+        <div class="price-row">
+
+          <span class="sale-price">
+            ₹${formatMoney(salePrice)}
           </span>
 
           ${
             discount > 0
-            ? `
-              <span class="original">
-                ₹${price.toFixed(0)}
-              </span>
+              ? `
+                <span class="original-price">
+                  ₹${formatMoney(price)}
+                </span>
 
-              <span class="discount">
-                ${discount}% OFF
-              </span>
-            `
-            : ""
+                <span class="discount">
+                  ${discount}% off
+                </span>
+              `
+              : ""
           }
 
         </div>
 
-        <div class="stock">
-          ${
-            stock > 0
-            ? `${stock} available`
-            : "Out of stock"
-          }
-        </div>
+        ${stockHtml}
 
         <button
           class="add-btn"
           ${
             stock <= 0
-            ? "disabled"
-            : ""
+              ? "disabled"
+              : ""
           }
-          onclick="event.stopPropagation();addToCart(${product.id})"
+          onclick="addToCart(${id})"
         >
           ${
             stock > 0
-            ? "Add to Cart"
-            : "Out of Stock"
+              ? "🛒 Add to Cart"
+              : "Out of Stock"
           }
         </button>
 
       </div>
-    </div>
+
+    </article>
   `;
+
 }
 
 
-// ================================
-// PRODUCT DETAILS
-// ================================
+/* =========================
+   SEARCH
+========================= */
 
-function openProduct(id){
+function searchProducts(){
 
-  const product =
-    products.find(
-      p => Number(p.id) === Number(id)
+  const query =
+    document
+      .getElementById("searchInput")
+      .value
+      .trim()
+      .toLowerCase();
+
+  if(!query){
+
+    filteredProducts =
+      [...allProducts];
+
+  }else{
+
+    filteredProducts =
+      allProducts.filter(product => {
+
+        const name =
+          String(
+            product.name || ""
+          ).toLowerCase();
+
+        const category =
+          String(
+            product.category || ""
+          ).toLowerCase();
+
+        const description =
+          String(
+            product.description || ""
+          ).toLowerCase();
+
+        const seller =
+          String(
+            product.seller_name || ""
+          ).toLowerCase();
+
+        return (
+          name.includes(query) ||
+          category.includes(query) ||
+          description.includes(query) ||
+          seller.includes(query)
+        );
+
+      });
+
+  }
+
+  renderProducts();
+
+}
+
+
+/* =========================
+   CATEGORY FILTER
+========================= */
+
+function filterCategory(category){
+
+  document
+    .querySelectorAll(".category")
+    .forEach(element => {
+
+      element.classList.remove(
+        "active"
+      );
+
+    });
+
+  const categoryElements =
+    document.querySelectorAll(
+      ".category"
     );
 
-  if(!product) return;
+  categoryElements.forEach(element => {
 
-  const price =
-    Number(product.price) || 0;
+    if(
+      element.textContent
+        .trim()
+        .toLowerCase()
+        .includes(
+          String(category)
+            .toLowerCase()
+        )
+    ){
 
-  const sale =
-    salePrice(product);
+      element.classList.add(
+        "active"
+      );
 
-  const discount =
-    Number(product.discount_percent) || 0;
+    }
 
-  const stock =
-    Number(product.stock) || 0;
+  });
 
-  const image =
-    product.image ||
-    "https://via.placeholder.com/500x500?text=Shrivi";
+  if(
+    !category ||
+    category === "all"
+  ){
 
+    filteredProducts =
+      [...allProducts];
 
-  document.getElementById("productDetails")
-    .innerHTML = `
+  }else{
 
-      <div class="modal-product">
+    const wanted =
+      String(category)
+        .trim()
+        .toLowerCase();
 
-        <img
-          src="${escapeHtml(image)}"
-          onerror="this.src='https://via.placeholder.com/500x500?text=Shrivi'"
-        >
+    filteredProducts =
+      allProducts.filter(
+        product => {
 
-        <div>
+          const productCategory =
+            String(
+              product.category || ""
+            )
+            .trim()
+            .toLowerCase();
 
-          <h2>
-            ${escapeHtml(product.name || "Product")}
-          </h2>
+          return (
+            productCategory === wanted ||
+            productCategory.includes(
+              wanted
+            )
+          );
 
-          <p class="seller">
-            Sold by ${escapeHtml(product.seller_name || "Shrivi")}
-          </p>
+        }
+      );
 
-          <p>
-            ${escapeHtml(product.description || "Premium quality product.")}
-          </p>
+  }
 
-          <div class="big-price">
-            ₹${sale.toFixed(0)}
+  renderProducts();
 
-            ${
-              discount > 0
-              ? `
-                <span class="original">
-                  ₹${price.toFixed(0)}
-                </span>
-              `
-              : ""
-            }
-          </div>
-
-          ${
-            discount > 0
-            ? `<p class="discount">${discount}% OFF</p>`
-            : ""
-          }
-
-          <p>
-            ${
-              stock > 0
-              ? `${stock} items available`
-              : "Currently out of stock"
-            }
-          </p>
-
-          <button
-            class="primary"
-            ${
-              stock <= 0
-              ? "disabled"
-              : ""
-            }
-            onclick="addToCart(${product.id});closeModal('productModal')"
-          >
-            Add to Cart
-          </button>
-
-        </div>
-
-      </div>
-  `;
-
-  openModal("productModal");
 }
 
 
-// ================================
-// CART
-// ================================
+/* =========================
+   CART
+========================= */
 
 function addToCart(id){
 
   const product =
-    products.find(
-      p => Number(p.id) === Number(id)
+    allProducts.find(
+      item =>
+        Number(item.id) ===
+        Number(id)
     );
 
-  if(!product) return;
+  if(!product){
+
+    alert("Product not found.");
+
+    return;
+  }
 
   const stock =
     Number(product.stock) || 0;
 
   if(stock <= 0){
-    showMessage("Product is out of stock.","error");
+
+    alert(
+      "This product is out of stock."
+    );
+
     return;
   }
 
   const existing =
     cart.find(
-      item => Number(item.id) === Number(id)
+      item =>
+        Number(item.id) ===
+        Number(id)
     );
 
   if(existing){
 
-    if(existing.quantity >= stock){
+    if(
+      existing.quantity >=
+      stock
+    ){
 
-      showMessage(
-        "Maximum available stock reached.",
-        "error"
+      alert(
+        `Only ${stock} item(s) available.`
       );
 
       return;
     }
 
-    existing.quantity++;
+    existing.quantity += 1;
 
   }else{
 
     cart.push({
-      id:Number(product.id),
+      id:
+        Number(product.id),
+
+      name:
+        product.name,
+
+      price:
+        Number(product.price) || 0,
+
+      sale_price:
+        Number(product.sale_price) ||
+        calculatePrice(
+          product.price,
+          product.discount_percent
+        ),
+
+      discount_percent:
+        Number(
+          product.discount_percent
+        ) || 0,
+
+      image:
+        product.image || "",
+
+      seller_name:
+        product.seller_name ||
+        "Shrivi",
+
+      stock:
+        stock,
+
       quantity:1
+
     });
+
   }
 
   saveCart();
 
-  showMessage(
-    "Product added to cart.",
-    "success"
-  );
+  updateCartCount();
+
+  renderCart();
+
 }
 
 
@@ -1212,7 +1667,6 @@ function saveCart(){
     JSON.stringify(cart)
   );
 
-  updateCartCount();
 }
 
 
@@ -1220,397 +1674,649 @@ function updateCartCount(){
 
   const count =
     cart.reduce(
-      (sum,item) =>
-        sum + Number(item.quantity || 0),
+      (total,item) =>
+        total +
+        Number(item.quantity || 0),
       0
     );
 
-  document.getElementById("cartCount")
+  document
+    .getElementById("cartCount")
     .textContent = count;
+
 }
 
-
-// ================================
-// CART UI
-// ================================
 
 function openCart(){
 
   renderCart();
 
-  openModal("cartModal");
+  document
+    .getElementById(
+      "cartOverlay"
+    )
+    .classList.add("show");
+
+}
+
+
+function closeCart(event){
+
+  if(
+    event &&
+    event.target !==
+      event.currentTarget
+  ){
+
+    return;
+
+  }
+
+  document
+    .getElementById(
+      "cartOverlay"
+    )
+    .classList.remove("show");
+
 }
 
 
 function renderCart(){
 
-  const box =
-    document.getElementById("cartItems");
+  const container =
+    document.getElementById(
+      "cartItems"
+    );
+
+  const totalElement =
+    document.getElementById(
+      "cartTotal"
+    );
 
   if(!cart.length){
 
-    box.innerHTML = `
+    container.innerHTML = `
       <div class="empty">
-        Your cart is empty.
+        <div style="font-size:50px;">
+          🛒
+        </div>
+        <h3>Your cart is empty</h3>
+        <p>Add some products to continue.</p>
       </div>
     `;
 
-    document.getElementById("cartTotal")
-      .textContent = "0";
+    totalElement.textContent =
+      "Total: ₹0";
 
     return;
+
   }
 
-
-  let total = 0;
-
-
-  box.innerHTML =
-    cart.map(item => {
-
-      const product =
-        products.find(
-          p => Number(p.id) === Number(item.id)
-        );
-
-      if(!product) return "";
-
-      const price =
-        salePrice(product);
-
-      const quantity =
-        Number(item.quantity) || 1;
-
-      total += price * quantity;
-
-      const image =
-        product.image ||
-        "https://via.placeholder.com/100";
-
-
-      return `
-        <div class="cart-item">
-
-          <img
-            src="${escapeHtml(image)}"
-            onerror="this.src='https://via.placeholder.com/100?text=Shrivi'"
-          >
-
-          <div class="cart-info">
-
-            <b>
-              ${escapeHtml(product.name)}
-            </b>
-
-            <p>
-              ₹${price.toFixed(0)}
-            </p>
-
-            <div class="qty">
-
-              <button
-                onclick="changeQty(${product.id},-1)"
-              >
-                −
-              </button>
-
-              <span>${quantity}</span>
-
-              <button
-                onclick="changeQty(${product.id},1)"
-              >
-                +
-              </button>
-
-              <button
-                class="remove"
-                onclick="removeFromCart(${product.id})"
-              >
-                Remove
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-      `;
-    })
-    .join("");
-
-
-  document.getElementById("cartTotal")
-    .textContent =
-      Math.round(total).toLocaleString("en-IN");
-}
-
-
-function changeQty(id,change){
-
-  const item =
-    cart.find(
-      x => Number(x.id) === Number(id)
-    );
-
-  const product =
-    products.find(
-      p => Number(p.id) === Number(id)
-    );
-
-  if(!item || !product) return;
-
-  const stock =
-    Number(product.stock) || 0;
-
-  item.quantity += change;
-
-  if(item.quantity <= 0){
-
-    removeFromCart(id);
-
-    return;
-  }
-
-  if(item.quantity > stock){
-
-    item.quantity = stock;
-
-    showMessage(
-      "Stock limit reached.",
-      "error"
-    );
-  }
-
-  saveCart();
-
-  renderCart();
-}
-
-
-function removeFromCart(id){
-
-  cart =
-    cart.filter(
-      item => Number(item.id) !== Number(id)
-    );
-
-  saveCart();
-
-  renderCart();
-}
-
-
-// ================================
-// CHECKOUT
-// ================================
-
-function openCheckout(){
-
-  if(!cart.length){
-
-    showMessage(
-      "Your cart is empty.",
-      "error"
-    );
-
-    return;
-  }
-
-  closeModal("cartModal");
+  container.innerHTML =
+    cart
+      .map(
+        (item,index) =>
+          cartItemHtml(
+            item,
+            index
+          )
+      )
+      .join("");
 
   const total =
     getCartTotal();
 
-  document.getElementById("checkoutTotal")
-    .textContent =
-      Math.round(total).toLocaleString("en-IN");
+  totalElement.textContent =
+    `Total: ₹${formatMoney(total)}`;
 
-  openModal("checkoutModal");
+}
+
+
+function cartItemHtml(item,index){
+
+  const price =
+    Number(
+      item.sale_price
+    ) ||
+    Number(item.price) ||
+    0;
+
+  const image =
+    item.image
+      ? `
+        <img
+          src="${escapeAttribute(item.image)}"
+          alt="${escapeHtml(item.name)}"
+        >
+      `
+      : `
+        <div
+          style="
+            width:75px;
+            height:75px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:#eee;
+            font-size:30px;
+          "
+        >
+          🛍️
+        </div>
+      `;
+
+  return `
+    <div class="cart-item">
+
+      ${image}
+
+      <div class="cart-item-info">
+
+        <div class="cart-item-name">
+          ${escapeHtml(item.name)}
+        </div>
+
+        <div class="cart-price">
+          ₹${formatMoney(price)}
+        </div>
+
+        <div class="qty">
+
+          <button
+            onclick="changeQuantity(
+              ${index},
+              -1
+            )"
+          >
+            −
+          </button>
+
+          <strong>
+            ${item.quantity}
+          </strong>
+
+          <button
+            onclick="changeQuantity(
+              ${index},
+              1
+            )"
+          >
+            +
+          </button>
+
+        </div>
+
+        <button
+          class="remove"
+          onclick="removeFromCart(${index})"
+        >
+          Remove
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
+}
+
+
+function changeQuantity(
+  index,
+  change
+){
+
+  const item =
+    cart[index];
+
+  if(!item) return;
+
+  const newQuantity =
+    Number(item.quantity) +
+    Number(change);
+
+  const product =
+    allProducts.find(
+      product =>
+        Number(product.id) ===
+        Number(item.id)
+    );
+
+  const stock =
+    product
+      ? Number(product.stock) || 0
+      : Number(item.stock) || 0;
+
+  if(newQuantity <= 0){
+
+    cart.splice(index,1);
+
+  }else if(
+    newQuantity > stock
+  ){
+
+    alert(
+      `Only ${stock} item(s) available.`
+    );
+
+    return;
+
+  }else{
+
+    item.quantity =
+      newQuantity;
+
+  }
+
+  saveCart();
+
+  updateCartCount();
+
+  renderCart();
+
+}
+
+
+function removeFromCart(index){
+
+  cart.splice(index,1);
+
+  saveCart();
+
+  updateCartCount();
+
+  renderCart();
+
 }
 
 
 function getCartTotal(){
 
-  return cart.reduce(
-    (total,item) => {
+  return Math.round(
+    cart.reduce(
+      (total,item) => {
 
-      const product =
-        products.find(
-          p => Number(p.id) === Number(item.id)
+        const price =
+          Number(
+            item.sale_price
+          ) ||
+          Number(item.price) ||
+          0;
+
+        return (
+          total +
+          price *
+          Number(
+            item.quantity
+          )
         );
 
-      if(!product) return total;
+      },
+      0
+    ) * 100
+  ) / 100;
 
-      return total +
-        salePrice(product) *
-        Number(item.quantity);
-
-    },
-    0
-  );
 }
 
 
-// ================================
-// PLACE ORDER
-// ================================
+/* =========================
+   CHECKOUT
+========================= */
 
-async function placeOrder(){
+function openCheckout(){
 
-  const name =
-    document.getElementById("customerName")
-      .value.trim();
+  if(!cart.length){
 
-  const phone =
-    document.getElementById("customerPhone")
-      .value.trim();
-
-  const address =
-    document.getElementById("customerAddress")
-      .value.trim();
-
-  const message =
-    document.getElementById("checkoutMessage");
-
-  message.style.display = "none";
-
-  if(!name){
-
-    showCheckoutMessage(
-      "Name is required.",
-      "error"
+    alert(
+      "Your cart is empty."
     );
 
     return;
+
+  }
+
+  document
+    .getElementById(
+      "cartOverlay"
+    )
+    .classList.remove("show");
+
+  const total =
+    getCartTotal();
+
+  const itemCount =
+    cart.reduce(
+      (sum,item) =>
+        sum +
+        Number(item.quantity),
+      0
+    );
+
+  document
+    .getElementById(
+      "checkoutSummary"
+    )
+    .innerHTML = `
+      <strong>
+        ${itemCount} item(s)
+      </strong>
+      <br>
+      Order Total:
+      <strong>
+        ₹${formatMoney(total)}
+      </strong>
+    `;
+
+  document
+    .getElementById(
+      "checkoutModal"
+    )
+    .classList.add("show");
+
+}
+
+
+function closeCheckout(){
+
+  document
+    .getElementById(
+      "checkoutModal"
+    )
+    .classList.remove("show");
+
+}
+
+
+async function placeOrder(event){
+
+  event.preventDefault();
+
+  if(!cart.length){
+
+    alert(
+      "Your cart is empty."
+    );
+
+    closeCheckout();
+
+    return;
+
+  }
+
+  const name =
+    document
+      .getElementById(
+        "customerName"
+      )
+      .value
+      .trim();
+
+  const phone =
+    document
+      .getElementById(
+        "customerPhone"
+      )
+      .value
+      .trim();
+
+  const address =
+    document
+      .getElementById(
+        "customerAddress"
+      )
+      .value
+      .trim();
+
+  if(!name){
+
+    alert(
+      "Please enter your name."
+    );
+
+    return;
+
   }
 
   if(!/^[0-9]{10}$/.test(phone)){
 
-    showCheckoutMessage(
-      "Enter a valid 10-digit mobile number.",
-      "error"
+    alert(
+      "Please enter a valid 10-digit mobile number."
     );
 
     return;
+
   }
 
   if(!address){
 
-    showCheckoutMessage(
-      "Delivery address is required.",
-      "error"
+    alert(
+      "Please enter your delivery address."
     );
 
     return;
+
   }
-
-  if(!cart.length){
-
-    showCheckoutMessage(
-      "Your cart is empty.",
-      "error"
-    );
-
-    return;
-  }
-
 
   const button =
-    document.getElementById("placeOrderBtn");
+    document.getElementById(
+      "placeOrderBtn"
+    );
 
   button.disabled = true;
-  button.textContent = "Placing Order...";
 
+  button.textContent =
+    "Placing Order...";
+
+  const items =
+    cart.map(item => ({
+
+      id:
+        Number(item.id),
+
+      quantity:
+        Number(item.quantity)
+
+    }));
 
   try{
 
     const response =
-      await fetch("/api/orders",{
+      await fetch(
+        "/api/orders",
+        {
+          method:"POST",
 
-        method:"POST",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+          body:JSON.stringify({
 
-        body:JSON.stringify({
+            customer_name:
+              name,
 
-          customer_name:name,
+            customer_phone:
+              phone,
 
-          customer_phone:phone,
+            customer_address:
+              address,
 
-          customer_address:address,
+            items
 
-          items:cart.map(item => ({
-            id:Number(item.id),
-            quantity:Number(item.quantity)
-          }))
+          })
 
-        })
-
-      });
-
+        }
+      );
 
     const data =
       await response.json();
-
 
     if(!response.ok){
 
       throw new Error(
         data.error ||
-        "Unable to place order"
+        "Order failed"
       );
-    }
 
+    }
 
     const order =
       data.order;
-
 
     cart = [];
 
     saveCart();
 
+    updateCartCount();
 
-    closeModal("checkoutModal");
+    renderCart();
 
+    closeCheckout();
 
-    document.getElementById("successOrderId")
-      .textContent =
-        order.id;
+    document
+      .getElementById(
+        "successContent"
+      )
+      .innerHTML = `
+        <div
+          style="
+            font-size:55px;
+            margin-bottom:10px;
+          "
+        >
+          ✅
+        </div>
 
+        <h3>
+          Thank you, ${escapeHtml(name)}!
+        </h3>
 
-    openModal("successModal");
+        <p style="margin:12px 0;">
+          Your order has been placed successfully.
+        </p>
 
+        <div
+          style="
+            background:#f5f5f5;
+            padding:15px;
+            border-radius:7px;
+            margin:15px 0;
+          "
+        >
+          <strong>
+            Order ID
+          </strong>
 
-    await loadProducts();
+          <div
+            style="
+              font-size:28px;
+              margin-top:5px;
+            "
+          >
+            #${order.id}
+          </div>
 
+          <br>
+
+          <strong>
+            Total:
+          </strong>
+
+          ₹${formatMoney(
+            Number(order.total) || 0
+          )}
+        </div>
+
+        <button
+          onclick="
+            closeSuccess();
+            openTracking(
+              ${order.id}
+            );
+          "
+          style="
+            padding:12px 20px;
+            border:0;
+            background:#ff9900;
+            border-radius:5px;
+            font-weight:bold;
+            cursor:pointer;
+          "
+        >
+          Track Order
+        </button>
+      `;
+
+    document
+      .getElementById(
+        "successModal"
+      )
+      .classList.add("show");
+
+    document
+      .getElementById(
+        "checkoutForm"
+      )
+      .reset();
+
+    loadProducts();
 
   }catch(error){
 
     console.error(error);
 
-    showCheckoutMessage(
-      error.message,
-      "error"
+    alert(
+      error.message ||
+      "Unable to place order."
     );
 
   }finally{
 
     button.disabled = false;
-    button.textContent = "Place Order";
+
+    button.textContent =
+      "Place Order";
+
   }
+
 }
 
 
-// ================================
-// TRACK ORDER
-// ================================
+/* =========================
+   ORDER TRACKING
+========================= */
 
-function openTrack(){
+function openTracking(orderId){
 
-  openModal("trackModal");
+  document
+    .getElementById(
+      "trackingModal"
+    )
+    .classList.add("show");
+
+  if(orderId){
+
+    document
+      .getElementById(
+        "trackingId"
+      )
+      .value = orderId;
+
+    trackOrder();
+
+  }
+
+}
+
+
+function closeTracking(){
+
+  document
+    .getElementById(
+      "trackingModal"
+    )
+    .classList.remove("show");
 
 }
 
@@ -1618,38 +2324,47 @@ function openTrack(){
 async function trackOrder(){
 
   const id =
-    document.getElementById("trackId")
-      .value.trim();
+    Number(
+      document
+        .getElementById(
+          "trackingId"
+        )
+        .value
+    );
 
   const result =
-    document.getElementById("trackingResult");
+    document.getElementById(
+      "trackingResult"
+    );
 
-  if(!id){
+  if(!Number.isInteger(id) || id <= 0){
 
     result.innerHTML = `
-      <div class="message error" style="display:block">
-        Enter Order ID.
-      </div>
+      <p style="color:#c62828;">
+        Please enter a valid Order ID.
+      </p>
     `;
 
     return;
+
   }
 
-
   result.innerHTML =
-    "<p>Loading...</p>";
-
+    `
+      <div class="loading">
+        Loading order...
+      </div>
+    `;
 
   try{
 
     const response =
       await fetch(
-        `/api/orders/track/${encodeURIComponent(id)}`
+        `/api/orders/track/${id}`
       );
 
     const data =
       await response.json();
-
 
     if(!response.ok){
 
@@ -1657,19 +2372,16 @@ async function trackOrder(){
         data.error ||
         "Order not found"
       );
+
     }
 
-
-    const status =
-      String(data.status || "pending")
-        .toUpperCase();
-
+    const items =
+      Array.isArray(data.items)
+        ? data.items
+        : [];
 
     result.innerHTML = `
-
-      <br>
-
-      <div class="message success" style="display:block">
+      <div class="order-result">
 
         <h3>
           Order #${data.id}
@@ -1677,22 +2389,69 @@ async function trackOrder(){
 
         <br>
 
-        <p>
-          Status:
-          <strong>${escapeHtml(status)}</strong>
-        </p>
+        <div class="status">
+          ${escapeHtml(
+            data.status || "pending"
+          )}
+        </div>
 
-        <p>
+        <br><br>
+
+        <strong>
           Total:
-          <strong>
-            ₹${Number(data.total || 0).toFixed(0)}
-          </strong>
-        </p>
+        </strong>
 
-        <p>
-          Ordered:
-          ${new Date(data.created_at).toLocaleString("en-IN")}
-        </p>
+        ₹${formatMoney(
+          Number(data.total) || 0
+        )}
+
+        <br><br>
+
+        <strong>
+          Items:
+        </strong>
+
+        <div style="margin-top:8px;">
+
+          ${
+            items.length
+              ? items
+                  .map(item => `
+                    <div
+                      style="
+                        padding:7px 0;
+                        border-bottom:1px solid #ddd;
+                      "
+                    >
+                      ${escapeHtml(
+                        item.name || "Product"
+                      )}
+                      ×
+                      ${Number(
+                        item.quantity || 0
+                      )}
+                      —
+                      ₹${formatMoney(
+                        Number(
+                          item.item_total
+                        ) || 0
+                      )}
+                    </div>
+                  `)
+                  .join("")
+              : "No item details"
+          }
+
+        </div>
+
+        <br>
+
+        <small>
+          Placed:
+          ${formatDate(
+            data.created_at
+          )}
+        </small>
 
       </div>
     `;
@@ -1700,106 +2459,166 @@ async function trackOrder(){
   }catch(error){
 
     result.innerHTML = `
-      <div class="message error" style="display:block">
-        ${escapeHtml(error.message)}
+      <div
+        style="
+          color:#c62828;
+          background:#ffebee;
+          padding:15px;
+          border-radius:6px;
+        "
+      >
+        ${escapeHtml(
+          error.message ||
+          "Unable to track order"
+        )}
       </div>
     `;
+
   }
+
 }
 
 
-// ================================
-// MODALS
-// ================================
+/* =========================
+   SUCCESS
+========================= */
 
-function openModal(id){
-
-  document
-    .getElementById(id)
-    .classList.add("show");
-}
-
-
-function closeModal(id){
+function closeSuccess(){
 
   document
-    .getElementById(id)
+    .getElementById(
+      "successModal"
+    )
     .classList.remove("show");
+
 }
 
 
-document
-  .querySelectorAll(".modal")
-  .forEach(modal => {
+/* =========================
+   HELPERS
+========================= */
 
-    modal.addEventListener("click",event => {
+function calculatePrice(
+  price,
+  discount
+){
 
-      if(event.target === modal){
-        modal.classList.remove("show");
-      }
+  const p =
+    Number(price) || 0;
 
-    });
+  const d =
+    Number(discount) || 0;
 
-  });
+  return Math.round(
+    (
+      p -
+      p * d / 100
+    ) * 100
+  ) / 100;
 
-
-// ================================
-// MESSAGES
-// ================================
-
-function showMessage(text,type){
-
-  const message =
-    document.getElementById("message");
-
-  message.textContent = text;
-
-  message.className =
-    `message ${type}`;
-
-  message.style.display = "block";
-
-
-  setTimeout(() => {
-    message.style.display = "none";
-  },3000);
 }
 
 
-function showCheckoutMessage(text,type){
+function formatMoney(value){
 
-  const message =
-    document.getElementById("checkoutMessage");
+  return Number(
+    value || 0
+  ).toLocaleString(
+    "en-IN",
+    {
+      minimumFractionDigits:0,
+      maximumFractionDigits:2
+    }
+  );
 
-  message.textContent = text;
-
-  message.className =
-    `message ${type}`;
-
-  message.style.display = "block";
 }
 
 
-// ================================
-// SECURITY / HTML ESCAPE
-// ================================
+function formatDate(value){
+
+  if(!value){
+
+    return "N/A";
+
+  }
+
+  try{
+
+    return new Date(
+      value
+    ).toLocaleString(
+      "en-IN"
+    );
+
+  }catch(_){
+
+    return String(value);
+
+  }
+
+}
+
 
 function escapeHtml(value){
 
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  return String(
+    value ?? ""
+  )
+  .replace(
+    /&/g,
+    "&amp;"
+  )
+  .replace(
+    /</g,
+    "&lt;"
+  )
+  .replace(
+    />/g,
+    "&gt;"
+  )
+  .replace(
+    /"/g,
+    "&quot;"
+  )
+  .replace(
+    /'/g,
+    "&#039;"
+  );
+
 }
 
 
-// ================================
-// START
-// ================================
+function escapeAttribute(value){
 
-loadProducts();
+  return escapeHtml(value);
+
+}
+
+
+/* =========================
+   ESC KEY
+========================= */
+
+document.addEventListener(
+  "keydown",
+  event => {
+
+    if(
+      event.key === "Escape"
+    ){
+
+      closeCart();
+
+      closeCheckout();
+
+      closeTracking();
+
+      closeSuccess();
+
+    }
+
+  }
+);
 
 </script>
 
