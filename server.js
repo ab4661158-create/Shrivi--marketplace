@@ -18,10 +18,14 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 let ADMIN_HASH = null;
 
 (async () => {
-  if (ADMIN_PASSWORD) {
-    ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
-  } else {
-    console.error("ADMIN_PASSWORD environment variable is missing");
+  try {
+    if (ADMIN_PASSWORD) {
+      ADMIN_HASH = await bcrypt.hash(ADMIN_PASSWORD, 10);
+    } else {
+      console.error("ADMIN_PASSWORD environment variable is missing");
+    }
+  } catch (error) {
+    console.error("Admin password hash error:", error);
   }
 })();
 
@@ -30,17 +34,21 @@ app.use(express.urlencoded({ extended: true }));
 
 app.set("trust proxy", 1);
 
-app.use(session({
-  secret: process.env.SESSION_SECRET || "shrivi-session-secret-2026",
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: true,
-    sameSite: "lax",
-    maxAge: 24 * 60 * 60 * 1000
-  }
-}));
+app.use(
+  session({
+    secret:
+      process.env.SESSION_SECRET ||
+      "shrivi-session-secret-2026",
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: true,
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000
+    }
+  })
+);
 
 // =========================
 // PAGES
@@ -102,7 +110,6 @@ app.post("/api/login", async (req, res) => {
         ok: true
       });
     });
-
   } catch (error) {
     console.error("Login error:", error);
 
@@ -153,14 +160,68 @@ function requireAdmin(req, res, next) {
 // SELLER AUTH HELPERS
 // =========================
 
-function requireSeller(req, res, next) {
-  if (!req.session.seller) {
-    return res.status(401).json({
-      error: "Seller login required"
+async function requireSeller(req, res, next) {
+  try {
+    if (!req.session.seller) {
+      return res.status(401).json({
+        error: "Seller login required"
+      });
+    }
+
+    const sellerId = Number(req.session.seller.id);
+
+    if (!Number.isInteger(sellerId) || sellerId <= 0) {
+      delete req.session.seller;
+
+      return res.status(401).json({
+        error: "Invalid seller session"
+      });
+    }
+
+    const result = await pool.query(
+      `
+      SELECT
+        id,
+        name,
+        email,
+        phone,
+        status,
+        created_at
+      FROM sellers
+      WHERE id = $1
+      LIMIT 1
+      `,
+      [sellerId]
+    );
+
+    if (!result.rows.length) {
+      delete req.session.seller;
+
+      return res.status(401).json({
+        error: "Seller account not found"
+      });
+    }
+
+    const seller = result.rows[0];
+
+    if (seller.status !== "active") {
+      delete req.session.seller;
+
+      return res.status(403).json({
+        error: "Seller account is blocked"
+      });
+    }
+
+    req.seller = seller;
+
+    next();
+  } catch (error) {
+    console.error("Seller authorization error:", error);
+
+    res.status(500).json({
+      error: "Seller authorization error"
     });
   }
-
-  next();
 }
 
 function validEmail(email) {
@@ -185,13 +246,20 @@ function calculateSalePrice(price, discount) {
 }
 
 function validStock(value) {
-  return Number.isInteger(Number(value)) && Number(value) >= 0;
+  return (
+    Number.isInteger(Number(value)) &&
+    Number(value) >= 0
+  );
 }
 
 function validDiscount(value) {
   const d = Number(value);
 
-  return Number.isFinite(d) && d >= 0 && d <= 100;
+  return (
+    Number.isFinite(d) &&
+    d >= 0 &&
+    d <= 100
+  );
 }
 
 // =========================
@@ -208,6 +276,7 @@ app.post("/api/seller/register", async (req, res) => {
     } = req.body || {};
 
     const sellerName = String(name || "").trim();
+
     const sellerEmail = String(email || "")
       .trim()
       .toLowerCase();
@@ -271,9 +340,21 @@ app.post("/api/seller/register", async (req, res) => {
     const result = await pool.query(
       `
       INSERT INTO sellers
-      (name, email, phone, password_hash, status)
+      (
+        name,
+        email,
+        phone,
+        password_hash,
+        status
+      )
       VALUES ($1,$2,$3,$4,$5)
-      RETURNING id, name, email, phone, status, created_at
+      RETURNING
+        id,
+        name,
+        email,
+        phone,
+        status,
+        created_at
       `,
       [
         sellerName,
@@ -309,12 +390,17 @@ app.post("/api/seller/register", async (req, res) => {
         seller
       });
     });
-
   } catch (error) {
     console.error(
       "Seller registration error:",
       error
     );
+
+    if (error.code === "23505") {
+      return res.status(409).json({
+        error: "Seller account already exists"
+      });
+    }
 
     res.status(500).json({
       error: "Failed to register seller"
@@ -421,7 +507,6 @@ app.post("/api/seller/login", async (req, res) => {
         }
       });
     });
-
   } catch (error) {
     console.error(
       "Seller login error:",
@@ -458,48 +543,27 @@ app.post("/api/seller/logout", (req, res) => {
 // SELLER CURRENT ACCOUNT
 // =========================
 
-app.get("/api/seller/me", requireSeller, async (req, res) => {
-  try {
-    const result = await pool.query(
-      `
-      SELECT
-        id,
-        name,
-        email,
-        phone,
-        status,
-        created_at
-      FROM sellers
-      WHERE id = $1
-      LIMIT 1
-      `,
-      [req.session.seller.id]
-    );
+app.get(
+  "/api/seller/me",
+  requireSeller,
+  async (req, res) => {
+    try {
+      res.json({
+        loggedIn: true,
+        seller: req.seller
+      });
+    } catch (error) {
+      console.error(
+        "Seller me error:",
+        error
+      );
 
-    if (!result.rows.length) {
-      delete req.session.seller;
-
-      return res.status(401).json({
-        error: "Seller account not found"
+      res.status(500).json({
+        error: "Failed to load seller account"
       });
     }
-
-    res.json({
-      loggedIn: true,
-      seller: result.rows[0]
-    });
-
-  } catch (error) {
-    console.error(
-      "Seller me error:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Failed to load seller account"
-    });
   }
-});
+);
 
 // =========================
 // PUBLIC PRODUCTS
@@ -523,11 +587,15 @@ app.get("/api/products", async (req, res) => {
       FROM products p
       LEFT JOIN sellers s
         ON s.id = p.seller_id
+      WHERE
+        p.seller_id IS NULL
+        OR s.status = 'active'
       ORDER BY p.id DESC
     `);
 
     const products = result.rows.map(product => {
       const price = Number(product.price) || 0;
+
       const discount =
         Number(product.discount_percent) || 0;
 
@@ -540,12 +608,13 @@ app.get("/api/products", async (req, res) => {
           price,
           discount
         ),
-        stock: Number(product.stock) || 0
+        stock: Number(product.stock) || 0,
+        seller_name:
+          product.seller_name || "Shrivi"
       };
     });
 
     res.json(products);
-
   } catch (error) {
     console.error(
       "Products fetch error:",
@@ -571,7 +640,8 @@ app.get(
         SELECT
           p.*,
           s.name AS seller_name,
-          s.email AS seller_email
+          s.email AS seller_email,
+          s.status AS seller_status
         FROM products p
         LEFT JOIN sellers s
           ON s.id = p.seller_id
@@ -594,7 +664,6 @@ app.get(
             )
         }))
       );
-
     } catch (error) {
       console.error(
         "Admin products error:",
@@ -663,9 +732,10 @@ app.post(
         const sellerCheck =
           await pool.query(
             `
-            SELECT id
+            SELECT id, status
             FROM sellers
             WHERE id = $1
+            LIMIT 1
             `,
             [numericSellerId]
           );
@@ -673,6 +743,15 @@ app.post(
         if (!sellerCheck.rows.length) {
           return res.status(400).json({
             error: "Seller not found"
+          });
+        }
+
+        if (
+          sellerCheck.rows[0].status !== "active"
+        ) {
+          return res.status(400).json({
+            error:
+              "Product cannot be assigned to a blocked seller"
           });
         }
       }
@@ -748,7 +827,6 @@ app.post(
             )
         }
       });
-
     } catch (error) {
       console.error(
         "Product add error:",
@@ -813,6 +891,32 @@ app.put(
         ) {
           return res.status(400).json({
             error: "Invalid seller ID"
+          });
+        }
+
+        const sellerCheck =
+          await pool.query(
+            `
+            SELECT id, status
+            FROM sellers
+            WHERE id = $1
+            LIMIT 1
+            `,
+            [numericSellerId]
+          );
+
+        if (!sellerCheck.rows.length) {
+          return res.status(400).json({
+            error: "Seller not found"
+          });
+        }
+
+        if (
+          sellerCheck.rows[0].status !== "active"
+        ) {
+          return res.status(400).json({
+            error:
+              "Product cannot be assigned to a blocked seller"
           });
         }
       }
@@ -891,7 +995,6 @@ app.put(
             )
         }
       });
-
     } catch (error) {
       console.error(
         "Product update error:",
@@ -943,7 +1046,6 @@ app.delete(
       res.json({
         ok: true
       });
-
     } catch (error) {
       console.error(
         "Product delete error:",
@@ -973,7 +1075,7 @@ app.get(
         WHERE seller_id = $1
         ORDER BY id DESC
         `,
-        [req.session.seller.id]
+        [req.seller.id]
       );
 
       res.json(
@@ -992,7 +1094,6 @@ app.get(
             )
         }))
       );
-
     } catch (error) {
       console.error(
         "Seller products error:",
@@ -1093,7 +1194,7 @@ app.post(
           description || null,
           numericStock,
           numericDiscount,
-          req.session.seller.id
+          req.seller.id
         ]
       );
 
@@ -1110,7 +1211,6 @@ app.post(
             )
         }
       });
-
     } catch (error) {
       console.error(
         "Seller product add error:",
@@ -1210,7 +1310,7 @@ app.put(
           numericStock,
           numericDiscount,
           id,
-          req.session.seller.id
+          req.seller.id
         ]
       );
 
@@ -1233,7 +1333,6 @@ app.put(
             )
         }
       });
-
     } catch (error) {
       console.error(
         "Seller product update error:",
@@ -1276,7 +1375,7 @@ app.delete(
         `,
         [
           id,
-          req.session.seller.id
+          req.seller.id
         ]
       );
 
@@ -1289,7 +1388,6 @@ app.delete(
       res.json({
         ok: true
       });
-
     } catch (error) {
       console.error(
         "Seller product delete error:",
@@ -1378,11 +1476,18 @@ app.post("/api/orders", async (req, res) => {
         });
       }
 
-      quantityMap.set(
-        id,
+      const newQuantity =
         (quantityMap.get(id) || 0) +
-        quantity
-      );
+        quantity;
+
+      if (newQuantity > 999) {
+        return res.status(400).json({
+          error:
+            "Maximum quantity exceeded"
+        });
+      }
+
+      quantityMap.set(id, newQuantity);
     }
 
     const ids = [
@@ -1395,11 +1500,17 @@ app.post("/api/orders", async (req, res) => {
       `
       SELECT
         p.*,
-        s.name AS seller_name
+        s.name AS seller_name,
+        s.status AS seller_status
       FROM products p
       LEFT JOIN sellers s
         ON s.id = p.seller_id
-      WHERE p.id = ANY($1::int[])
+      WHERE
+        p.id = ANY($1::int[])
+        AND (
+          p.seller_id IS NULL
+          OR s.status = 'active'
+        )
       FOR UPDATE OF p
       `,
       [ids]
@@ -1480,13 +1591,10 @@ app.post("/api/orders", async (req, res) => {
         discount_percent: discount,
         price: salePrice,
         item_total: itemTotal,
-
-        // Marketplace seller information
         seller_id:
           product.seller_id
             ? Number(product.seller_id)
             : null,
-
         seller_name:
           product.seller_name || "Shrivi"
       });
@@ -1496,17 +1604,32 @@ app.post("/api/orders", async (req, res) => {
       Math.round(total * 100) / 100;
 
     for (const id of ids) {
-      await client.query(
-        `
-        UPDATE products
-        SET stock = stock - $1
-        WHERE id = $2
-        `,
-        [
-          quantityMap.get(id),
-          id
-        ]
-      );
+      const quantity =
+        quantityMap.get(id);
+
+      const updateResult =
+        await client.query(
+          `
+          UPDATE products
+          SET stock = stock - $1
+          WHERE id = $2
+            AND stock >= $1
+          RETURNING id, stock
+          `,
+          [
+            quantity,
+            id
+          ]
+        );
+
+      if (!updateResult.rows.length) {
+        await client.query("ROLLBACK");
+
+        return res.status(409).json({
+          error:
+            "Stock changed. Please refresh your cart and try again."
+        });
+      }
     }
 
     const orderResult =
@@ -1544,7 +1667,6 @@ app.post("/api/orders", async (req, res) => {
       order:
         orderResult.rows[0]
     });
-
   } catch (error) {
     try {
       await client.query("ROLLBACK");
@@ -1559,69 +1681,78 @@ app.post("/api/orders", async (req, res) => {
       error:
         "Failed to create order"
     });
-
   } finally {
     client.release();
   }
 });
+
 // =========================
 // CUSTOMER ORDER TRACKING
 // =========================
 
-app.get("/api/orders/track/:id", async (req, res) => {
-  try {
-    const id = Number(req.params.id);
+app.get(
+  "/api/orders/track/:id",
+  async (req, res) => {
+    try {
+      const id = Number(req.params.id);
 
-    if (!Number.isInteger(id) || id <= 0) {
-      return res.status(400).json({
-        error: "Invalid order ID"
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+        return res.status(400).json({
+          error: "Invalid order ID"
+        });
+      }
+
+      const result = await pool.query(
+        `
+        SELECT
+          id,
+          status,
+          total,
+          items,
+          created_at
+        FROM orders
+        WHERE id = $1
+        LIMIT 1
+        `,
+        [id]
+      );
+
+      if (!result.rows.length) {
+        return res.status(404).json({
+          error: "Order not found"
+        });
+      }
+
+      const order = result.rows[0];
+
+      res.json({
+        id: order.id,
+        status: order.status,
+        total:
+          Number(order.total) || 0,
+        items:
+          Array.isArray(order.items)
+            ? order.items
+            : [],
+        created_at:
+          order.created_at
+      });
+    } catch (error) {
+      console.error(
+        "Order tracking error:",
+        error
+      );
+
+      res.status(500).json({
+        error: "Failed to track order"
       });
     }
-
-    const result = await pool.query(
-      `
-      SELECT
-        id,
-        status,
-        total,
-        items,
-        created_at
-      FROM orders
-      WHERE id = $1
-      LIMIT 1
-      `,
-      [id]
-    );
-
-    if (!result.rows.length) {
-      return res.status(404).json({
-        error: "Order not found"
-      });
-    }
-
-    const order = result.rows[0];
-
-    res.json({
-      id: order.id,
-      status: order.status,
-      total: Number(order.total) || 0,
-      items: Array.isArray(order.items)
-        ? order.items
-        : [],
-      created_at: order.created_at
-    });
-
-  } catch (error) {
-    console.error(
-      "Order tracking error:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Failed to track order"
-    });
   }
-});
+);
+
 // =========================
 // ADMIN ORDERS
 // =========================
@@ -1637,7 +1768,6 @@ app.get(
         );
 
       res.json(result.rows);
-
     } catch (error) {
       console.error(
         "Orders fetch error:",
@@ -1662,9 +1792,7 @@ app.get(
   async (req, res) => {
     try {
       const sellerId =
-        Number(
-          req.session.seller.id
-        );
+        Number(req.seller.id);
 
       const result =
         await pool.query(
@@ -1677,7 +1805,10 @@ app.get(
               COALESCE(items, '[]'::jsonb)
             ) AS item
             WHERE
-              (item->>'seller_id')::integer = $1
+              NULLIF(
+                item->>'seller_id',
+                ''
+              )::integer = $1
           )
           ORDER BY id DESC
           `,
@@ -1719,7 +1850,6 @@ app.get(
         });
 
       res.json(sellerOrders);
-
     } catch (error) {
       console.error(
         "Seller orders error:",
@@ -1744,9 +1874,7 @@ app.get(
   async (req, res) => {
     try {
       const sellerId =
-        Number(
-          req.session.seller.id
-        );
+        Number(req.seller.id);
 
       const products =
         await pool.query(
@@ -1782,7 +1910,10 @@ app.get(
               COALESCE(items, '[]'::jsonb)
             ) AS item
             WHERE
-              (item->>'seller_id')::integer = $1
+              NULLIF(
+                item->>'seller_id',
+                ''
+              )::integer = $1
           )
           `,
           [sellerId]
@@ -1798,17 +1929,26 @@ app.get(
                   SELECT COALESCE(
                     SUM(
                       COALESCE(
-                        (item->>'item_total')::numeric,
+                        NULLIF(
+                          item->>'item_total',
+                          ''
+                        )::numeric,
                         0
                       )
                     ),
                     0
                   )
                   FROM jsonb_array_elements(
-                    COALESCE(orders.items, '[]'::jsonb)
+                    COALESCE(
+                      orders.items,
+                      '[]'::jsonb
+                    )
                   ) AS item
                   WHERE
-                    (item->>'seller_id')::integer = $1
+                    NULLIF(
+                      item->>'seller_id',
+                      ''
+                    )::integer = $1
                 )
               ),
               0
@@ -1817,10 +1957,16 @@ app.get(
           WHERE EXISTS (
             SELECT 1
             FROM jsonb_array_elements(
-              COALESCE(items, '[]'::jsonb)
+              COALESCE(
+                items,
+                '[]'::jsonb
+              )
             ) AS item
             WHERE
-              (item->>'seller_id')::integer = $1
+              NULLIF(
+                item->>'seller_id',
+                ''
+              )::integer = $1
           )
           `,
           [sellerId]
@@ -1847,7 +1993,6 @@ app.get(
             revenue.rows[0].revenue
           ) || 0
       });
-
     } catch (error) {
       console.error(
         "Seller dashboard error:",
@@ -1908,9 +2053,7 @@ app.put(
       }
 
       const sellerId =
-        Number(
-          req.session.seller.id
-        );
+        Number(req.seller.id);
 
       const check =
         await pool.query(
@@ -1921,10 +2064,16 @@ app.put(
             AND EXISTS (
               SELECT 1
               FROM jsonb_array_elements(
-                COALESCE(items, '[]'::jsonb)
+                COALESCE(
+                  items,
+                  '[]'::jsonb
+                )
               ) AS item
               WHERE
-                (item->>'seller_id')::integer = $2
+                NULLIF(
+                  item->>'seller_id',
+                  ''
+                )::integer = $2
             )
           `,
           [
@@ -1959,7 +2108,6 @@ app.put(
         order:
           result.rows[0]
       });
-
     } catch (error) {
       console.error(
         "Seller order status error:",
@@ -2046,7 +2194,6 @@ app.put(
         order:
           result.rows[0]
       });
-
     } catch (error) {
       console.error(
         "Order status error:",
@@ -2104,7 +2251,6 @@ app.get(
             )
         }))
       );
-
     } catch (error) {
       console.error(
         "Admin sellers error:",
@@ -2194,7 +2340,6 @@ app.put(
         seller:
           result.rows[0]
       });
-
     } catch (error) {
       console.error(
         "Seller status error:",
@@ -2249,7 +2394,6 @@ app.get(
             sellers.rows[0].count
           )
       });
-
     } catch (error) {
       console.error(
         "Dashboard error:",
@@ -2357,14 +2501,12 @@ async function initializeDatabase() {
     NOT NULL DEFAULT 'active'
   `);
 
-  // Existing seller rows without status
   await pool.query(`
     UPDATE sellers
     SET status = 'active'
     WHERE status IS NULL
   `);
 
-  // Unique seller email when email exists
   await pool.query(`
     CREATE UNIQUE INDEX IF NOT EXISTS
     sellers_email_unique_idx
@@ -2376,6 +2518,10 @@ async function initializeDatabase() {
     "SHRIVI database tables ready"
   );
 }
+
+// =========================
+// DATABASE START
+// =========================
 
 async function startDatabase() {
   try {
