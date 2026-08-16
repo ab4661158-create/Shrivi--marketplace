@@ -1,11 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-<link rel="manifest" href="/manifest.json">
-    <head>
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Shrivi Marketplace</title>
+<title>Shrivi — Fashion Marketplace</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#ffffff">
+<meta name="description" content="Shrivi Fashion Marketplace — discover fashion, jewellery and accessories from independent sellers.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Shrivi">
 
 <style>
 *{
@@ -24,12 +32,16 @@ button,input,select{
     font:inherit;
 }
 
+button{
+    cursor:pointer;
+}
+
 header{
     background:#111827;
     color:white;
     position:sticky;
     top:0;
-    z-index:100;
+    z-index:1000;
 }
 
 .navbar{
@@ -45,6 +57,7 @@ header{
     font-size:28px;
     font-weight:bold;
     white-space:nowrap;
+    cursor:pointer;
 }
 
 .search-box{
@@ -65,7 +78,6 @@ header{
     border:none;
     background:#f59e0b;
     padding:0 20px;
-    cursor:pointer;
     border-radius:0 8px 8px 0;
     font-weight:bold;
 }
@@ -74,7 +86,6 @@ header{
     background:transparent;
     color:white;
     border:none;
-    cursor:pointer;
     font-weight:bold;
     white-space:nowrap;
 }
@@ -84,6 +95,8 @@ header{
     color:#111;
     padding:10px 15px;
     border-radius:8px;
+    border:none;
+    font-weight:bold;
 }
 
 .categories{
@@ -105,11 +118,11 @@ header{
     background:white;
     padding:9px 16px;
     border-radius:20px;
-    cursor:pointer;
     white-space:nowrap;
 }
 
-.category-btn:hover{
+.category-btn:hover,
+.category-btn.active{
     background:#111827;
     color:white;
 }
@@ -117,7 +130,7 @@ header{
 .hero{
     max-width:1400px;
     margin:20px auto;
-    padding:45px 30px;
+    padding:55px 30px;
     border-radius:16px;
     background:linear-gradient(135deg,#111827,#374151);
     color:white;
@@ -133,10 +146,19 @@ header{
     color:#ddd;
 }
 
+.hero button{
+    margin-top:22px;
+    padding:12px 22px;
+    border:none;
+    border-radius:8px;
+    background:#f59e0b;
+    font-weight:bold;
+}
+
 .container{
     max-width:1400px;
     margin:auto;
-    padding:0 20px 40px;
+    padding:0 20px 50px;
 }
 
 .section-head{
@@ -155,6 +177,7 @@ header{
     padding:9px;
     border:1px solid #ccc;
     border-radius:7px;
+    background:white;
 }
 
 .products-grid{
@@ -179,4 +202,1438 @@ header{
 .product-image{
     width:100%;
     height:260px;
-   
+    object-fit:cover;
+    background:#eee;
+}
+
+.product-info{
+    padding:15px;
+}
+
+.product-name{
+    font-size:17px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.seller-name{
+    color:#777;
+    font-size:13px;
+    margin-bottom:8px;
+}
+
+.price-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+}
+
+.price{
+    font-size:20px;
+    font-weight:bold;
+}
+
+.old-price{
+    color:#888;
+    text-decoration:line-through;
+    font-size:14px;
+}
+
+.discount{
+    color:#008a3e;
+    font-size:14px;
+    font-weight:bold;
+}
+
+.description{
+    color:#666;
+    font-size:13px;
+    margin-top:8px;
+    min-height:34px;
+}
+
+.add-cart{
+    width:100%;
+    margin-top:12px;
+    padding:11px;
+    border:none;
+    border-radius:8px;
+    background:#111827;
+    color:white;
+    font-weight:bold;
+}
+
+.add-cart:hover{
+    background:#000;
+}
+
+.empty{
+    text-align:center;
+    padding:60px 20px;
+    background:white;
+    border-radius:12px;
+    color:#777;
+}
+
+.loading{
+    text-align:center;
+    padding:50px;
+    font-size:18px;
+}
+
+.error{
+    text-align:center;
+    padding:40px;
+    background:#fff;
+    border-radius:12px;
+    color:#b00020;
+}
+
+/* CART */
+
+.cart-overlay,
+.modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    z-index:2000;
+}
+
+.cart-overlay.show,
+.modal-overlay.show{
+    display:block;
+}
+
+.cart-drawer{
+    position:absolute;
+    right:0;
+    top:0;
+    height:100%;
+    width:min(430px,100%);
+    background:white;
+    padding:20px;
+    overflow-y:auto;
+}
+
+.cart-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.close-btn{
+    border:none;
+    background:#eee;
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    font-size:20px;
+}
+
+.cart-item{
+    display:flex;
+    gap:12px;
+    padding:14px 0;
+    border-bottom:1px solid #eee;
+}
+
+.cart-item img{
+    width:75px;
+    height:75px;
+    object-fit:cover;
+    border-radius:8px;
+    background:#eee;
+}
+
+.cart-item-info{
+    flex:1;
+}
+
+.cart-item-name{
+    font-weight:bold;
+    margin-bottom:5px;
+}
+
+.qty-controls{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-top:8px;
+}
+
+.qty-controls button{
+    width:28px;
+    height:28px;
+    border:1px solid #ddd;
+    background:white;
+    border-radius:5px;
+}
+
+.remove-btn{
+    color:#c00;
+    border:none;
+    background:none;
+    font-size:12px;
+    margin-top:5px;
+}
+
+.cart-footer{
+    margin-top:20px;
+    border-top:1px solid #ddd;
+    padding-top:20px;
+}
+
+.total-row{
+    display:flex;
+    justify-content:space-between;
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.checkout-btn{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+    background:#f59e0b;
+    font-weight:bold;
+}
+
+/* MODAL */
+
+.modal{
+    background:white;
+    width:min(500px,92%);
+    max-height:90vh;
+    overflow-y:auto;
+    margin:5vh auto;
+    border-radius:14px;
+    padding:22px;
+}
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:20px;
+}
+
+.form-group{
+    margin-bottom:14px;
+}
+
+.form-group label{
+    display:block;
+    margin-bottom:6px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+    outline:none;
+}
+
+.form-group textarea{
+    min-height:100px;
+    resize:vertical;
+}
+
+.place-order{
+    width:100%;
+    padding:13px;
+    background:#111827;
+    color:white;
+    border:none;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.account-box{
+    text-align:center;
+}
+
+.account-box button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:8px;
+    background:#111827;
+    color:white;
+}
+
+.seller-cta{
+    margin-top:30px;
+    padding:30px;
+    border-radius:14px;
+    background:white;
+    text-align:center;
+}
+
+.seller-cta h2{
+    margin-bottom:8px;
+}
+
+.seller-cta p{
+    color:#666;
+    margin-bottom:15px;
+}
+
+.seller-cta button{
+    padding:12px 22px;
+    border:none;
+    border-radius:8px;
+    background:#111827;
+    color:white;
+    font-weight:bold;
+}
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+    transform:translateX(-50%);
+    background:#111827;
+    color:white;
+    padding:12px 18px;
+    border-radius:8px;
+    display:none;
+    z-index:5000;
+}
+
+.toast.show{
+    display:block;
+}
+
+footer{
+    background:#111827;
+    color:#ddd;
+    text-align:center;
+    padding:25px 15px;
+    margin-top:30px;
+}
+
+@media(max-width:1000px){
+    .products-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .navbar{
+        flex-wrap:wrap;
+    }
+
+    .search-box{
+        order:3;
+        flex-basis:100%;
+        max-width:none;
+    }
+}
+
+@media(max-width:700px){
+    .products-grid{
+        grid-template-columns:repeat(2,1fr);
+        gap:12px;
+    }
+
+    .product-image{
+        height:210px;
+    }
+
+    .hero{
+        margin:12px;
+        padding:35px 22px;
+    }
+
+    .hero h1{
+        font-size:32px;
+    }
+
+    .container{
+        padding:0 12px 40px;
+    }
+
+    .navbar{
+        padding:12px;
+        gap:10px;
+    }
+
+    .logo{
+        font-size:23px;
+    }
+
+    .nav-btn{
+        font-size:13px;
+    }
+
+    .cart-btn{
+        padding:8px 10px;
+    }
+}
+
+@media(max-width:430px){
+    .products-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+    .product-image{
+        height:180px;
+    }
+
+    .product-info{
+        padding:10px;
+    }
+
+    .product-name{
+        font-size:15px;
+    }
+
+    .price{
+        font-size:17px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div class="navbar">
+
+        <div class="logo" onclick="window.location.href='/shop'">
+            SHRIVI
+        </div>
+
+        <div class="search-box">
+            <input
+                id="searchInput"
+                type="search"
+                placeholder="Search products..."
+                autocomplete="off"
+            >
+            <button onclick="searchProducts()">Search</button>
+        </div>
+
+        <button class="nav-btn" onclick="openAccount()">
+            Account
+        </button>
+
+        <button class="nav-btn" onclick="window.location.href='/seller'">
+            Sell
+        </button>
+
+        <button class="cart-btn" onclick="openCart()">
+            Cart (<span id="cartCount">0</span>)
+        </button>
+
+    </div>
+</header>
+
+<nav class="categories">
+    <div class="categories-inner">
+
+        <button class="category-btn active" onclick="filterCategory('All',this)">
+            All
+        </button>
+
+        <button class="category-btn" onclick="filterCategory('Fashion',this)">
+            Fashion
+        </button>
+
+        <button class="category-btn" onclick="filterCategory('Jewellery',this)">
+            Jewellery
+        </button>
+
+        <button class="category-btn" onclick="filterCategory('Co-ord Sets',this)">
+            Co-ord Sets
+        </button>
+
+        <button class="category-btn" onclick="filterCategory('Accessories',this)">
+            Accessories
+        </button>
+
+        <button class="category-btn" onclick="filterCategory('Electronics',this)">
+            Electronics
+        </button>
+
+    </div>
+</nav>
+
+<section class="hero">
+
+    <h1>Style that feels like you.</h1>
+
+    <p>
+        Discover fashion, jewellery and accessories
+        from independent sellers on Shrivi.
+    </p>
+
+    <button onclick="scrollToProducts()">
+        Shop Now
+    </button>
+
+</section>
+
+<main class="container">
+
+    <div class="section-head">
+
+        <h2>Trending on Shrivi</h2>
+
+        <select id="sortSelect" class="sort" onchange="sortProducts()">
+            <option value="default">Sort</option>
+            <option value="low">Price: Low to High</option>
+            <option value="high">Price: High to Low</option>
+            <option value="discount">Best Discount</option>
+        </select>
+
+    </div>
+
+    <div id="products" class="products-grid">
+        <div class="loading">
+            Loading products...
+        </div>
+    </div>
+
+    <section class="seller-cta">
+
+        <h2>Sell on Shrivi</h2>
+
+        <p>
+            Have products to sell? Join Shrivi and reach more customers.
+        </p>
+
+        <button onclick="window.location.href='/seller'">
+            Become a Seller
+        </button>
+
+    </section>
+
+</main>
+
+<footer>
+    <div>
+        © 2026 Shrivi Marketplace
+    </div>
+
+    <div style="margin-top:6px;">
+        Fashion • Jewellery • Accessories
+    </div>
+</footer>
+
+<!-- CART -->
+
+<div id="cartOverlay" class="cart-overlay">
+
+    <div class="cart-drawer">
+
+        <div class="cart-header">
+
+            <h2>Your Cart</h2>
+
+            <button class="close-btn" onclick="closeCart()">
+                ×
+            </button>
+
+        </div>
+
+        <div id="cartItems"></div>
+
+        <div class="cart-footer">
+
+            <div class="total-row">
+                <span>Total</span>
+                <span>₹<span id="cartTotal">0</span></span>
+            </div>
+
+            <button class="checkout-btn" onclick="openCheckout()">
+                Proceed to Checkout
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- CHECKOUT -->
+
+<div id="checkoutOverlay" class="modal-overlay">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2>Checkout</h2>
+
+            <button class="close-btn" onclick="closeCheckout()">
+                ×
+            </button>
+
+        </div>
+
+        <form id="checkoutForm">
+
+            <div class="form-group">
+                <label>Customer Name</label>
+                <input id="customerName" required>
+            </div>
+
+            <div class="form-group">
+                <label>Mobile Number</label>
+                <input
+                    id="customerMobile"
+                    type="tel"
+                    inputmode="numeric"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label>Delivery Address</label>
+                <textarea
+                    id="customerAddress"
+                    required
+                ></textarea>
+            </div>
+
+            <button class="place-order" type="submit">
+                Place Order
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+<!-- ACCOUNT -->
+
+<div id="accountOverlay" class="modal-overlay">
+
+    <div class="modal">
+
+        <div class="modal-header">
+
+            <h2>My Account</h2>
+
+            <button class="close-btn" onclick="closeAccount()">
+                ×
+            </button>
+
+        </div>
+
+        <div class="account-box">
+
+            <p>
+                Your Shrivi customer account.
+            </p>
+
+            <button onclick="showOrders()">
+                My Orders
+            </button>
+
+            <button onclick="closeAccount();openCart()">
+                My Cart
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+let allProducts = [];
+let visibleProducts = [];
+let currentCategory = "All";
+
+let cart = JSON.parse(
+    localStorage.getItem("shrivi_cart") || "[]"
+);
+
+function saveCart(){
+    localStorage.setItem(
+        "shrivi_cart",
+        JSON.stringify(cart)
+    );
+
+    updateCartCount();
+}
+
+function updateCartCount(){
+
+    const count = cart.reduce(
+        (sum,item) => sum + Number(item.quantity || 0),
+        0
+    );
+
+    document.getElementById("cartCount").textContent = count;
+}
+
+function showToast(message){
+
+    const toast = document.getElementById("toast");
+
+    toast.textContent = message;
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+    }, 2200);
+}
+
+async function loadProducts(){
+
+    const container = document.getElementById("products");
+
+    container.innerHTML = `
+        <div class="loading">
+            Loading products...
+        </div>
+    `;
+
+    try{
+
+        const response = await fetch("/api/products");
+
+        if(!response.ok){
+            throw new Error("Product API failed");
+        }
+
+        const data = await response.json();
+
+        if(Array.isArray(data)){
+            allProducts = data;
+        }else if(Array.isArray(data.products)){
+            allProducts = data.products;
+        }else{
+            allProducts = [];
+        }
+
+        visibleProducts = [...allProducts];
+
+        renderProducts();
+
+    }catch(error){
+
+        console.error(error);
+
+        container.innerHTML = `
+            <div class="error">
+                Unable to load products right now.
+                Please refresh the page.
+            </div>
+        `;
+    }
+}
+
+function getProductImage(product){
+
+    if(product.image){
+        return product.image;
+    }
+
+    return "data:image/svg+xml;charset=UTF-8," +
+        encodeURIComponent(`
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="600"
+                 height="500">
+                <rect width="100%" height="100%"
+                      fill="#eeeeee"/>
+                <text x="50%" y="50%"
+                      dominant-baseline="middle"
+                      text-anchor="middle"
+                      font-family="Arial"
+                      font-size="28"
+                      fill="#888">
+                    SHRIVI
+                </text>
+            </svg>
+        `);
+}
+
+function getPrice(product){
+
+    const price =
+        product.sale_price ??
+        product.price ??
+        0;
+
+    return Number(price);
+}
+
+function getOldPrice(product){
+
+    const old =
+        product.original_price ??
+        product.price ??
+        0;
+
+    return Number(old);
+}
+
+function getDiscount(product){
+
+    if(product.discount_percent){
+        return Number(product.discount_percent);
+    }
+
+    const old = getOldPrice(product);
+    const price = getPrice(product);
+
+    if(old > price){
+        return Math.round(
+            ((old - price) / old) * 100
+        );
+    }
+
+    return 0;
+}
+
+function renderProducts(){
+
+    const container =
+        document.getElementById("products");
+
+    if(!visibleProducts.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                <h3>No products found</h3>
+                <p style="margin-top:8px;">
+                    Try another search or category.
+                </p>
+            </div>
+        `;
+
+        return;
+    }
+
+    container.innerHTML = visibleProducts.map(product => {
+
+        const price = getPrice(product);
+        const oldPrice = getOldPrice(product);
+        const discount = getDiscount(product);
+
+        const seller =
+            product.seller_name ||
+            "Shrivi Seller";
+
+        const description =
+            product.description ||
+            "Discover this product on Shrivi.";
+
+        return `
+            <article class="product-card">
+
+                <img
+                    class="product-image"
+                    src="${escapeHtml(getProductImage(product))}"
+                    alt="${escapeHtml(product.name || "Shrivi Product")}"
+                    onerror="this.src='${getProductImage({})}'"
+                >
+
+                <div class="product-info">
+
+                    <div class="product-name">
+                        ${escapeHtml(product.name || "Product")}
+                    </div>
+
+                    <div class="seller-name">
+                        Sold by ${escapeHtml(seller)}
+                    </div>
+
+                    <div class="price-row">
+
+                        <span class="price">
+                            ₹${price.toLocaleString("en-IN")}
+                        </span>
+
+                        ${
+                            oldPrice > price
+                            ? `
+                                <span class="old-price">
+                                    ₹${oldPrice.toLocaleString("en-IN")}
+                                </span>
+                            `
+                            : ""
+                        }
+
+                        ${
+                            discount > 0
+                            ? `
+                                <span class="discount">
+                                    ${discount}% OFF
+                                </span>
+                            `
+                            : ""
+                        }
+
+                    </div>
+
+                    <div class="description">
+                        ${escapeHtml(description)}
+                    </div>
+
+                    <button
+                        class="add-cart"
+                        onclick="addToCart(${Number(product.id)})"
+                    >
+                        Add to Cart
+                    </button>
+
+                </div>
+
+            </article>
+        `;
+
+    }).join("");
+}
+
+function escapeHtml(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+}
+
+function addToCart(productId){
+
+    const product =
+        allProducts.find(
+            item => Number(item.id) === Number(productId)
+        );
+
+    if(!product){
+        showToast("Product not found");
+        return;
+    }
+
+    const existing =
+        cart.find(
+            item => Number(item.id) === Number(product.id)
+        );
+
+    if(existing){
+
+        existing.quantity =
+            Number(existing.quantity || 0) + 1;
+
+    }else{
+
+        cart.push({
+            id: product.id,
+            name: product.name,
+            price: getPrice(product),
+            image: product.image || null,
+            seller_name: product.seller_name || null,
+            quantity: 1
+        });
+
+    }
+
+    saveCart();
+
+    showToast("Added to cart");
+
+    renderCart();
+}
+
+function changeQuantity(id, change){
+
+    const item =
+        cart.find(
+            product => Number(product.id) === Number(id)
+        );
+
+    if(!item) return;
+
+    item.quantity =
+        Number(item.quantity || 0) + change;
+
+    if(item.quantity <= 0){
+
+        cart =
+            cart.filter(
+                product =>
+                    Number(product.id) !== Number(id)
+            );
+    }
+
+    saveCart();
+    renderCart();
+}
+
+function removeFromCart(id){
+
+    cart =
+        cart.filter(
+            product =>
+                Number(product.id) !== Number(id)
+        );
+
+    saveCart();
+    renderCart();
+
+    showToast("Removed from cart");
+}
+
+function renderCart(){
+
+    const container =
+        document.getElementById("cartItems");
+
+    if(!cart.length){
+
+        container.innerHTML = `
+            <div class="empty">
+                <h3>Your cart is empty</h3>
+                <p style="margin-top:8px;">
+                    Add products to continue.
+                </p>
+            </div>
+        `;
+
+        document.getElementById("cartTotal").textContent = "0";
+
+        return;
+    }
+
+    let total = 0;
+
+    container.innerHTML = cart.map(item => {
+
+        const price = Number(item.price || 0);
+        const quantity = Number(item.quantity || 1);
+
+        total += price * quantity;
+
+        return `
+            <div class="cart-item">
+
+                <img
+                    src="${getProductImage(item)}"
+                    alt="${escapeHtml(item.name)}"
+                >
+
+                <div class="cart-item-info">
+
+                    <div class="cart-item-name">
+                        ${escapeHtml(item.name)}
+                    </div>
+
+                    <div>
+                        ₹${price.toLocaleString("en-IN")}
+                    </div>
+
+                    <div class="qty-controls">
+
+                        <button
+                            onclick="changeQuantity(${Number(item.id)},-1)"
+                        >
+                            −
+                        </button>
+
+                        <strong>
+                            ${quantity}
+                        </strong>
+
+                        <button
+                            onclick="changeQuantity(${Number(item.id)},1)"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                    <button
+                        class="remove-btn"
+                        onclick="removeFromCart(${Number(item.id)})"
+                    >
+                        Remove
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+    }).join("");
+
+    document.getElementById("cartTotal").textContent =
+        total.toLocaleString("en-IN");
+}
+
+function openCart(){
+
+    renderCart();
+
+    document
+        .getElementById("cartOverlay")
+        .classList.add("show");
+}
+
+function closeCart(){
+
+    document
+        .getElementById("cartOverlay")
+        .classList.remove("show");
+}
+
+function openCheckout(){
+
+    if(!cart.length){
+
+        showToast("Your cart is empty");
+        return;
+    }
+
+    closeCart();
+
+    document
+        .getElementById("checkoutOverlay")
+        .classList.add("show");
+}
+
+function closeCheckout(){
+
+    document
+        .getElementById("checkoutOverlay")
+        .classList.remove("show");
+}
+
+function openAccount(){
+
+    document
+        .getElementById("accountOverlay")
+        .classList.add("show");
+}
+
+function closeAccount(){
+
+    document
+        .getElementById("accountOverlay")
+        .classList.remove("show");
+}
+
+function filterCategory(category, button){
+
+    currentCategory = category;
+
+    document
+        .querySelectorAll(".category-btn")
+        .forEach(btn => btn.classList.remove("active"));
+
+    if(button){
+        button.classList.add("active");
+    }
+
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    visibleProducts =
+        allProducts.filter(product => {
+
+            const matchesCategory =
+                category === "All" ||
+                String(product.category || "")
+                    .toLowerCase() === category.toLowerCase();
+
+            const matchesSearch =
+                !search ||
+                String(product.name || "")
+                    .toLowerCase()
+                    .includes(search) ||
+                String(product.description || "")
+                    .toLowerCase()
+                    .includes(search) ||
+                String(product.category || "")
+                    .toLowerCase()
+                    .includes(search);
+
+            return matchesCategory && matchesSearch;
+        });
+
+    renderProducts();
+}
+
+function searchProducts(){
+
+    const search =
+        document
+            .getElementById("searchInput")
+            .value
+            .trim()
+            .toLowerCase();
+
+    visibleProducts =
+        allProducts.filter(product => {
+
+            const matchesCategory =
+                currentCategory === "All" ||
+                String(product.category || "")
+                    .toLowerCase() ===
+                currentCategory.toLowerCase();
+
+            const matchesSearch =
+                !search ||
+                String(product.name || "")
+                    .toLowerCase()
+                    .includes(search) ||
+                String(product.description || "")
+                    .toLowerCase()
+                    .includes(search) ||
+                String(product.category || "")
+                    .toLowerCase()
+                    .includes(search);
+
+            return matchesCategory && matchesSearch;
+        });
+
+    renderProducts();
+}
+
+document
+    .getElementById("searchInput")
+    .addEventListener("input", searchProducts);
+
+function sortProducts(){
+
+    const sort =
+        document.getElementById("sortSelect").value;
+
+    if(sort === "low"){
+
+        visibleProducts.sort(
+            (a,b) => getPrice(a) - getPrice(b)
+        );
+
+    }else if(sort === "high"){
+
+        visibleProducts.sort(
+            (a,b) => getPrice(b) - getPrice(a)
+        );
+
+    }else if(sort === "discount"){
+
+        visibleProducts.sort(
+            (a,b) => getDiscount(b) - getDiscount(a)
+        );
+
+    }
+
+    renderProducts();
+}
+
+function scrollToProducts(){
+
+    document
+        .getElementById("products")
+        .scrollIntoView({
+            behavior:"smooth",
+            block:"start"
+        });
+}
+
+async function submitOrder(event){
+
+    event.preventDefault();
+
+    if(!cart.length){
+
+        showToast("Your cart is empty");
+        return;
+    }
+
+    const name =
+        document.getElementById("customerName").value.trim();
+
+    const mobile =
+        document.getElementById("customerMobile").value.trim();
+
+    const address =
+        document.getElementById("customerAddress").value.trim();
+
+    if(!name || !mobile || !address){
+
+        showToast("Please fill all details");
+        return;
+    }
+
+    const button =
+        document.querySelector(".place-order");
+
+    button.disabled = true;
+    button.textContent = "Placing Order...";
+
+    try{
+
+        const orderPayload = {
+            customer_name: name,
+            customer_mobile: mobile,
+            customer_phone: mobile,
+            delivery_address: address,
+            address: address,
+            items: cart.map(item => ({
+                product_id: item.id,
+                id: item.id,
+                quantity: item.quantity,
+                price: item.price
+            }))
+        };
+
+        const response = await fetch(
+            "/api/orders",
+            {
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(orderPayload)
+            }
+        );
+
+        const data = await response.json();
+
+        if(!response.ok){
+
+            throw new Error(
+                data.message ||
+                data.error ||
+                "Order failed"
+            );
+        }
+
+        cart = [];
+
+        saveCart();
+
+        document
+            .getElementById("checkoutForm")
+            .reset();
+
+        closeCheckout();
+
+        showToast(
+            "Order placed successfully!"
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        showToast(
+            error.message ||
+            "Unable to place order"
+        );
+
+    }finally{
+
+        button.disabled = false;
+        button.textContent = "Place Order";
+    }
+}
+
+document
+    .getElementById("checkoutForm")
+    .addEventListener(
+        "submit",
+        submitOrder
+    );
+
+function showOrders(){
+
+    closeAccount();
+
+    alert(
+        "Customer order tracking is connected to the Shrivi marketplace backend."
+    );
+}
+
+/* Close overlays by clicking outside */
+
+document
+    .getElementById("cartOverlay")
+    .addEventListener("click",function(event){
+
+        if(event.target === this){
+            closeCart();
+        }
+
+    });
+
+document
+    .getElementById("checkoutOverlay")
+    .addEventListener("click",function(event){
+
+        if(event.target === this){
+            closeCheckout();
+        }
+
+    });
+
+document
+    .getElementById("accountOverlay")
+    .addEventListener("click",function(event){
+
+        if(event.target === this){
+            closeAccount();
+        }
+
+    });
+
+/* PWA SERVICE WORKER */
+
+if("serviceWorker" in navigator){
+
+    window.addEventListener("load",function(){
+
+        navigator.serviceWorker
+            .register("/service-worker.js")
+            .then(function(registration){
+
+                console.log(
+                    "Shrivi Service Worker registered:",
+                    registration.scope
+                );
+
+            })
+            .catch(function(error){
+
+                console.error(
+                    "Shrivi Service Worker registration failed:",
+                    error
+                );
+
+            });
+
+    });
+
+}
+
+/* START */
+
+updateCartCount();
+renderCart();
+loadProducts();
+</script>
+
+</body>
+</html>
