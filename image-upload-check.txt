@@ -1,0 +1,1 @@
+Image upload setup check: Render must have CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET configured. Do not store secret values in GitHub.
