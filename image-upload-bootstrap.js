@@ -16,7 +16,6 @@ express.response.sendFile = function (filePath, ...args) {
   }
 
   const callback = typeof args[args.length - 1] === "function" ? args[args.length - 1] : null;
-  const options = callback ? args[0] : args[0];
 
   fs.readFile(filePath, "utf8", (error, html) => {
     if (error) {
@@ -25,7 +24,7 @@ express.response.sendFile = function (filePath, ...args) {
     }
 
     const injected = html.replace(
-      /<\\/body>/i,
+      /<\/body>/i,
       '<script src="/image-upload-ui.js"></script></body>'
     );
 
@@ -36,21 +35,12 @@ express.response.sendFile = function (filePath, ...args) {
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024,
-    files: 1
-  },
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => {
-    const allowed = new Set([
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ]);
-
+    const allowed = new Set(["image/jpeg", "image/png", "image/webp"]);
     if (!allowed.has(file.mimetype)) {
       return cb(new Error("Only JPG, PNG and WEBP images are allowed"));
     }
-
     cb(null, true);
   }
 });
@@ -71,11 +61,7 @@ function cloudinarySignature(params, apiSecret) {
     .sort()
     .map(key => `${key}=${params[key]}`)
     .join("&");
-
-  return crypto
-    .createHash("sha1")
-    .update(canonical + apiSecret)
-    .digest("hex");
+  return crypto.createHash("sha1").update(canonical + apiSecret).digest("hex");
 }
 
 async function uploadToCloudinary(file, productId) {
@@ -92,13 +78,7 @@ async function uploadToCloudinary(file, productId) {
   const timestamp = Math.floor(Date.now() / 1000);
   const publicId = `product-${productId}-${Date.now()}`;
   const folder = "shrivi/products";
-
-  const signedParams = {
-    folder,
-    public_id: publicId,
-    timestamp
-  };
-
+  const signedParams = { folder, public_id: publicId, timestamp };
   const signature = cloudinarySignature(signedParams, apiSecret);
 
   const form = new FormData();
@@ -111,12 +91,8 @@ async function uploadToCloudinary(file, productId) {
 
   const response = await fetch(
     `https://api.cloudinary.com/v1_1/${encodeURIComponent(cloudName)}/image/upload`,
-    {
-      method: "POST",
-      body: form
-    }
+    { method: "POST", body: form }
   );
-
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok || !data.secure_url) {
@@ -150,15 +126,7 @@ async function requireSellerProduct(req, res, productId) {
   }
 
   const result = await pool.query(
-    `
-    SELECT p.id
-    FROM products p
-    JOIN sellers s ON s.id = p.seller_id
-    WHERE p.id = $1
-      AND p.seller_id = $2
-      AND s.status = 'active'
-    LIMIT 1
-    `,
+    `SELECT p.id FROM products p JOIN sellers s ON s.id = p.seller_id WHERE p.id = $1 AND p.seller_id = $2 AND s.status = 'active' LIMIT 1`,
     [productId, sellerId]
   );
 
@@ -174,90 +142,52 @@ function installImageRoutes(app) {
   if (app.__shriviImageRoutesInstalled) return;
   app.__shriviImageRoutesInstalled = true;
 
-  app.post(
-    "/api/admin/products/:id/image",
-    upload.single("image"),
-    async (req, res) => {
-      try {
-        if (!(await requireAdminSession(req, res))) return;
+  app.post("/api/admin/products/:id/image", upload.single("image"), async (req, res) => {
+    try {
+      if (!(await requireAdminSession(req, res))) return;
+      const productId = positiveInt(req.params.id);
+      if (!productId) return res.status(400).json({ error: "Invalid product id" });
+      if (!req.file) return res.status(400).json({ error: "Image file is required" });
 
-        const productId = positiveInt(req.params.id);
-        if (!productId) return res.status(400).json({ error: "Invalid product id" });
-        if (!req.file) return res.status(400).json({ error: "Image file is required" });
+      const existing = await pool.query("SELECT id FROM products WHERE id = $1 LIMIT 1", [productId]);
+      if (!existing.rows.length) return res.status(404).json({ error: "Product not found" });
 
-        const existing = await pool.query(
-          "SELECT id FROM products WHERE id = $1 LIMIT 1",
-          [productId]
-        );
-
-        if (!existing.rows.length) {
-          return res.status(404).json({ error: "Product not found" });
-        }
-
-        const imageUrl = await uploadToCloudinary(req.file, productId);
-
-        const result = await pool.query(
-          `UPDATE products SET image = $1 WHERE id = $2 RETURNING id, image`,
-          [imageUrl, productId]
-        );
-
-        return res.json({ ok: true, product: result.rows[0] });
-      } catch (error) {
-        console.error("Admin product image upload:", error);
-        return res.status(error.statusCode || 500).json({
-          error: error.message || "Image upload failed"
-        });
-      }
+      const imageUrl = await uploadToCloudinary(req.file, productId);
+      const result = await pool.query(
+        "UPDATE products SET image = $1 WHERE id = $2 RETURNING id, image",
+        [imageUrl, productId]
+      );
+      return res.json({ ok: true, product: result.rows[0] });
+    } catch (error) {
+      console.error("Admin product image upload:", error);
+      return res.status(error.statusCode || 500).json({ error: error.message || "Image upload failed" });
     }
-  );
+  });
 
-  app.post(
-    "/api/seller/products/:id/image",
-    upload.single("image"),
-    async (req, res) => {
-      try {
-        const productId = positiveInt(req.params.id);
-        if (!productId) return res.status(400).json({ error: "Invalid product id" });
+  app.post("/api/seller/products/:id/image", upload.single("image"), async (req, res) => {
+    try {
+      const productId = positiveInt(req.params.id);
+      if (!productId) return res.status(400).json({ error: "Invalid product id" });
+      const sellerId = await requireSellerProduct(req, res, productId);
+      if (!sellerId) return;
+      if (!req.file) return res.status(400).json({ error: "Image file is required" });
 
-        const sellerId = await requireSellerProduct(req, res, productId);
-        if (!sellerId) return;
-        if (!req.file) return res.status(400).json({ error: "Image file is required" });
-
-        const imageUrl = await uploadToCloudinary(req.file, productId);
-
-        const result = await pool.query(
-          `
-          UPDATE products
-          SET image = $1
-          WHERE id = $2 AND seller_id = $3
-          RETURNING id, image
-          `,
-          [imageUrl, productId, sellerId]
-        );
-
-        if (!result.rows.length) {
-          return res.status(404).json({ error: "Seller product not found" });
-        }
-
-        return res.json({ ok: true, product: result.rows[0] });
-      } catch (error) {
-        console.error("Seller product image upload:", error);
-        return res.status(error.statusCode || 500).json({
-          error: error.message || "Image upload failed"
-        });
-      }
+      const imageUrl = await uploadToCloudinary(req.file, productId);
+      const result = await pool.query(
+        `UPDATE products SET image = $1 WHERE id = $2 AND seller_id = $3 RETURNING id, image`,
+        [imageUrl, productId, sellerId]
+      );
+      if (!result.rows.length) return res.status(404).json({ error: "Seller product not found" });
+      return res.json({ ok: true, product: result.rows[0] });
+    } catch (error) {
+      console.error("Seller product image upload:", error);
+      return res.status(error.statusCode || 500).json({ error: error.message || "Image upload failed" });
     }
-  );
+  });
 
   app.use((error, req, res, next) => {
-    if (error && error.code === "LIMIT_FILE_SIZE") {
-      return res.status(413).json({ error: "Image must be 5MB or smaller" });
-    }
-
-    if (error && error.message === "Only JPG, PNG and WEBP images are allowed") {
-      return res.status(400).json({ error: error.message });
-    }
-
+    if (error && error.code === "LIMIT_FILE_SIZE") return res.status(413).json({ error: "Image must be 5MB or smaller" });
+    if (error && error.message === "Only JPG, PNG and WEBP images are allowed") return res.status(400).json({ error: error.message });
     next(error);
   });
 }
