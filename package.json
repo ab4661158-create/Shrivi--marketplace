@@ -4,7 +4,7 @@
   "description": "Shrivi Fashion Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node image-upload-bootstrap-v2.js"
+    "start": "node server.js"
   },
   "engines": {
     "node": ">=18"
