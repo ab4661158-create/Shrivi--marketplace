@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shrivi — Image Upload</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f6f8;color:#111827;padding:20px}.box{max-width:520px;margin:40px auto;background:#fff;border-radius:18px;padding:24px;box-shadow:0 8px 30px rgba(0,0,0,.08)}h1{margin:0 0 8px}.muted{color:#6b7280;margin-bottom:20px}input[type=file]{width:100%;padding:14px;border:1px solid #d1d5db;border-radius:10px;background:#fff}.preview{display:none;width:100%;max-height:320px;object-fit:contain;margin:18px 0;border-radius:12px;background:#f3f4f6}.btn{width:100%;margin-top:15px;padding:13px;border:0;border-radius:10px;background:#111827;color:#fff;font-weight:700;font-size:16px}.btn:disabled{opacity:.5}.result{display:none;margin-top:18px}.url{width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px}.copy{margin-top:10px;background:#15803d}.msg{margin-top:15px;padding:12px;border-radius:9px;display:none}.ok{background:#dcfce7;color:#166534}.err{background:#fee2e2;color:#991b1b}</style>
+</head>
+<body>
+<div class="box">
+<h1>SHRIVI Image Upload</h1>
+<div class="muted">Upload JPG, PNG or WEBP image. Maximum 5 MB.</div>
+<input id="image" type="file" accept="image/jpeg,image/png,image/webp">
+<img id="preview" class="preview" alt="Preview">
+<button id="uploadBtn" class="btn" onclick="uploadImage()">Upload Image</button>
+<div id="msg" class="msg"></div>
+<div id="result" class="result">
+<input id="url" class="url" readonly>
+<button class="btn copy" onclick="copyUrl()">Copy Image URL</button>
+</div>
+</div>
+<script>
+const fileInput=document.getElementById('image');
+const preview=document.getElementById('preview');
+const msg=document.getElementById('msg');
+const result=document.getElementById('result');
+const urlBox=document.getElementById('url');
+fileInput.addEventListener('change',()=>{const f=fileInput.files[0];result.style.display='none';if(!f){preview.style.display='none';return}preview.src=URL.createObjectURL(f);preview.style.display='block'});
+function show(text,ok){msg.textContent=text;msg.className='msg '+(ok?'ok':'err');msg.style.display='block'}
+async function uploadImage(){const file=fileInput.files[0];if(!file)return show('Please select an image.',false);if(file.size>5*1024*1024)return show('Image must be 5 MB or smaller.',false);const btn=document.getElementById('uploadBtn');btn.disabled=true;btn.textContent='Uploading...';try{const form=new FormData();form.append('image',file);const r=await fetch('/api/upload/image',{method:'POST',credentials:'include',body:form});let d={};try{d=await r.json()}catch(e){}if(!r.ok)throw new Error(d.error||'Upload failed');urlBox.value=d.secure_url||d.url||'';result.style.display='block';show('Image uploaded successfully. Copy this URL into Product Image URL.',true)}catch(e){show(e.message||'Image upload failed.',false)}finally{btn.disabled=false;btn.textContent='Upload Image'}}
+async function copyUrl(){try{await navigator.clipboard.writeText(urlBox.value);show('Image URL copied.',true)}catch(e){urlBox.select();document.execCommand('copy');show('Image URL copied.',true)}}
+</script>
+</body>
+</html>
