@@ -1,9 +1,38 @@
 const express = require("express");
 const multer = require("multer");
 const crypto = require("crypto");
+const fs = require("fs");
 const { Pool } = require("pg");
 
 const originalListen = express.application.listen;
+const originalSendFile = express.response.sendFile;
+
+express.response.sendFile = function (filePath, ...args) {
+  const normalized = String(filePath || "").replace(/\\/g, "/");
+  const isTargetPage = normalized.endsWith("/admin.html") || normalized.endsWith("/seller.html");
+
+  if (!isTargetPage) {
+    return originalSendFile.call(this, filePath, ...args);
+  }
+
+  const callback = typeof args[args.length - 1] === "function" ? args[args.length - 1] : null;
+  const options = callback ? args[0] : args[0];
+
+  fs.readFile(filePath, "utf8", (error, html) => {
+    if (error) {
+      if (callback) return callback(error);
+      return this.status(500).send("Page load error");
+    }
+
+    const injected = html.replace(
+      /<\\/body>/i,
+      '<script src="/image-upload-ui.js"></script></body>'
+    );
+
+    this.type("html").send(injected);
+    if (callback) callback();
+  });
+};
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -70,10 +99,7 @@ async function uploadToCloudinary(file, productId) {
     timestamp
   };
 
-  const signature = cloudinarySignature(
-    signedParams,
-    apiSecret
-  );
+  const signature = cloudinarySignature(signedParams, apiSecret);
 
   const form = new FormData();
   form.append("file", new Blob([file.buffer], { type: file.mimetype }), file.originalname);
@@ -108,7 +134,6 @@ async function requireAdminSession(req, res) {
     res.status(401).json({ error: "Admin login required" });
     return false;
   }
-
   return true;
 }
 
@@ -119,7 +144,6 @@ async function requireSellerProduct(req, res, productId) {
   }
 
   const sellerId = positiveInt(req.session.seller.id);
-
   if (!sellerId) {
     res.status(401).json({ error: "Invalid seller session" });
     return null;
@@ -158,13 +182,8 @@ function installImageRoutes(app) {
         if (!(await requireAdminSession(req, res))) return;
 
         const productId = positiveInt(req.params.id);
-        if (!productId) {
-          return res.status(400).json({ error: "Invalid product id" });
-        }
-
-        if (!req.file) {
-          return res.status(400).json({ error: "Image file is required" });
-        }
+        if (!productId) return res.status(400).json({ error: "Invalid product id" });
+        if (!req.file) return res.status(400).json({ error: "Image file is required" });
 
         const existing = await pool.query(
           "SELECT id FROM products WHERE id = $1 LIMIT 1",
@@ -178,19 +197,11 @@ function installImageRoutes(app) {
         const imageUrl = await uploadToCloudinary(req.file, productId);
 
         const result = await pool.query(
-          `
-          UPDATE products
-          SET image = $1
-          WHERE id = $2
-          RETURNING id, image
-          `,
+          `UPDATE products SET image = $1 WHERE id = $2 RETURNING id, image`,
           [imageUrl, productId]
         );
 
-        return res.json({
-          ok: true,
-          product: result.rows[0]
-        });
+        return res.json({ ok: true, product: result.rows[0] });
       } catch (error) {
         console.error("Admin product image upload:", error);
         return res.status(error.statusCode || 500).json({
@@ -206,16 +217,11 @@ function installImageRoutes(app) {
     async (req, res) => {
       try {
         const productId = positiveInt(req.params.id);
-        if (!productId) {
-          return res.status(400).json({ error: "Invalid product id" });
-        }
+        if (!productId) return res.status(400).json({ error: "Invalid product id" });
 
         const sellerId = await requireSellerProduct(req, res, productId);
         if (!sellerId) return;
-
-        if (!req.file) {
-          return res.status(400).json({ error: "Image file is required" });
-        }
+        if (!req.file) return res.status(400).json({ error: "Image file is required" });
 
         const imageUrl = await uploadToCloudinary(req.file, productId);
 
@@ -223,8 +229,7 @@ function installImageRoutes(app) {
           `
           UPDATE products
           SET image = $1
-          WHERE id = $2
-            AND seller_id = $3
+          WHERE id = $2 AND seller_id = $3
           RETURNING id, image
           `,
           [imageUrl, productId, sellerId]
@@ -234,10 +239,7 @@ function installImageRoutes(app) {
           return res.status(404).json({ error: "Seller product not found" });
         }
 
-        return res.json({
-          ok: true,
-          product: result.rows[0]
-        });
+        return res.json({ ok: true, product: result.rows[0] });
       } catch (error) {
         console.error("Seller product image upload:", error);
         return res.status(error.statusCode || 500).json({
@@ -249,15 +251,11 @@ function installImageRoutes(app) {
 
   app.use((error, req, res, next) => {
     if (error && error.code === "LIMIT_FILE_SIZE") {
-      return res.status(413).json({
-        error: "Image must be 5MB or smaller"
-      });
+      return res.status(413).json({ error: "Image must be 5MB or smaller" });
     }
 
     if (error && error.message === "Only JPG, PNG and WEBP images are allowed") {
-      return res.status(400).json({
-        error: error.message
-      });
+      return res.status(400).json({ error: error.message });
     }
 
     next(error);
