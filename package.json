@@ -4,7 +4,7 @@
   "description": "Shrivi Fashion Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node image-upload-bootstrap.js"
   },
   "engines": {
     "node": ">=18"
@@ -13,6 +13,7 @@
     "bcryptjs": "^2.4.3",
     "express": "^4.21.2",
     "express-session": "^1.18.1",
+    "multer": "^2.0.2",
     "pg": "^8.13.1",
     "razorpay": "^2.9.6"
   }
