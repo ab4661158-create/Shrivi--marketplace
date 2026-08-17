@@ -1,8 +1,11 @@
-const CACHE_NAME = "shrivi-v1";
+const CACHE_NAME = "shrivi-v2";
 
 const APP_FILES = [
-  "/",
-  "/manifest.json"
+  "/shop",
+  "/app",
+  "/manifest.json",
+  "/icon-192.png",
+  "/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -26,12 +29,26 @@ self.addEventListener("activate", event => {
 });
 
 self.addEventListener("fetch", event => {
-  if (event.request.method !== "GET") {
+  if (event.request.method !== "GET") return;
+
+  const url = new URL(event.request.url);
+
+  // Never cache API responses: product/order/account data must stay fresh.
+  if (url.pathname.startsWith("/api/")) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
+      .then(response => {
+        if (response && response.ok && url.origin === self.location.origin) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, copy).catch(() => {});
+          });
+        }
+        return response;
+      })
       .catch(() => caches.match(event.request))
   );
 });
