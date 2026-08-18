@@ -1,614 +1,646 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Shrivi Marketplace - Admin</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            background: #f4f6f8;
-            color: #222;
-        }
-
-        button,
-        input,
-        select,
-        textarea {
-            font: inherit;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        /* =========================
-           LOGIN
-        ========================= */
-
-        #loginPage {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #111827, #374151);
-        }
-
-        .login-box {
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 35px;
-            border-radius: 18px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-        }
-
-        .login-box h1 {
-            text-align: center;
-            margin-bottom: 8px;
-            font-size: 30px;
-        }
-
-        .login-box p {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-        }
-
-        .form-group {
-            margin-bottom: 16px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 7px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 12px 13px;
-            border: 1px solid #d1d5db;
-            border-radius: 9px;
-            outline: none;
-            background: #fff;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #111827;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 90px;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 9px;
-            padding: 11px 17px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.2s;
-        }
-
-        .btn:hover {
-            opacity: 0.88;
-        }
-
-        .btn-primary {
-            background: #111827;
-            color: white;
-        }
-
-        .btn-success {
-            background: #15803d;
-            color: white;
-        }
-
-        .btn-danger {
-            background: #dc2626;
-            color: white;
-        }
-
-        .btn-warning {
-            background: #d97706;
-            color: white;
-        }
-
-        .btn-secondary {
-            background: #6b7280;
-            color: white;
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        .error-message {
-            color: #dc2626;
-            margin-top: 12px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .success-message {
-            color: #15803d;
-            margin-top: 12px;
-            text-align: center;
-            font-size: 14px;
-        }
-
-        /* =========================
-           ADMIN
-        ========================= */
-
-        #adminPage {
-            min-height: 100vh;
-        }
-
-        .topbar {
-            background: #111827;
-            color: white;
-            padding: 15px 25px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .topbar h1 {
-            font-size: 23px;
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .admin-badge {
-            background: #374151;
-            padding: 7px 12px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-
-        .logout-btn {
-            background: #dc2626;
-            color: white;
-            border: none;
-            padding: 9px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: auto;
-            padding: 25px;
-        }
-
-        .section {
-            background: white;
-            border-radius: 14px;
-            padding: 22px;
-            margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        }
-
-        .section-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .section-title h2 {
-            font-size: 22px;
-        }
-
-        /* =========================
-           DASHBOARD CARDS
-        ========================= */
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 25px;
-        }
-
-        .dashboard-card {
-            background: white;
-            border-radius: 14px;
-            padding: 22px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-        }
-
-        .dashboard-card .label {
-            color: #6b7280;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .dashboard-card .value {
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        /* =========================
-           PRODUCT FORM
-        ========================= */
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .full-width {
-            grid-column: 1 / -1;
-        }
-
-        .sale-preview {
-            background: #f3f4f6;
-            border-radius: 9px;
-            padding: 12px;
-            margin-top: 7px;
-            font-weight: bold;
-        }
-
-        .product-actions {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 12px;
-        }
-
-        /* =========================
-           PRODUCTS
-        ========================= */
-
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-        }
-
-        .product-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            overflow: hidden;
-            background: white;
-        }
-
-        .product-image {
-            width: 100%;
-            height: 230px;
-            object-fit: cover;
-            background: #f3f4f6;
-        }
-
-        .product-content {
-            padding: 15px;
-        }
-
-        .product-content h3 {
-            margin-bottom: 8px;
-        }
-
-        .product-category {
-            display: inline-block;
-            background: #f3f4f6;
-            padding: 5px 9px;
-            border-radius: 20px;
-            font-size: 12px;
-            margin-bottom: 10px;
-        }
-
-        .price-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
-            margin-bottom: 7px;
-        }
-
-        .original-price {
-            color: #777;
-            text-decoration: line-through;
-        }
-
-        .sale-price {
-            font-size: 19px;
-            font-weight: bold;
-        }
-
-        .discount-badge {
-            color: #15803d;
-            font-weight: bold;
-        }
-
-        .stock-info {
-            margin-top: 8px;
-            color: #555;
-            font-size: 14px;
-        }
-
-        .edit-box {
-            padding: 15px;
-            background: #f9fafb;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        /* =========================
-           ORDERS
-        ========================= */
-
-        .orders-wrapper {
-            overflow-x: auto;
-            width: 100%;
-        }
-
-        .orders-table {
-            width: 100%;
-            border-collapse: collapse;
-            min-width: 1050px;
-        }
-
-        .orders-table th {
-            background: #111827;
-            color: white;
-            text-align: left;
-            padding: 12px;
-            font-size: 13px;
-            white-space: nowrap;
-        }
-
-        .orders-table td {
-            padding: 13px 12px;
-            border-bottom: 1px solid #e5e7eb;
-            vertical-align: top;
-            font-size: 14px;
-        }
-
-        .orders-table tr:hover {
-            background: #f9fafb;
-        }
-
-        .order-id {
-            font-weight: bold;
-        }
-
-        .customer-name {
-            font-weight: bold;
-            margin-bottom: 4px;
-        }
-
-        .customer-phone {
-            color: #555;
-        }
-
-        .address {
-            max-width: 220px;
-            line-height: 1.4;
-        }
-
-        .order-items {
-            min-width: 180px;
-        }
-
-        .order-item {
-            margin-bottom: 7px;
-            padding-bottom: 7px;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .order-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .order-total {
-            font-weight: bold;
-            font-size: 16px;
-        }
-
-        .status-select {
-            padding: 8px;
-            border: 1px solid #d1d5db;
-            border-radius: 7px;
-            min-width: 125px;
-            background: white;
-        }
-
-        .status-action {
-            margin-top: 7px;
-        }
-
-        .status-badge {
-            display: inline-block;
-            padding: 5px 9px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: capitalize;
-        }
-
-        .status-pending {
-            background: #fef3c7;
-            color: #92400e;
-        }
-
-        .status-confirmed {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-
-        .status-shipped {
-            background: #ede9fe;
-            color: #5b21b6;
-        }
-
-        .status-delivered {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .status-cancelled {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 35px;
-            color: #6b7280;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 25px;
-            color: #6b7280;
-        }
-
-        .message-box {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-        }
-
-        .message-success {
-            background: #dcfce7;
-            color: #166534;
-        }
-
-        .message-error {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
-        /* =========================
-           RESPONSIVE
-        ========================= */
-
-        @media (max-width: 1000px) {
-            .products-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .dashboard-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        @media (max-width: 700px) {
-            .topbar {
-                padding: 12px 15px;
-            }
-
-            .topbar h1 {
-                font-size: 18px;
-            }
-
-            .admin-badge {
-                display: none;
-            }
-
-            .container {
-                padding: 15px;
-            }
-
-            .section {
-                padding: 16px;
-            }
-
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .full-width {
-                grid-column: auto;
-            }
-
-            .products-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .product-image {
-                height: 260px;
-            }
-
-            .login-box {
-                padding: 25px 20px;
-            }
-
-            .section-title h2 {
-                font-size: 19px;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Shrivi Marketplace - Admin</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f4f6f8;
+    color:#222;
+}
+
+button,input,select,textarea{
+    font:inherit;
+}
+
+.hidden{
+    display:none!important;
+}
+
+button{
+    cursor:pointer;
+}
+
+.btn{
+    border:0;
+    border-radius:9px;
+    padding:11px 17px;
+    font-weight:bold;
+    transition:.2s;
+}
+
+.btn:hover{
+    opacity:.88;
+}
+
+.btn:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+}
+
+.btn-primary{
+    background:#111827;
+    color:#fff;
+}
+
+.btn-success{
+    background:#15803d;
+    color:#fff;
+}
+
+.btn-danger{
+    background:#dc2626;
+    color:#fff;
+}
+
+.btn-warning{
+    background:#d97706;
+    color:#fff;
+}
+
+.btn-secondary{
+    background:#6b7280;
+    color:#fff;
+}
+
+.btn-full{
+    width:100%;
+}
+
+/* LOGIN */
+
+#loginPage{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    background:linear-gradient(135deg,#111827,#374151);
+}
+
+.login-box{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    padding:35px;
+    border-radius:18px;
+    box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+
+.login-box h1{
+    text-align:center;
+    margin-bottom:8px;
+    font-size:30px;
+}
+
+.login-box p{
+    text-align:center;
+    color:#666;
+    margin-bottom:25px;
+}
+
+/* COMMON FORM */
+
+.form-group{
+    margin-bottom:16px;
+}
+
+.form-group label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+    width:100%;
+    padding:12px 13px;
+    border:1px solid #d1d5db;
+    border-radius:9px;
+    outline:none;
+    background:#fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+    border-color:#111827;
+}
+
+textarea{
+    resize:vertical;
+    min-height:90px;
+}
+
+.error-message{
+    color:#dc2626;
+    margin-top:12px;
+    text-align:center;
+    font-size:14px;
+}
+
+/* ADMIN */
+
+#adminPage{
+    min-height:100vh;
+}
+
+.topbar{
+    background:#111827;
+    color:#fff;
+    padding:15px 25px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.topbar h1{
+    font-size:23px;
+}
+
+.topbar-right{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.admin-badge{
+    background:#374151;
+    padding:7px 12px;
+    border-radius:20px;
+    font-size:13px;
+}
+
+.logout-btn{
+    background:#dc2626;
+    color:#fff;
+    border:0;
+    padding:9px 14px;
+    border-radius:8px;
+    font-weight:bold;
+}
+
+.container{
+    width:100%;
+    max-width:1400px;
+    margin:auto;
+    padding:25px;
+}
+
+.section{
+    background:#fff;
+    border-radius:14px;
+    padding:22px;
+    margin-bottom:25px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+.section-title{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+
+.section-title h2{
+    font-size:22px;
+}
+
+/* DASHBOARD */
+
+.dashboard-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+    margin-bottom:25px;
+}
+
+.dashboard-card{
+    background:#fff;
+    border-radius:14px;
+    padding:22px;
+    box-shadow:0 2px 10px rgba(0,0,0,.06);
+}
+
+.dashboard-card .label{
+    color:#6b7280;
+    font-size:14px;
+    margin-bottom:8px;
+}
+
+.dashboard-card .value{
+    font-size:32px;
+    font-weight:bold;
+}
+
+/* FORM */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:15px;
+}
+
+.full-width{
+    grid-column:1/-1;
+}
+
+.sale-preview{
+    background:#f3f4f6;
+    border-radius:9px;
+    padding:12px;
+    margin-top:7px;
+    font-weight:bold;
+}
+
+/* IMAGE UPLOAD */
+
+.upload-box{
+    border:2px dashed #d1d5db;
+    border-radius:12px;
+    padding:15px;
+    background:#fafafa;
+}
+
+.upload-box input[type=file]{
+    width:100%;
+    padding:10px;
+    border:1px solid #ddd;
+    border-radius:8px;
+    background:#fff;
+}
+
+.upload-help{
+    color:#6b7280;
+    font-size:12px;
+    margin-top:7px;
+}
+
+.image-preview-box{
+    display:none;
+    margin-top:12px;
+    max-width:240px;
+}
+
+.image-preview-box img{
+    width:100%;
+    height:230px;
+    object-fit:cover;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:#f3f4f6;
+}
+
+/* PRODUCTS */
+
+.products-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:18px;
+}
+
+.product-card{
+    border:1px solid #e5e7eb;
+    border-radius:12px;
+    overflow:hidden;
+    background:#fff;
+}
+
+.product-image{
+    width:100%;
+    height:230px;
+    object-fit:cover;
+    background:#f3f4f6;
+}
+
+.no-image{
+    width:100%;
+    height:230px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#777;
+    background:#f3f4f6;
+}
+
+.product-content{
+    padding:15px;
+}
+
+.product-content h3{
+    margin-bottom:8px;
+}
+
+.product-category{
+    display:inline-block;
+    background:#f3f4f6;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    margin-bottom:10px;
+}
+
+.price-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:7px;
+}
+
+.original-price{
+    color:#777;
+    text-decoration:line-through;
+}
+
+.sale-price{
+    font-size:19px;
+    font-weight:bold;
+}
+
+.discount-badge{
+    color:#15803d;
+    font-weight:bold;
+}
+
+.stock-info{
+    margin-top:8px;
+    color:#555;
+    font-size:14px;
+}
+
+.product-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:12px;
+}
+
+.edit-box{
+    padding:15px;
+    background:#f9fafb;
+    border-top:1px solid #e5e7eb;
+}
+
+/* MESSAGES */
+
+.message-box{
+    padding:12px 15px;
+    border-radius:8px;
+    margin-bottom:15px;
+    display:none;
+}
+
+.message-success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.message-error{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+.loading{
+    text-align:center;
+    padding:25px;
+    color:#6b7280;
+}
+
+.empty-state{
+    text-align:center;
+    padding:35px;
+    color:#6b7280;
+}
+
+/* ORDERS */
+
+.orders-wrapper{
+    overflow-x:auto;
+    width:100%;
+}
+
+.orders-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1050px;
+}
+
+.orders-table th{
+    background:#111827;
+    color:#fff;
+    text-align:left;
+    padding:12px;
+    font-size:13px;
+    white-space:nowrap;
+}
+
+.orders-table td{
+    padding:13px 12px;
+    border-bottom:1px solid #e5e7eb;
+    vertical-align:top;
+    font-size:14px;
+}
+
+.orders-table tr:hover{
+    background:#f9fafb;
+}
+
+.order-id{
+    font-weight:bold;
+}
+
+.customer-name{
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+.address{
+    max-width:220px;
+    line-height:1.4;
+}
+
+.order-items{
+    min-width:180px;
+}
+
+.order-item{
+    margin-bottom:7px;
+    padding-bottom:7px;
+    border-bottom:1px dashed #ddd;
+}
+
+.order-item:last-child{
+    border-bottom:0;
+}
+
+.order-total{
+    font-weight:bold;
+    font-size:16px;
+}
+
+.status-select{
+    padding:8px;
+    border:1px solid #d1d5db;
+    border-radius:7px;
+    min-width:125px;
+    background:#fff;
+}
+
+.status-action{
+    margin-top:7px;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+    text-transform:capitalize;
+}
+
+.status-pending{
+    background:#fef3c7;
+    color:#92400e;
+}
+
+.status-confirmed{
+    background:#dbeafe;
+    color:#1e40af;
+}
+
+.status-shipped{
+    background:#ede9fe;
+    color:#5b21b6;
+}
+
+.status-delivered{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.status-cancelled{
+    background:#fee2e2;
+    color:#991b1b;
+}
+
+/* MOBILE */
+
+@media(max-width:1000px){
+
+    .products-grid{
+        grid-template-columns:repeat(2,1fr);
+    }
+}
+
+@media(max-width:700px){
+
+    .topbar{
+        padding:12px 15px;
+    }
+
+    .topbar h1{
+        font-size:18px;
+    }
+
+    .admin-badge{
+        display:none;
+    }
+
+    .container{
+        padding:15px;
+    }
+
+    .section{
+        padding:16px;
+    }
+
+    .dashboard-grid{
+        grid-template-columns:1fr;
+    }
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .full-width{
+        grid-column:auto;
+    }
+
+    .products-grid{
+        grid-template-columns:1fr;
+    }
+
+    .product-image,
+    .no-image{
+        height:260px;
+    }
+
+    .login-box{
+        padding:25px 20px;
+    }
+}
+</style>
 </head>
 
 <body>
 
-<!-- =========================================================
-     LOGIN PAGE
-========================================================= -->
+<!-- =====================================================
+     LOGIN
+===================================================== -->
 
 <div id="loginPage">
 
     <div class="login-box">
 
-        <h1>Shrivi</h1>
+        <h1>SHRIVI</h1>
+
         <p>Marketplace Admin Panel</p>
 
         <form onsubmit="login(event)">
 
             <div class="form-group">
-                <label for="username">Username</label>
+
+                <label>Username</label>
+
                 <input
                     type="text"
                     id="username"
                     autocomplete="username"
                     required
                 >
+
             </div>
 
             <div class="form-group">
-                <label for="password">Password</label>
+
+                <label>Password</label>
+
                 <input
                     type="password"
                     id="password"
                     autocomplete="current-password"
                     required
                 >
+
             </div>
 
             <button
@@ -619,7 +651,10 @@
                 Login
             </button>
 
-            <div id="loginError" class="error-message"></div>
+            <div
+                id="loginError"
+                class="error-message"
+            ></div>
 
         </form>
 
@@ -628,608 +663,576 @@
 </div>
 
 
-<!-- =========================================================
-     ADMIN PAGE
-========================================================= -->
+<!-- =====================================================
+     ADMIN
+===================================================== -->
 
 <div id="adminPage" class="hidden">
 
-    <!-- TOP BAR -->
+<header class="topbar">
 
-    <header class="topbar">
+    <h1>Shrivi Marketplace</h1>
 
-        <h1>Shrivi Marketplace</h1>
+    <div class="topbar-right">
 
-        <div class="topbar-right">
+        <span class="admin-badge">
+            Admin Panel
+        </span>
 
-            <span class="admin-badge">
-                Admin Panel
-            </span>
+        <button
+            class="logout-btn"
+            onclick="logout()"
+        >
+            Logout
+        </button>
 
-            <button
-                class="logout-btn"
-                onclick="logout()"
+    </div>
+
+</header>
+
+
+<main class="container">
+
+<!-- DASHBOARD -->
+
+<div class="dashboard-grid">
+
+    <div class="dashboard-card">
+
+        <div class="label">
+            Products
+        </div>
+
+        <div
+            class="value"
+            id="productsCount"
+        >
+            0
+        </div>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <div class="label">
+            Orders
+        </div>
+
+        <div
+            class="value"
+            id="ordersCount"
+        >
+            0
+        </div>
+
+    </div>
+
+    <div class="dashboard-card">
+
+        <div class="label">
+            Sellers
+        </div>
+
+        <div
+            class="value"
+            id="sellersCount"
+        >
+            0
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     ADD PRODUCT
+===================================================== -->
+
+<section class="section">
+
+<div class="section-title">
+
+    <h2>Add Product</h2>
+
+</div>
+
+<div
+    id="productMessage"
+    class="message-box"
+></div>
+
+
+<form onsubmit="addProduct(event)">
+
+<div class="form-grid">
+
+    <div class="form-group">
+
+        <label>Product Name</label>
+
+        <input
+            type="text"
+            id="productName"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Category</label>
+
+        <select
+            id="productCategory"
+            required
+        >
+
+            <option value="">
+                Select Category
+            </option>
+
+            <option>Fashion</option>
+            <option>Women</option>
+            <option>Men</option>
+            <option>Kids</option>
+            <option>Hoodie</option>
+            <option>Kurti</option>
+            <option>Top</option>
+            <option>Coord Set</option>
+            <option>Jewellery</option>
+            <option>Accessories</option>
+            <option>Electronics</option>
+            <option>Other</option>
+
+        </select>
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Original Price (₹)</label>
+
+        <input
+            type="number"
+            id="productPrice"
+            min="0"
+            step="0.01"
+            oninput="updateAddPreview()"
+            required
+        >
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Discount %</label>
+
+        <input
+            type="number"
+            id="productDiscount"
+            min="0"
+            max="100"
+            step="0.01"
+            value="0"
+            oninput="updateAddPreview()"
+        >
+
+        <div
+            class="sale-preview"
+            id="addSalePreview"
+        >
+            Sale Price: ₹0.00
+        </div>
+
+    </div>
+
+
+    <div class="form-group">
+
+        <label>Stock</label>
+
+        <input
+            type="number"
+            id="productStock"
+            min="0"
+            step="1"
+            value="0"
+            required
+        >
+
+    </div>
+
+
+    <!-- IMAGE UPLOAD -->
+
+    <div class="form-group">
+
+        <label>Product Image</label>
+
+        <div class="upload-box">
+
+            <input
+                type="file"
+                id="productImageFile"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onchange="handleImageUpload(event)"
             >
-                Logout
-            </button>
 
-        </div>
-
-    </header>
-
-
-    <main class="container">
-
-
-        <!-- =================================================
-             DASHBOARD
-        ================================================== -->
-
-        <div class="dashboard-grid">
-
-            <div class="dashboard-card">
-
-                <div class="label">
-                    Products
-                </div>
-
-                <div
-                    class="value"
-                    id="productsCount"
-                >
-                    0
-                </div>
-
+            <div class="upload-help">
+                JPG / PNG / WEBP / GIF • Image automatically compressed
             </div>
-
-
-            <div class="dashboard-card">
-
-                <div class="label">
-                    Orders
-                </div>
-
-                <div
-                    class="value"
-                    id="ordersCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-
-            <div class="dashboard-card">
-
-                <div class="label">
-                    Sellers
-                </div>
-
-                <div
-                    class="value"
-                    id="sellersCount"
-                >
-                    0
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- =================================================
-             ADD PRODUCT
-        ================================================== -->
-
-        <section class="section">
-
-            <div class="section-title">
-
-                <h2>Add Product</h2>
-
-            </div>
-
 
             <div
-                id="productMessage"
-                class="message-box"
-            ></div>
+                id="imageUploadPreview"
+                class="image-preview-box"
+            >
 
-
-            <form onsubmit="addProduct(event)">
-
-                <div class="form-grid">
-
-                    <div class="form-group">
-
-                        <label for="productName">
-                            Product Name
-                        </label>
-
-                        <input
-                            type="text"
-                            id="productName"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="productCategory">
-                            Category
-                        </label>
-
-                        <select
-                            id="productCategory"
-                            required
-                        >
-
-                            <option value="">
-                                Select Category
-                            </option>
-
-                            <option value="Fashion">
-                                Fashion
-                            </option>
-
-                            <option value="Women">
-                                Women
-                            </option>
-
-                            <option value="Men">
-                                Men
-                            </option>
-
-                            <option value="Kids">
-                                Kids
-                            </option>
-
-                            <option value="Hoodie">
-                                Hoodie
-                            </option>
-
-                            <option value="Kurti">
-                                Kurti
-                            </option>
-
-                            <option value="Top">
-                                Top
-                            </option>
-
-                            <option value="Coord Set">
-                                Coord Set
-                            </option>
-
-                            <option value="Other">
-                                Other
-                            </option>
-
-                        </select>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="productPrice">
-                            Original Price (₹)
-                        </label>
-
-                        <input
-                            type="number"
-                            id="productPrice"
-                            min="0"
-                            step="0.01"
-                            oninput="updateAddPreview()"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="productDiscount">
-                            Discount %
-                        </label>
-
-                        <input
-                            type="number"
-                            id="productDiscount"
-                            min="0"
-                            max="100"
-                            step="0.01"
-                            value="0"
-                            oninput="updateAddPreview()"
-                        >
-
-                        <div
-                            class="sale-preview"
-                            id="addSalePreview"
-                        >
-                            Sale Price: ₹0
-                        </div>
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="productStock">
-                            Stock
-                        </label>
-
-                        <input
-                            type="number"
-                            id="productStock"
-                            min="0"
-                            step="1"
-                            value="0"
-                            required
-                        >
-
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <label for="productImage">
-                            Image URL
-                        </label>
-
-                        <input
-                            type="url"
-                            id="productImage"
-                            placeholder="https://..."
-                        >
-
-                    </div>
-
-
-                    <div class="form-group full-width">
-
-                        <label for="productDescription">
-                            Description
-                        </label>
-
-                        <textarea
-                            id="productDescription"
-                            placeholder="Product description..."
-                        ></textarea>
-
-                    </div>
-
-
-                    <div class="full-width">
-
-                        <button
-                            type="submit"
-                            class="btn btn-success"
-                            id="addProductButton"
-                        >
-                            Add Product
-                        </button>
-
-                    </div>
-
-                </div>
-
-            </form>
-
-        </section>
-
-
-        <!-- =================================================
-             PRODUCT MANAGEMENT
-        ================================================== -->
-
-        <section class="section">
-
-            <div class="section-title">
-
-                <h2>Product Management</h2>
+                <img
+                    id="imagePreview"
+                    src=""
+                    alt="Preview"
+                >
 
                 <button
-                    class="btn btn-secondary"
-                    onclick="loadAdminProducts()"
+                    type="button"
+                    class="btn btn-danger"
+                    style="margin-top:8px;width:100%;"
+                    onclick="removeUploadedImage()"
                 >
-                    Refresh Products
+                    Remove Image
                 </button>
 
             </div>
 
+        </div>
 
-            <div id="productsLoading" class="loading">
-                Loading products...
-            </div>
-
-
-            <div
-                id="adminProducts"
-                class="products-grid"
-            ></div>
-
-        </section>
+    </div>
 
 
-        <!-- =================================================
-             ORDER MANAGEMENT
-        ================================================== -->
+    <!-- IMAGE URL -->
 
-        <section class="section">
+    <div class="form-group">
 
-            <div class="section-title">
+        <label>
+            Or Image URL
+        </label>
 
-                <h2>Order Management</h2>
+        <input
+            type="url"
+            id="productImage"
+            placeholder="https://..."
+            oninput="handleImageUrlInput()"
+        >
 
-                <button
-                    class="btn btn-secondary"
-                    onclick="loadOrders()"
-                >
-                    Refresh Orders
-                </button>
-
-            </div>
+    </div>
 
 
-            <div
-                id="orderMessage"
-                class="message-box"
-            ></div>
+    <div class="form-group full-width">
+
+        <label>Description</label>
+
+        <textarea
+            id="productDescription"
+            placeholder="Product description..."
+        ></textarea>
+
+    </div>
 
 
-            <div
-                id="ordersLoading"
-                class="loading"
-            >
-                Loading orders...
-            </div>
+    <div class="full-width">
+
+        <button
+            type="submit"
+            class="btn btn-success"
+            id="addProductButton"
+        >
+            Add Product
+        </button>
+
+    </div>
+
+</div>
+
+</form>
+
+</section>
 
 
-            <div class="orders-wrapper">
+<!-- =====================================================
+     PRODUCTS
+===================================================== -->
 
-                <table class="orders-table">
+<section class="section">
 
-                    <thead>
+<div class="section-title">
 
-                        <tr>
+    <h2>Product Management</h2>
 
-                            <th>
-                                Order No.
-                            </th>
+    <button
+        class="btn btn-secondary"
+        onclick="loadAdminProducts()"
+    >
+        Refresh Products
+    </button>
 
-                            <th>
-                                Customer
-                            </th>
+</div>
 
-                            <th>
-                                Phone
-                            </th>
+<div
+    id="productsLoading"
+    class="loading"
+>
+    Loading products...
+</div>
 
-                            <th>
-                                Address
-                            </th>
+<div
+    id="adminProducts"
+    class="products-grid"
+></div>
 
-                            <th>
-                                Items
-                            </th>
+</section>
 
-                            <th>
-                                Total
-                            </th>
 
-                            <th>
-                                Date
-                            </th>
+<!-- =====================================================
+     ORDERS
+===================================================== -->
 
-                            <th>
-                                Status
-                            </th>
+<section class="section">
 
-                            <th>
-                                Action
-                            </th>
+<div class="section-title">
 
-                        </tr>
+    <h2>Order Management</h2>
 
-                    </thead>
+    <button
+        class="btn btn-secondary"
+        onclick="loadOrders()"
+    >
+        Refresh Orders
+    </button>
 
-                    <tbody id="ordersTableBody">
+</div>
 
-                    </tbody>
+<div
+    id="orderMessage"
+    class="message-box"
+></div>
 
-                </table>
+<div
+    id="ordersLoading"
+    class="loading"
+>
+    Loading orders...
+</div>
 
-            </div>
+<div class="orders-wrapper">
 
-        </section>
+<table class="orders-table">
 
-    </main>
+<thead>
+
+<tr>
+<th>Order No.</th>
+<th>Customer</th>
+<th>Phone</th>
+<th>Address</th>
+<th>Items</th>
+<th>Total</th>
+<th>Date</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="ordersTableBody"></tbody>
+
+</table>
+
+</div>
+
+</section>
+
+</main>
 
 </div>
 
 
 <script>
 
-/* =========================================================
-   GLOBAL DATA
-========================================================= */
+/* =====================================================
+   GLOBAL
+===================================================== */
 
 let adminProducts = [];
 let adminOrders = [];
 
+let uploadedProductImage = "";
 
-/* =========================================================
-   HELPER
-========================================================= */
+const editUploadedImages = {};
 
-async function apiFetch(url, options = {}) {
 
-    const response = await fetch(url, {
-        credentials: "include",
+/* =====================================================
+   API
+===================================================== */
+
+async function apiFetch(url,options={}){
+
+    const response = await fetch(url,{
+        credentials:"include",
         ...options,
-        headers: {
-            "Content-Type": "application/json",
-            ...(options.headers || {})
+        headers:{
+            "Content-Type":"application/json",
+            ...(options.headers||{})
         }
     });
 
-    let data = null;
+    let data=null;
 
-    try {
-        data = await response.json();
-    } catch (error) {
-        data = null;
+    try{
+        data=await response.json();
+    }catch(e){
+        data=null;
     }
 
-    if (!response.ok) {
+    if(!response.ok){
 
-        const message =
+        throw new Error(
             data?.message ||
             data?.error ||
-            `Request failed (${response.status})`;
-
-        throw new Error(message);
+            `Request failed (${response.status})`
+        );
     }
 
     return data;
 }
 
 
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
+/* =====================================================
+   ESCAPE
+===================================================== */
 
-function escapeHTML(value) {
+function escapeHTML(value){
 
-    if (value === null || value === undefined) {
+    if(value===null||value===undefined){
         return "";
     }
 
     return String(value)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
 }
 
-
-function escapeAttribute(value) {
+function escapeAttribute(value){
     return escapeHTML(value);
 }
 
 
-/* =========================================================
+/* =====================================================
    LOGIN
-========================================================= */
+===================================================== */
 
-async function login(event) {
+async function login(event){
 
-    if (event) {
-        event.preventDefault();
-    }
+    event.preventDefault();
 
-    const username =
+    const username=
         document.getElementById("username").value.trim();
 
-    const password =
+    const password=
         document.getElementById("password").value;
 
-    const errorBox =
+    const errorBox=
         document.getElementById("loginError");
 
-    const button =
+    const button=
         document.getElementById("loginButton");
 
-    errorBox.textContent = "";
+    errorBox.textContent="";
 
-    button.disabled = true;
-    button.textContent = "Logging in...";
+    button.disabled=true;
+    button.textContent="Logging in...";
 
-    try {
+    try{
 
-        await apiFetch("/api/login", {
-            method: "POST",
-            body: JSON.stringify({
+        await apiFetch("/api/login",{
+            method:"POST",
+            body:JSON.stringify({
                 username,
                 password
             })
         });
 
-        document
-            .getElementById("loginPage")
-            .classList.add("hidden");
-
-        document
-            .getElementById("adminPage")
-            .classList.remove("hidden");
+        showAdmin();
 
         await loadDashboard();
-
         await loadAdminProducts();
-
         await loadOrders();
 
-    } catch (error) {
+    }catch(error){
 
-        errorBox.textContent =
-            error.message || "Login failed";
+        errorBox.textContent=
+            error.message||"Login failed.";
 
-    } finally {
+    }finally{
 
-        button.disabled = false;
-        button.textContent = "Login";
+        button.disabled=false;
+        button.textContent="Login";
     }
 }
 
 
-/* =========================================================
+/* =====================================================
+   SHOW ADMIN
+===================================================== */
+
+function showAdmin(){
+
+    document
+        .getElementById("loginPage")
+        .classList.add("hidden");
+
+    document
+        .getElementById("adminPage")
+        .classList.remove("hidden");
+}
+
+
+/* =====================================================
    CHECK LOGIN
-========================================================= */
+===================================================== */
 
-async function checkLogin() {
+async function checkLogin(){
 
-    try {
+    try{
 
-        const data = await apiFetch("/api/me");
+        const data=
+            await apiFetch("/api/me");
 
-        if (
+        if(
             data &&
             (
-                data.loggedIn === true ||
-                data.authenticated === true ||
-                data.isAdmin === true ||
+                data.loggedIn===true ||
+                data.authenticated===true ||
+                data.isAdmin===true ||
                 data.user
             )
-        ) {
+        ){
 
-            document
-                .getElementById("loginPage")
-                .classList.add("hidden");
-
-            document
-                .getElementById("adminPage")
-                .classList.remove("hidden");
+            showAdmin();
 
             await loadDashboard();
             await loadAdminProducts();
             await loadOrders();
 
-        } else {
-
-            document
-                .getElementById("loginPage")
-                .classList.remove("hidden");
-
-            document
-                .getElementById("adminPage")
-                .classList.add("hidden");
         }
 
-    } catch (error) {
+    }catch(error){
 
         document
             .getElementById("loginPage")
@@ -1242,180 +1245,408 @@ async function checkLogin() {
 }
 
 
-/* =========================================================
+/* =====================================================
    DASHBOARD
-========================================================= */
+===================================================== */
 
-async function loadDashboard() {
+async function loadDashboard(){
 
-    try {
+    try{
 
-        const data =
+        const data=
             await apiFetch("/api/dashboard");
 
-        const productsCount =
+        document.getElementById("productsCount")
+            .textContent=
             data?.products ??
             data?.productCount ??
             data?.productsCount ??
             data?.counts?.products ??
             0;
 
-        const ordersCount =
+        document.getElementById("ordersCount")
+            .textContent=
             data?.orders ??
             data?.orderCount ??
             data?.ordersCount ??
             data?.counts?.orders ??
             0;
 
-        const sellersCount =
+        document.getElementById("sellersCount")
+            .textContent=
             data?.sellers ??
             data?.sellerCount ??
             data?.sellersCount ??
             data?.counts?.sellers ??
             0;
 
-        document.getElementById("productsCount").textContent =
-            productsCount;
+    }catch(error){
 
-        document.getElementById("ordersCount").textContent =
-            ordersCount;
+        console.error("Dashboard:",error);
+    }
+}
 
-        document.getElementById("sellersCount").textContent =
-            sellersCount;
 
-    } catch (error) {
+/* =====================================================
+   SALE PRICE
+===================================================== */
 
-        console.error(
-            "Dashboard error:",
-            error
+function calculateSalePrice(price,discount){
+
+    const p=Number(price)||0;
+    const d=Number(discount)||0;
+
+    return Math.max(
+        0,
+        p-(p*d/100)
+    );
+}
+
+function updateAddPreview(){
+
+    const price=
+        document.getElementById("productPrice").value;
+
+    const discount=
+        document.getElementById("productDiscount").value;
+
+    const sale=
+        calculateSalePrice(price,discount);
+
+    document.getElementById("addSalePreview")
+        .textContent=
+        `Sale Price: ₹${sale.toFixed(2)}`;
+}
+
+
+/* =====================================================
+   MESSAGE
+===================================================== */
+
+function showProductMessage(message,type="success"){
+
+    const box=
+        document.getElementById("productMessage");
+
+    box.textContent=message;
+
+    box.className=
+        "message-box "+
+        (
+            type==="error"
+            ?"message-error"
+            :"message-success"
+        );
+
+    box.style.display="block";
+
+    setTimeout(()=>{
+        box.style.display="none";
+    },3500);
+}
+
+
+function showOrderMessage(message,type="success"){
+
+    const box=
+        document.getElementById("orderMessage");
+
+    box.textContent=message;
+
+    box.className=
+        "message-box "+
+        (
+            type==="error"
+            ?"message-error"
+            :"message-success"
+        );
+
+    box.style.display="block";
+
+    setTimeout(()=>{
+        box.style.display="none";
+    },3500);
+}
+
+
+/* =====================================================
+   IMAGE COMPRESSION
+===================================================== */
+
+function compressImage(
+    file,
+    maxWidth=1200,
+    quality=.82
+){
+
+    return new Promise((resolve,reject)=>{
+
+        if(!file){
+            reject(new Error("No image selected."));
+            return;
+        }
+
+        if(!file.type.startsWith("image/")){
+            reject(new Error("Please select a valid image."));
+            return;
+        }
+
+        const reader=new FileReader();
+
+        reader.onload=function(event){
+
+            const img=new Image();
+
+            img.onload=function(){
+
+                let width=img.width;
+                let height=img.height;
+
+                if(width>maxWidth){
+
+                    height=Math.round(
+                        height*maxWidth/width
+                    );
+
+                    width=maxWidth;
+                }
+
+                const canvas=
+                    document.createElement("canvas");
+
+                canvas.width=width;
+                canvas.height=height;
+
+                const ctx=
+                    canvas.getContext("2d");
+
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+                const result=
+                    canvas.toDataURL(
+                        "image/jpeg",
+                        quality
+                    );
+
+                resolve(result);
+            };
+
+            img.onerror=function(){
+
+                reject(
+                    new Error("Unable to read image.")
+                );
+            };
+
+            img.src=event.target.result;
+        };
+
+        reader.onerror=function(){
+
+            reject(
+                new Error("Unable to read selected file.")
+            );
+        };
+
+        reader.readAsDataURL(file);
+    });
+}
+
+
+/* =====================================================
+   ADD IMAGE UPLOAD
+===================================================== */
+
+async function handleImageUpload(event){
+
+    const file=
+        event.target.files?.[0];
+
+    if(!file){
+        return;
+    }
+
+    try{
+
+        showProductMessage(
+            "Processing image..."
+        );
+
+        uploadedProductImage=
+            await compressImage(file);
+
+        const preview=
+            document.getElementById("imagePreview");
+
+        preview.src=
+            uploadedProductImage;
+
+        document
+            .getElementById("imageUploadPreview")
+            .style.display="block";
+
+        document
+            .getElementById("productImage")
+            .value="";
+
+        showProductMessage(
+            "Image ready. Now click Add Product."
+        );
+
+    }catch(error){
+
+        uploadedProductImage="";
+
+        event.target.value="";
+
+        document
+            .getElementById("imageUploadPreview")
+            .style.display="none";
+
+        showProductMessage(
+            error.message||
+            "Image processing failed.",
+            "error"
         );
     }
 }
 
 
-/* =========================================================
-   SALE PRICE
-========================================================= */
+/* =====================================================
+   IMAGE URL
+===================================================== */
 
-function calculateSalePrice(price, discount) {
+function handleImageUrlInput(){
 
-    const original =
-        Number(price) || 0;
+    const url=
+        document
+            .getElementById("productImage")
+            .value.trim();
 
-    const discountPercent =
-        Number(discount) || 0;
+    if(!url){
+        return;
+    }
 
-    const sale =
-        original -
-        (
-            original *
-            discountPercent /
-            100
-        );
+    uploadedProductImage="";
 
-    return Math.max(0, sale);
+    document
+        .getElementById("productImageFile")
+        .value="";
+
+    const preview=
+        document.getElementById("imagePreview");
+
+    preview.src=url;
+
+    document
+        .getElementById("imageUploadPreview")
+        .style.display="block";
 }
 
 
-function updateAddPreview() {
+/* =====================================================
+   REMOVE IMAGE
+===================================================== */
 
-    const price =
-        document.getElementById("productPrice").value;
+function removeUploadedImage(){
 
-    const discount =
-        document.getElementById("productDiscount").value;
+    uploadedProductImage="";
 
-    const salePrice =
-        calculateSalePrice(
-            price,
-            discount
-        );
+    document
+        .getElementById("productImageFile")
+        .value="";
 
-    document.getElementById("addSalePreview")
-        .textContent =
-        `Sale Price: ₹${salePrice.toFixed(2)}`;
+    document
+        .getElementById("productImage")
+        .value="";
+
+    document
+        .getElementById("imagePreview")
+        .src="";
+
+    document
+        .getElementById("imageUploadPreview")
+        .style.display="none";
 }
 
 
-/* =========================================================
-   PRODUCT MESSAGE
-========================================================= */
-
-function showProductMessage(message, type = "success") {
-
-    const box =
-        document.getElementById("productMessage");
-
-    box.textContent = message;
-
-    box.className =
-        "message-box " +
-        (
-            type === "error"
-                ? "message-error"
-                : "message-success"
-        );
-
-    box.style.display = "block";
-
-    setTimeout(() => {
-        box.style.display = "none";
-    }, 3500);
-}
-
-
-/* =========================================================
+/* =====================================================
    ADD PRODUCT
-========================================================= */
+===================================================== */
 
-async function addProduct(event) {
+async function addProduct(event){
 
     event.preventDefault();
 
-    const button =
+    const button=
         document.getElementById("addProductButton");
 
-    button.disabled = true;
-    button.textContent = "Adding...";
+    button.disabled=true;
+    button.textContent="Adding...";
 
-    const name =
-        document.getElementById("productName").value.trim();
+    const name=
+        document
+            .getElementById("productName")
+            .value.trim();
 
-    const price =
+    const price=
         Number(
-            document.getElementById("productPrice").value
+            document
+                .getElementById("productPrice")
+                .value
         );
 
-    const discount =
+    const discount=
         Number(
-            document.getElementById("productDiscount").value
-        ) || 0;
+            document
+                .getElementById("productDiscount")
+                .value
+        )||0;
 
-    const stock =
+    const stock=
         Number(
-            document.getElementById("productStock").value
-        ) || 0;
+            document
+                .getElementById("productStock")
+                .value
+        )||0;
 
-    const category =
-        document.getElementById("productCategory").value;
+    const category=
+        document
+            .getElementById("productCategory")
+            .value;
 
-    const image =
-        document.getElementById("productImage").value.trim();
+    const imageUrl=
+        document
+            .getElementById("productImage")
+            .value.trim();
 
-    const description =
-        document.getElementById("productDescription").value.trim();
+    const image=
+        uploadedProductImage||
+        imageUrl||
+        "";
 
-    const salePrice =
+    const description=
+        document
+            .getElementById("productDescription")
+            .value.trim();
+
+    const salePrice=
         calculateSalePrice(
             price,
             discount
         );
 
-    try {
+    try{
 
-        await apiFetch("/api/products", {
-            method: "POST",
-            body: JSON.stringify({
+        await apiFetch("/api/products",{
+            method:"POST",
+            body:JSON.stringify({
 
                 name,
                 price,
@@ -1423,39 +1654,41 @@ async function addProduct(event) {
                 image,
                 description,
                 stock,
-                discount_percent: discount,
-                sale_price: salePrice
+                discount_percent:discount,
+                sale_price:salePrice
 
             })
         });
 
         document
             .getElementById("productName")
-            .value = "";
+            .value="";
 
         document
             .getElementById("productPrice")
-            .value = "";
+            .value="";
 
         document
             .getElementById("productDiscount")
-            .value = "0";
+            .value="0";
 
         document
             .getElementById("productStock")
-            .value = "0";
+            .value="0";
 
         document
             .getElementById("productCategory")
-            .value = "";
+            .value="";
 
         document
             .getElementById("productImage")
-            .value = "";
+            .value="";
 
         document
             .getElementById("productDescription")
-            .value = "";
+            .value="";
+
+        removeUploadedImage();
 
         updateAddPreview();
 
@@ -1466,84 +1699,82 @@ async function addProduct(event) {
         await loadAdminProducts();
         await loadDashboard();
 
-    } catch (error) {
+    }catch(error){
 
         console.error(error);
 
         showProductMessage(
-            error.message || "Product add failed.",
+            error.message||
+            "Product add failed.",
             "error"
         );
 
-    } finally {
+    }finally{
 
-        button.disabled = false;
-        button.textContent = "Add Product";
+        button.disabled=false;
+        button.textContent="Add Product";
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    LOAD PRODUCTS
-========================================================= */
+===================================================== */
 
-async function loadAdminProducts() {
+async function loadAdminProducts(){
 
-    const loading =
+    const loading=
         document.getElementById("productsLoading");
 
-    const container =
+    const container=
         document.getElementById("adminProducts");
 
-    loading.style.display = "block";
+    loading.style.display="block";
 
-    try {
+    try{
 
-        const data =
+        const data=
             await apiFetch("/api/products");
 
-        if (Array.isArray(data)) {
-            adminProducts = data;
-        } else if (Array.isArray(data?.products)) {
-            adminProducts = data.products;
-        } else {
-            adminProducts = [];
+        if(Array.isArray(data)){
+            adminProducts=data;
+        }else if(Array.isArray(data?.products)){
+            adminProducts=data.products;
+        }else{
+            adminProducts=[];
         }
 
         renderAdminProducts();
 
-    } catch (error) {
+    }catch(error){
 
-        console.error(
-            "Products error:",
-            error
-        );
+        console.error(error);
 
-        container.innerHTML = `
+        container.innerHTML=`
             <div class="empty-state">
                 Unable to load products.
             </div>
         `;
 
-    } finally {
+    }finally{
 
-        loading.style.display = "none";
+        loading.style.display="none";
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    RENDER PRODUCTS
-========================================================= */
+===================================================== */
 
-function renderAdminProducts() {
+function renderAdminProducts(){
 
-    const container =
+    const container=
         document.getElementById("adminProducts");
 
-    if (!adminProducts.length) {
+    if(!adminProducts.length){
 
-        container.innerHTML = `
+        container.innerHTML=`
             <div class="empty-state">
                 No products found.
             </div>
@@ -1552,427 +1783,498 @@ function renderAdminProducts() {
         return;
     }
 
-    container.innerHTML =
-        adminProducts.map(product => {
+    container.innerHTML=
+        adminProducts.map(product=>{
 
-            const id =
-                product.id;
+            const id=Number(product.id);
 
-            const name =
+            const name=
                 escapeHTML(product.name);
 
-            const category =
-                escapeHTML(product.category || "");
+            const category=
+                escapeHTML(product.category||"");
 
-            const image =
-                escapeAttribute(
-                    product.image || ""
-                );
+            const image=
+                product.image||"";
 
-            const description =
-                escapeHTML(
-                    product.description || ""
-                );
+            const description=
+                escapeHTML(product.description||"");
 
-            const price =
-                Number(product.price) || 0;
+            const price=
+                Number(product.price)||0;
 
-            const discount =
-                Number(
-                    product.discount_percent
-                ) || 0;
+            const discount=
+                Number(product.discount_percent)||0;
 
-            const salePrice =
+            const salePrice=
                 calculateSalePrice(
                     price,
                     discount
                 );
 
-            const stock =
-                Number(product.stock) || 0;
+            const stock=
+                Number(product.stock)||0;
 
             return `
 
-                <div class="product-card">
+<div class="product-card">
 
-                    ${
-                        image
-                        ?
-                        `
-                        <img
-                            src="${image}"
-                            class="product-image"
-                            alt="${name}"
-                            onerror="this.style.display='none'"
-                        >
-                        `
-                        :
-                        `
-                        <div
-                            class="product-image"
-                            style="
-                                display:flex;
-                                align-items:center;
-                                justify-content:center;
-                                color:#777;
-                            "
-                        >
-                            No Image
-                        </div>
-                        `
-                    }
+${
+image
+?
+`
+<img
+    src="${escapeAttribute(image)}"
+    class="product-image"
+    alt="${escapeAttribute(name)}"
+    onerror="
+        this.style.display='none';
+        this.nextElementSibling.style.display='flex';
+    "
+>
 
-                    <div class="product-content">
+<div
+    class="no-image"
+    style="display:none"
+>
+    No Image
+</div>
+`
+:
+`
+<div class="no-image">
+    No Image
+</div>
+`
+}
 
-                        <span class="product-category">
-                            ${category || "Uncategorized"}
-                        </span>
+<div class="product-content">
 
-                        <h3>
-                            ${name}
-                        </h3>
+<span class="product-category">
+    ${category||"Uncategorized"}
+</span>
 
-                        <div class="price-row">
+<h3>${name}</h3>
 
-                            <span class="original-price">
-                                ₹${price.toFixed(2)}
-                            </span>
+<div class="price-row">
 
-                            <span class="sale-price">
-                                ₹${salePrice.toFixed(2)}
-                            </span>
+<span class="original-price">
+    ₹${price.toFixed(2)}
+</span>
 
-                            ${
-                                discount > 0
-                                ?
-                                `
-                                <span class="discount-badge">
-                                    ${discount}% OFF
-                                </span>
-                                `
-                                :
-                                ""
-                            }
+<span class="sale-price">
+    ₹${salePrice.toFixed(2)}
+</span>
 
-                        </div>
+${
+discount>0
+?
+`
+<span class="discount-badge">
+    ${discount}% OFF
+</span>
+`
+:
+""
+}
 
-                        <div class="stock-info">
-                            Stock: ${stock}
-                        </div>
+</div>
 
-                        ${
-                            description
-                            ?
-                            `
-                            <p
-                                style="
-                                    margin-top:8px;
-                                    color:#666;
-                                    line-height:1.4;
-                                "
-                            >
-                                ${description}
-                            </p>
-                            `
-                            :
-                            ""
-                        }
+<div class="stock-info">
+    Stock: ${stock}
+</div>
 
-                        <div class="product-actions">
+${
+description
+?
+`
+<p style="
+    margin-top:8px;
+    color:#666;
+    line-height:1.4;
+">
+${description}
+</p>
+`
+:
+""
+}
 
-                            <button
-                                class="btn btn-warning"
-                                onclick="toggleEdit(${id})"
-                            >
-                                Edit Product
-                            </button>
+<div class="product-actions">
 
-                            <button
-                                class="btn btn-danger"
-                                onclick="deleteProduct(${id})"
-                            >
-                                Delete
-                            </button>
+<button
+    class="btn btn-warning"
+    onclick="toggleEdit(${id})"
+>
+    Edit Product
+</button>
 
-                        </div>
+<button
+    class="btn btn-danger"
+    onclick="deleteProduct(${id})"
+>
+    Delete
+</button>
 
-                    </div>
+</div>
+
+</div>
 
 
-                    <div
-                        id="edit-${id}"
-                        class="edit-box hidden"
-                    >
+<!-- EDIT -->
 
-                        <div class="form-group">
+<div
+    id="edit-${id}"
+    class="edit-box hidden"
+>
 
-                            <label>
-                                Product Name
-                            </label>
+<div class="form-group">
 
-                            <input
-                                type="text"
-                                id="edit-name-${id}"
-                                value="${escapeAttribute(product.name || "")}"
-                            >
+<label>Product Name</label>
 
-                        </div>
+<input
+    type="text"
+    id="edit-name-${id}"
+    value="${escapeAttribute(product.name||"")}"
+>
 
-
-                        <div class="form-group">
-
-                            <label>
-                                Original Price
-                            </label>
-
-                            <input
-                                type="number"
-                                id="edit-price-${id}"
-                                min="0"
-                                step="0.01"
-                                value="${price}"
-                                oninput="updateEditPreview(${id})"
-                            >
-
-                        </div>
+</div>
 
 
-                        <div class="form-group">
+<div class="form-group">
 
-                            <label>
-                                Discount %
-                            </label>
+<label>Original Price</label>
 
-                            <input
-                                type="number"
-                                id="edit-discount-${id}"
-                                min="0"
-                                max="100"
-                                step="0.01"
-                                value="${discount}"
-                                oninput="updateEditPreview(${id})"
-                            >
+<input
+    type="number"
+    id="edit-price-${id}"
+    min="0"
+    step="0.01"
+    value="${price}"
+    oninput="updateEditPreview(${id})"
+>
 
-                        </div>
+</div>
 
 
-                        <div
-                            class="sale-preview"
-                            id="edit-preview-${id}"
-                        >
-                            Sale Price: ₹${salePrice.toFixed(2)}
-                        </div>
+<div class="form-group">
+
+<label>Discount %</label>
+
+<input
+    type="number"
+    id="edit-discount-${id}"
+    min="0"
+    max="100"
+    step="0.01"
+    value="${discount}"
+    oninput="updateEditPreview(${id})"
+>
+
+<div
+    class="sale-preview"
+    id="edit-preview-${id}"
+>
+Sale Price: ₹${salePrice.toFixed(2)}
+</div>
+
+</div>
 
 
-                        <div class="form-group">
+<div class="form-group">
 
-                            <label>
-                                Stock
-                            </label>
+<label>Stock</label>
 
-                            <input
-                                type="number"
-                                id="edit-stock-${id}"
-                                min="0"
-                                step="1"
-                                value="${stock}"
-                            >
+<input
+    type="number"
+    id="edit-stock-${id}"
+    min="0"
+    step="1"
+    value="${stock}"
+>
 
-                        </div>
+</div>
 
 
-                        <div class="form-group">
+<div class="form-group">
 
-                            <label>
-                                Category
-                            </label>
+<label>Category</label>
 
-                            <input
-                                type="text"
-                                id="edit-category-${id}"
-                                value="${escapeAttribute(product.category || "")}"
-                            >
+<input
+    type="text"
+    id="edit-category-${id}"
+    value="${escapeAttribute(product.category||"")}"
+>
 
-                        </div>
+</div>
 
 
-                        <div class="form-group">
+<!-- EDIT IMAGE -->
 
-                            <label>
-                                Image URL
-                            </label>
+<div class="form-group">
 
-                            <input
-                                type="url"
-                                id="edit-image-${id}"
-                                value="${escapeAttribute(product.image || "")}"
-                            >
+<label>Product Image</label>
 
-                        </div>
+<div class="upload-box">
+
+<input
+    type="file"
+    id="edit-image-file-${id}"
+    accept="image/jpeg,image/png,image/webp,image/gif"
+    onchange="handleEditImageUpload(event,${id})"
+>
+
+<div class="upload-help">
+    Select new image to replace current image.
+</div>
+
+<div
+    id="edit-image-preview-${id}"
+    class="image-preview-box"
+    style="
+        display:${image?"block":"none"};
+        max-width:200px;
+    "
+>
+
+<img
+    id="edit-preview-img-${id}"
+    src="${escapeAttribute(image)}"
+    alt="Product"
+>
+
+</div>
+
+</div>
+
+<input
+    type="url"
+    id="edit-image-${id}"
+    value="${escapeAttribute(image)}"
+    placeholder="Or enter image URL"
+    style="margin-top:8px;width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px;"
+>
+
+</div>
 
 
-                        <div class="form-group">
+<div class="form-group">
 
-                            <label>
-                                Description
-                            </label>
+<label>Description</label>
 
-                            <textarea
-                                id="edit-description-${id}"
-                            >${description}</textarea>
+<textarea
+    id="edit-description-${id}"
+>${description}</textarea>
 
-                        </div>
+</div>
 
 
-                        <div class="product-actions">
+<div class="product-actions">
 
-                            <button
-                                class="btn btn-success"
-                                onclick="saveProduct(${id})"
-                            >
-                                Save Product
-                            </button>
+<button
+    class="btn btn-success"
+    onclick="saveProduct(${id})"
+>
+    Save Product
+</button>
 
-                            <button
-                                class="btn btn-secondary"
-                                onclick="toggleEdit(${id})"
-                            >
-                                Cancel
-                            </button>
+<button
+    class="btn btn-secondary"
+    onclick="toggleEdit(${id})"
+>
+    Cancel
+</button>
 
-                        </div>
+</div>
 
-                    </div>
+</div>
 
-                </div>
+</div>
 
-            `;
+`;
 
         }).join("");
 }
 
 
-/* =========================================================
-   TOGGLE EDIT
-========================================================= */
+/* =====================================================
+   EDIT IMAGE
+===================================================== */
 
-function toggleEdit(id) {
+async function handleEditImageUpload(event,id){
 
-    const box =
-        document.getElementById(`edit-${id}`);
+    const file=
+        event.target.files?.[0];
 
-    if (!box) {
+    if(!file){
         return;
     }
 
-    box.classList.toggle("hidden");
+    try{
+
+        const compressed=
+            await compressImage(file);
+
+        editUploadedImages[id]=
+            compressed;
+
+        const preview=
+            document.getElementById(
+                `edit-preview-img-${id}`
+            );
+
+        const previewBox=
+            document.getElementById(
+                `edit-image-preview-${id}`
+            );
+
+        preview.src=compressed;
+
+        preview.style.display="block";
+
+        previewBox.style.display="block";
+
+        document
+            .getElementById(`edit-image-${id}`)
+            .value="";
+
+    }catch(error){
+
+        event.target.value="";
+
+        alert(
+            error.message||
+            "Image upload failed."
+        );
+    }
 }
 
 
-/* =========================================================
-   UPDATE EDIT PREVIEW
-========================================================= */
+/* =====================================================
+   TOGGLE EDIT
+===================================================== */
 
-function updateEditPreview(id) {
+function toggleEdit(id){
 
-    const price =
+    const box=
+        document.getElementById(`edit-${id}`);
+
+    if(box){
+        box.classList.toggle("hidden");
+    }
+}
+
+
+/* =====================================================
+   EDIT PREVIEW
+===================================================== */
+
+function updateEditPreview(id){
+
+    const price=
         document.getElementById(
             `edit-price-${id}`
-        )?.value || 0;
+        )?.value||0;
 
-    const discount =
+    const discount=
         document.getElementById(
             `edit-discount-${id}`
-        )?.value || 0;
+        )?.value||0;
 
-    const salePrice =
+    const sale=
         calculateSalePrice(
             price,
             discount
         );
 
-    const preview =
+    const preview=
         document.getElementById(
             `edit-preview-${id}`
         );
 
-    if (preview) {
+    if(preview){
 
-        preview.textContent =
-            `Sale Price: ₹${salePrice.toFixed(2)}`;
+        preview.textContent=
+            `Sale Price: ₹${sale.toFixed(2)}`;
     }
 }
 
 
-/* =========================================================
+/* =====================================================
    SAVE PRODUCT
-========================================================= */
+===================================================== */
 
-async function saveProduct(id) {
+async function saveProduct(id){
 
-    const product =
+    const product=
         adminProducts.find(
-            item => Number(item.id) === Number(id)
+            item=>Number(item.id)===Number(id)
         );
 
-    if (!product) {
+    if(!product){
         return;
     }
 
-    const name =
-        document.getElementById(
-            `edit-name-${id}`
-        ).value.trim();
+    const name=
+        document
+            .getElementById(`edit-name-${id}`)
+            .value.trim();
 
-    const price =
+    const price=
         Number(
-            document.getElementById(
-                `edit-price-${id}`
-            ).value
+            document
+                .getElementById(`edit-price-${id}`)
+                .value
         );
 
-    const discount =
+    const discount=
         Number(
-            document.getElementById(
-                `edit-discount-${id}`
-            ).value
-        ) || 0;
+            document
+                .getElementById(`edit-discount-${id}`)
+                .value
+        )||0;
 
-    const stock =
+    const stock=
         Number(
-            document.getElementById(
-                `edit-stock-${id}`
-            ).value
-        ) || 0;
+            document
+                .getElementById(`edit-stock-${id}`)
+                .value
+        )||0;
 
-    const category =
-        document.getElementById(
-            `edit-category-${id}`
-        ).value.trim();
+    const category=
+        document
+            .getElementById(`edit-category-${id}`)
+            .value.trim();
 
-    const image =
-        document.getElementById(
-            `edit-image-${id}`
-        ).value.trim();
+    const imageUrl=
+        document
+            .getElementById(`edit-image-${id}`)
+            .value.trim();
 
-    const description =
-        document.getElementById(
-            `edit-description-${id}`
-        ).value.trim();
+    const image=
+        editUploadedImages[id]||
+        imageUrl||
+        product.image||
+        "";
 
-    const salePrice =
+    const description=
+        document
+            .getElementById(`edit-description-${id}`)
+            .value.trim();
+
+    const salePrice=
         calculateSalePrice(
             price,
             discount
         );
 
-    try {
+    try{
 
         await apiFetch(
             `/api/products/${id}`,
             {
-                method: "PUT",
-                body: JSON.stringify({
+                method:"PUT",
+                body:JSON.stringify({
 
                     name,
                     price,
@@ -1980,12 +2282,14 @@ async function saveProduct(id) {
                     image,
                     description,
                     stock,
-                    discount_percent: discount,
-                    sale_price: salePrice
+                    discount_percent:discount,
+                    sale_price:salePrice
 
                 })
             }
         );
+
+        delete editUploadedImages[id];
 
         showProductMessage(
             "Product updated successfully."
@@ -1994,12 +2298,12 @@ async function saveProduct(id) {
         await loadAdminProducts();
         await loadDashboard();
 
-    } catch (error) {
+    }catch(error){
 
         console.error(error);
 
         showProductMessage(
-            error.message ||
+            error.message||
             "Product update failed.",
             "error"
         );
@@ -2007,35 +2311,35 @@ async function saveProduct(id) {
 }
 
 
-/* =========================================================
-   DELETE PRODUCT
-========================================================= */
+/* =====================================================
+   DELETE
+===================================================== */
 
-async function deleteProduct(id) {
+async function deleteProduct(id){
 
-    const product =
+    const product=
         adminProducts.find(
-            item => Number(item.id) === Number(id)
+            item=>Number(item.id)===Number(id)
         );
 
-    const productName =
-        product?.name || "this product";
+    const name=
+        product?.name||
+        "this product";
 
-    const confirmed =
-        confirm(
-            `Are you sure you want to delete "${productName}"?`
-        );
-
-    if (!confirmed) {
+    if(
+        !confirm(
+            `Are you sure you want to delete "${name}"?`
+        )
+    ){
         return;
     }
 
-    try {
+    try{
 
         await apiFetch(
             `/api/products/${id}`,
             {
-                method: "DELETE"
+                method:"DELETE"
             }
         );
 
@@ -2046,12 +2350,10 @@ async function deleteProduct(id) {
         await loadAdminProducts();
         await loadDashboard();
 
-    } catch (error) {
-
-        console.error(error);
+    }catch(error){
 
         showProductMessage(
-            error.message ||
+            error.message||
             "Product delete failed.",
             "error"
         );
@@ -2059,75 +2361,40 @@ async function deleteProduct(id) {
 }
 
 
-/* =========================================================
-   ORDER MESSAGE
-========================================================= */
-
-function showOrderMessage(message, type = "success") {
-
-    const box =
-        document.getElementById("orderMessage");
-
-    box.textContent = message;
-
-    box.className =
-        "message-box " +
-        (
-            type === "error"
-                ? "message-error"
-                : "message-success"
-        );
-
-    box.style.display = "block";
-
-    setTimeout(() => {
-        box.style.display = "none";
-    }, 3500);
-}
-
-
-/* =========================================================
+/* =====================================================
    LOAD ORDERS
-========================================================= */
+===================================================== */
 
-async function loadOrders() {
+async function loadOrders(){
 
-    const loading =
+    const loading=
         document.getElementById("ordersLoading");
 
-    const tbody =
+    const tbody=
         document.getElementById("ordersTableBody");
 
-    loading.style.display = "block";
+    loading.style.display="block";
 
-    try {
+    try{
 
-        const data =
+        const data=
             await apiFetch("/api/orders");
 
-        if (Array.isArray(data)) {
-
-            adminOrders = data;
-
-        } else if (Array.isArray(data?.orders)) {
-
-            adminOrders = data.orders;
-
-        } else {
-
-            adminOrders = [];
+        if(Array.isArray(data)){
+            adminOrders=data;
+        }else if(Array.isArray(data?.orders)){
+            adminOrders=data.orders;
+        }else{
+            adminOrders=[];
         }
 
         renderOrders();
 
-    } catch (error) {
+    }catch(error){
 
-        console.error(
-            "Orders error:",
-            error
-        );
+        console.error(error);
 
-        tbody.innerHTML = `
+        tbody.innerHTML=`
             <tr>
                 <td
                     colspan="9"
@@ -2138,40 +2405,39 @@ async function loadOrders() {
             </tr>
         `;
 
-    } finally {
+    }finally{
 
-        loading.style.display = "none";
+        loading.style.display="none";
     }
 }
 
 
-/* =========================================================
-   ORDER ITEMS NORMALIZER
-========================================================= */
+/* =====================================================
+   ORDER ITEMS
+===================================================== */
 
-function getOrderItems(order) {
+function getOrderItems(order){
 
-    let items =
-        order?.items;
+    let items=order?.items;
 
-    if (!items) {
+    if(!items){
         return [];
     }
 
-    if (typeof items === "string") {
+    if(typeof items==="string"){
 
-        try {
-            items = JSON.parse(items);
-        } catch (error) {
+        try{
+            items=JSON.parse(items);
+        }catch(e){
             return [];
         }
     }
 
-    if (Array.isArray(items)) {
+    if(Array.isArray(items)){
         return items;
     }
 
-    if (Array.isArray(items?.items)) {
+    if(Array.isArray(items?.items)){
         return items.items;
     }
 
@@ -2179,65 +2445,53 @@ function getOrderItems(order) {
 }
 
 
-/* =========================================================
-   ORDER ITEM NAME
-========================================================= */
+function getItemName(item){
 
-function getItemName(item) {
-
-    return (
-        item?.name ||
-        item?.product_name ||
-        item?.title ||
-        item?.product?.name ||
-        `Product #${item?.product_id || ""}`
+    return(
+        item?.name||
+        item?.product_name||
+        item?.title||
+        item?.product?.name||
+        `Product #${item?.product_id||""}`
     );
 }
 
 
-/* =========================================================
-   ORDER ITEM QUANTITY
-========================================================= */
-
-function getItemQuantity(item) {
+function getItemQuantity(item){
 
     return Number(
-        item?.quantity ??
-        item?.qty ??
+        item?.quantity??
+        item?.qty??
         1
     );
 }
 
 
-/* =========================================================
-   ORDER ITEM PRICE
-========================================================= */
-
-function getItemPrice(item) {
+function getItemPrice(item){
 
     return Number(
-        item?.price ??
-        item?.sale_price ??
-        item?.product?.price ??
+        item?.price??
+        item?.sale_price??
+        item?.product?.price??
         0
     );
 }
 
 
-/* =========================================================
-   RENDER ORDERS
-========================================================= */
+/* =====================================================
+   ORDERS RENDER
+===================================================== */
 
-function renderOrders() {
+function renderOrders(){
 
-    const tbody =
+    const tbody=
         document.getElementById(
             "ordersTableBody"
         );
 
-    if (!adminOrders.length) {
+    if(!adminOrders.length){
 
-        tbody.innerHTML = `
+        tbody.innerHTML=`
             <tr>
                 <td
                     colspan="9"
@@ -2251,340 +2505,301 @@ function renderOrders() {
         return;
     }
 
+    tbody.innerHTML=
+        adminOrders.map(order=>{
 
-    tbody.innerHTML =
-        adminOrders.map(order => {
+            const id=order.id;
 
-            const id =
-                order.id;
-
-            const customerName =
+            const customer=
                 escapeHTML(
-                    order.customer_name ||
-                    order.customerName ||
+                    order.customer_name||
+                    order.customerName||
                     "Customer"
                 );
 
-            const phone =
+            const phone=
                 escapeHTML(
-                    order.customer_phone ||
-                    order.customerPhone ||
+                    order.customer_phone||
+                    order.customerPhone||
                     "-"
                 );
 
-            const address =
+            const address=
                 escapeHTML(
-                    order.customer_address ||
-                    order.customerAddress ||
+                    order.customer_address||
+                    order.customerAddress||
                     "-"
                 );
 
-            const status =
+            const status=
                 String(
-                    order.status ||
+                    order.status||
                     "pending"
                 ).toLowerCase();
 
-            const total =
-                Number(order.total) || 0;
+            const total=
+                Number(order.total)||0;
 
-            const date =
+            const date=
                 formatOrderDate(
-                    order.created_at ||
+                    order.created_at||
                     order.createdAt
                 );
 
-            const items =
+            const items=
                 getOrderItems(order);
 
-
-            const itemsHTML =
+            const itemsHTML=
                 items.length
                 ?
-                items.map(item => {
+                items.map(item=>{
 
-                    const itemName =
+                    const name=
                         escapeHTML(
                             getItemName(item)
                         );
 
-                    const quantity =
+                    const qty=
                         getItemQuantity(item);
 
-                    const price =
+                    const price=
                         getItemPrice(item);
 
-                    return `
-                        <div class="order-item">
+                    return`
+                    <div class="order-item">
 
-                            <strong>
-                                ${itemName}
-                            </strong>
+                        <strong>${name}</strong>
 
-                            <div>
-                                Qty: ${quantity}
-                            </div>
-
-                            <div>
-                                ₹${price.toFixed(2)}
-                            </div>
-
+                        <div>
+                            Qty: ${qty}
                         </div>
+
+                        <div>
+                            ₹${price.toFixed(2)}
+                        </div>
+
+                    </div>
                     `;
 
                 }).join("")
                 :
-                `
-                <div>
-                    No item details
-                </div>
-                `;
+                "No item details";
 
+            return`
 
-            const statusClass =
-                getStatusClass(status);
+<tr>
 
+<td>
+    <div class="order-id">
+        #${escapeHTML(id)}
+    </div>
+</td>
 
-            return `
+<td>
+    <div class="customer-name">
+        ${customer}
+    </div>
+</td>
 
-                <tr>
+<td>
+    ${phone}
+</td>
 
-                    <td>
-                        <div class="order-id">
-                            #${escapeHTML(id)}
-                        </div>
-                    </td>
+<td>
+    <div class="address">
+        ${address}
+    </div>
+</td>
 
+<td>
+    <div class="order-items">
+        ${itemsHTML}
+    </div>
+</td>
 
-                    <td>
+<td>
+    <div class="order-total">
+        ₹${total.toFixed(2)}
+    </div>
+</td>
 
-                        <div class="customer-name">
-                            ${customerName}
-                        </div>
+<td>
+    ${escapeHTML(date)}
+</td>
 
-                    </td>
+<td>
 
+<span class="status-badge ${getStatusClass(status)}">
+    ${escapeHTML(status)}
+</span>
 
-                    <td>
-                        ${phone}
-                    </td>
+</td>
 
+<td>
 
-                    <td>
+<select
+    class="status-select"
+    id="status-${id}"
+>
 
-                        <div class="address">
-                            ${address}
-                        </div>
+<option
+    value="pending"
+    ${status==="pending"?"selected":""}
+>
+Pending
+</option>
 
-                    </td>
+<option
+    value="confirmed"
+    ${status==="confirmed"?"selected":""}
+>
+Confirmed
+</option>
 
+<option
+    value="shipped"
+    ${status==="shipped"?"selected":""}
+>
+Shipped
+</option>
 
-                    <td>
+<option
+    value="delivered"
+    ${status==="delivered"?"selected":""}
+>
+Delivered
+</option>
 
-                        <div class="order-items">
-                            ${itemsHTML}
-                        </div>
+<option
+    value="cancelled"
+    ${status==="cancelled"?"selected":""}
+>
+Cancelled
+</option>
 
-                    </td>
+</select>
 
+<div class="status-action">
 
-                    <td>
+<button
+    class="btn btn-primary"
+    onclick="updateOrderStatus(${id})"
+>
+Update Status
+</button>
 
-                        <div class="order-total">
-                            ₹${total.toFixed(2)}
-                        </div>
+</div>
 
-                    </td>
+</td>
 
+</tr>
 
-                    <td>
-                        ${escapeHTML(date)}
-                    </td>
-
-
-                    <td>
-
-                        <span
-                            class="status-badge ${statusClass}"
-                        >
-                            ${escapeHTML(status)}
-                        </span>
-
-                    </td>
-
-
-                    <td>
-
-                        <select
-                            class="status-select"
-                            id="status-${id}"
-                        >
-
-                            <option
-                                value="pending"
-                                ${status === "pending" ? "selected" : ""}
-                            >
-                                Pending
-                            </option>
-
-                            <option
-                                value="confirmed"
-                                ${status === "confirmed" ? "selected" : ""}
-                            >
-                                Confirmed
-                            </option>
-
-                            <option
-                                value="shipped"
-                                ${status === "shipped" ? "selected" : ""}
-                            >
-                                Shipped
-                            </option>
-
-                            <option
-                                value="delivered"
-                                ${status === "delivered" ? "selected" : ""}
-                            >
-                                Delivered
-                            </option>
-
-                            <option
-                                value="cancelled"
-                                ${status === "cancelled" ? "selected" : ""}
-                            >
-                                Cancelled
-                            </option>
-
-                        </select>
-
-
-                        <div class="status-action">
-
-                            <button
-                                class="btn btn-primary"
-                                onclick="updateOrderStatus(${id})"
-                            >
-                                Update Status
-                            </button>
-
-                        </div>
-
-                    </td>
-
-                </tr>
-
-            `;
+`;
 
         }).join("");
 }
 
 
-/* =========================================================
-   FORMAT ORDER DATE
-========================================================= */
+/* =====================================================
+   DATE
+===================================================== */
 
-function formatOrderDate(value) {
+function formatOrderDate(value){
 
-    if (!value) {
+    if(!value){
         return "-";
     }
 
-    const date =
-        new Date(value);
+    const date=new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
+    if(Number.isNaN(date.getTime())){
         return String(value);
     }
 
     return date.toLocaleString(
         "en-IN",
         {
-            dateStyle: "medium",
-            timeStyle: "short"
+            dateStyle:"medium",
+            timeStyle:"short"
         }
     );
 }
 
 
-/* =========================================================
+/* =====================================================
    STATUS CLASS
-========================================================= */
+===================================================== */
 
-function getStatusClass(status) {
+function getStatusClass(status){
 
-    switch (String(status).toLowerCase()) {
+    switch(String(status).toLowerCase()){
 
-        case "confirmed":
-            return "status-confirmed";
+        case"confirmed":
+            return"status-confirmed";
 
-        case "shipped":
-            return "status-shipped";
+        case"shipped":
+            return"status-shipped";
 
-        case "delivered":
-            return "status-delivered";
+        case"delivered":
+            return"status-delivered";
 
-        case "cancelled":
-            return "status-cancelled";
+        case"cancelled":
+            return"status-cancelled";
 
-        case "pending":
         default:
-            return "status-pending";
+            return"status-pending";
     }
 }
 
 
-/* =========================================================
-   UPDATE ORDER STATUS
-========================================================= */
+/* =====================================================
+   UPDATE ORDER
+===================================================== */
 
-async function updateOrderStatus(id) {
+async function updateOrderStatus(id){
 
-    const select =
+    const select=
         document.getElementById(
             `status-${id}`
         );
 
-    if (!select) {
+    if(!select){
         return;
     }
 
-    const status =
-        select.value;
+    const status=select.value;
 
-    const confirmed =
-        confirm(
+    if(
+        !confirm(
             `Change Order #${id} status to "${status}"?`
-        );
-
-    if (!confirmed) {
+        )
+    ){
         return;
     }
 
-    try {
+    try{
 
         await apiFetch(
             `/api/orders/${id}/status`,
             {
-                method: "PUT",
-                body: JSON.stringify({
+                method:"PUT",
+                body:JSON.stringify({
                     status
                 })
             }
         );
 
         showOrderMessage(
-            `Order #${id} status updated to ${status}.`
+            `Order #${id} status updated.`
         );
 
         await loadOrders();
         await loadDashboard();
 
-    } catch (error) {
-
-        console.error(error);
+    }catch(error){
 
         showOrderMessage(
-            error.message ||
+            error.message||
             "Order status update failed.",
             "error"
         );
@@ -2592,27 +2807,24 @@ async function updateOrderStatus(id) {
 }
 
 
-/* =========================================================
+/* =====================================================
    LOGOUT
-========================================================= */
+===================================================== */
 
-async function logout() {
+async function logout(){
 
-    try {
+    try{
 
         await apiFetch(
             "/api/logout",
             {
-                method: "POST"
+                method:"POST"
             }
         );
 
-    } catch (error) {
+    }catch(error){
 
-        console.error(
-            "Logout error:",
-            error
-        );
+        console.error(error);
     }
 
     document
@@ -2625,30 +2837,27 @@ async function logout() {
 
     document
         .getElementById("username")
-        .value = "";
+        .value="";
 
     document
         .getElementById("password")
-        .value = "";
+        .value="";
 
     document
         .getElementById("loginError")
-        .textContent = "";
+        .textContent="";
 }
 
 
-/* =========================================================
+/* =====================================================
    START
-========================================================= */
+===================================================== */
 
 document.addEventListener(
     "DOMContentLoaded",
-    () => {
-
+    ()=>{
         updateAddPreview();
-
         checkLogin();
-
     }
 );
 
