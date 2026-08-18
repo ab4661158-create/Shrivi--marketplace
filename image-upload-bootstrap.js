@@ -25,7 +25,7 @@ express.response.sendFile = function (filePath, ...args) {
     }
 
     if (!html.includes("/image-upload-ui.js")) {
-      html = html.replace(/<\/body>/i, '<script src="/image-upload-ui.js?v=400"></script></body>');
+      html = html.replace(/<\/body>/i, '<script src="/image-upload-ui.js?v=401"></script></body>');
     }
 
     this.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -106,6 +106,147 @@ async function uploadToCloudinary(file, productId) {
 
     stream.end(file.buffer);
   });
+}
+
+// ======================================================
+// SELLER PRODUCT DATA CLEANUP
+// ======================================================
+// Older versions allowed rapid double-clicks / repeated submits to
+// create identical seller listings. Clean those old duplicates once,
+// then protect future inserts with a database-level unique index.
+async function repairDuplicateSellerProducts() {
+  try {
+    const deleted = await pool.query(`
+      DELETE FROM products p
+      USING products older
+      WHERE p.seller_id IS NOT NULL
+        AND older.seller_id = p.seller_id
+        AND LOWER(TRIM(older.name)) = LOWER(TRIM(p.name))
+        AND COALESCE(LOWER(TRIM(older.category)), '') = COALESCE(LOWER(TRIM(p.category)), '')
+        AND older.price = p.price
+        AND older.id < p.id
+    `);
+
+    if (deleted.rowCount > 0) {
+      console.log(`SHRIVI duplicate seller products removed: ${deleted.rowCount}`);
+    }
+
+    await pool.query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS
+      seller_products_unique_listing_idx
+      ON products (
+        seller_id,
+        LOWER(TRIM(name)),
+        LOWER(TRIM(COALESCE(category, ''))),
+        price
+      )
+      WHERE seller_id IS NOT NULL
+    `);
+
+    console.log("SHRIVI seller product duplicate protection ready");
+  } catch (error) {
+    console.error("Seller product duplicate repair:", error);
+  }
+}
+
+// ======================================================
+// SELLER DASHBOARD RELIABILITY FIX
+// ======================================================
+// Keep the existing dashboard UI/API contract, but use defensive JSONB
+// handling so a malformed historical order item cannot break the whole
+// seller dashboard request.
+function installSellerDashboardReliabilityFix(app) {
+  if (app.__shriviSellerDashboardFixV1) return;
+  app.__shriviSellerDashboardFixV1 = true;
+
+  app.get("/api/seller/dashboard-fixed", async (req, res) => {
+    try {
+      const sellerId = positiveInt(req.session?.seller?.id);
+      if (!sellerId) {
+        return res.status(401).json({ ok: false, error: "Seller login required" });
+      }
+
+      const seller = await pool.query(
+        `SELECT id, status FROM sellers WHERE id=$1 LIMIT 1`,
+        [sellerId]
+      );
+
+      if (!seller.rows.length || seller.rows[0].status !== "active") {
+        return res.status(403).json({ ok: false, error: "Seller account is not active" });
+      }
+
+      const products = await pool.query(
+        `SELECT COUNT(*)::int AS count, COALESCE(SUM(stock),0)::int AS stock
+         FROM products
+         WHERE seller_id=$1`,
+        [sellerId]
+      );
+
+      const orders = await pool.query(
+        `SELECT COUNT(*)::int AS count
+         FROM orders o
+         WHERE EXISTS (
+           SELECT 1
+           FROM jsonb_array_elements(
+             CASE WHEN jsonb_typeof(COALESCE(o.items,'[]'::jsonb))='array'
+                  THEN COALESCE(o.items,'[]'::jsonb)
+                  ELSE '[]'::jsonb END
+           ) AS item
+           WHERE (item->>'seller_id') ~ '^[0-9]+$'
+             AND (item->>'seller_id')::int=$1
+         )`,
+        [sellerId]
+      );
+
+      const revenue = await pool.query(
+        `SELECT COALESCE(SUM(
+           CASE
+             WHEN item->>'seller_id' ~ '^[0-9]+$'
+              AND (item->>'seller_id')::int=$1
+             THEN COALESCE(NULLIF(item->>'item_total','')::numeric,0)
+             ELSE 0
+           END
+         ),0) AS revenue
+         FROM orders o
+         CROSS JOIN LATERAL jsonb_array_elements(
+           CASE WHEN jsonb_typeof(COALESCE(o.items,'[]'::jsonb))='array'
+                THEN COALESCE(o.items,'[]'::jsonb)
+                ELSE '[]'::jsonb END
+         ) AS item`,
+        [sellerId]
+      );
+
+      res.json({
+        products: Number(products.rows[0]?.count || 0),
+        stock: Number(products.rows[0]?.stock || 0),
+        orders: Number(orders.rows[0]?.count || 0),
+        revenue: Number(revenue.rows[0]?.revenue || 0)
+      });
+    } catch (error) {
+      console.error("Seller dashboard fixed:", error);
+      res.status(500).json({ ok: false, error: "Failed to load seller dashboard" });
+    }
+  });
+
+  // Move the fixed route to the same public API path and ahead of the
+  // original dashboard handler when Express exposes its router stack.
+  const stack = app?._router?.stack;
+  if (!Array.isArray(stack)) return;
+
+  const fixedLayer = stack.find(layer => layer?.route?.path === "/api/seller/dashboard-fixed");
+  if (!fixedLayer) return;
+
+  fixedLayer.route.path = "/api/seller/dashboard";
+  fixedLayer.route.stack.forEach(layer => {
+    layer.path = null;
+    layer.regexp = /^\/?$/i;
+  });
+
+  const index = stack.indexOf(fixedLayer);
+  if (index >= 0) stack.splice(index, 1);
+
+  const originalIndex = stack.findIndex(layer => layer?.route?.path === "/api/seller/dashboard");
+  stack.splice(originalIndex >= 0 ? originalIndex : stack.length, 0, fixedLayer);
 }
 
 // ======================================================
@@ -250,11 +391,25 @@ function promoteImageRoutes(app) {
   app._router.stack = remaining;
 }
 
-// Install routes immediately before the existing server starts listening.
+// ======================================================
+// STARTUP PATCH
+// ======================================================
+// server.js initializes the database before calling app.listen().
+// We use that moment to repair old duplicate seller listings and install
+// the protected dashboard route before the service accepts traffic.
 express.application.listen = function (...args) {
-  installImageRoutes(this);
-  promoteImageRoutes(this);
-  return originalListen.apply(this, args);
+  const app = this;
+
+  (async () => {
+    await repairDuplicateSellerProducts();
+    installSellerDashboardReliabilityFix(app);
+    installImageRoutes(app);
+    promoteImageRoutes(app);
+    return originalListen.apply(app, args);
+  })().catch(error => {
+    console.error("SHRIVI startup patch error:", error);
+    process.exit(1);
+  });
 };
 
 require("./server.js");
