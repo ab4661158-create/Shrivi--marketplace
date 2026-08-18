@@ -1,7 +1,6 @@
 const express = require("express");
 const multer = require("multer");
 const fs = require("fs");
-const path = require("path");
 const { Pool } = require("pg");
 const { v2: cloudinary } = require("cloudinary");
 
@@ -26,7 +25,7 @@ express.response.sendFile = function (filePath, ...args) {
     }
 
     if (!html.includes("/image-upload-ui.js")) {
-      html = html.replace(/<\\/body>/i, '<script src="/image-upload-ui.js?v=300"></script></body>');
+      html = html.replace(/<\/body>/i, '<script src="/image-upload-ui.js?v=400"></script></body>');
     }
 
     this.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
@@ -61,10 +60,6 @@ const pool = new Pool({
 function positiveInt(value) {
   const n = Number(value);
   return Number.isInteger(n) && n > 0 ? n : null;
-}
-
-function getSellerId(req) {
-  return positiveInt(req.session?.seller?.id);
 }
 
 function cloudinaryConfigured() {
@@ -117,13 +112,12 @@ async function uploadToCloudinary(file, productId) {
 // ROUTES
 // ======================================================
 function installImageRoutes(app) {
-  if (app.__shriviImageRoutesInstalledV3) return;
-  app.__shriviImageRoutesInstalledV3 = true;
+  if (app.__shriviImageRoutesInstalledV4) return;
+  app.__shriviImageRoutesInstalledV4 = true;
 
-  // Seller: upload image and permanently save its Cloudinary URL in products.image.
   app.post("/api/seller/products/:id/image", upload.single("image"), async (req, res) => {
     try {
-      const sellerId = getSellerId(req);
+      const sellerId = positiveInt(req.session?.seller?.id);
       if (!sellerId) {
         return res.status(401).json({ ok: false, error: "Seller login required" });
       }
@@ -160,15 +154,7 @@ function installImageRoutes(app) {
         [imageUrl, productId, sellerId]
       );
 
-      if (!saved.rows.length) {
-        return res.status(404).json({ ok: false, error: "Seller product not found" });
-      }
-
-      return res.json({
-        ok: true,
-        url: imageUrl,
-        product: saved.rows[0]
-      });
+      return res.json({ ok: true, url: imageUrl, product: saved.rows[0] });
     } catch (error) {
       console.error("Seller product image upload:", error);
       return res.status(error.statusCode || 500).json({
@@ -178,7 +164,6 @@ function installImageRoutes(app) {
     }
   });
 
-  // Admin: upload image and save its Cloudinary URL in products.image.
   app.post("/api/admin/products/:id/image", upload.single("image"), async (req, res) => {
     try {
       if (!req.session?.admin) {
@@ -228,9 +213,47 @@ function installImageRoutes(app) {
   });
 }
 
+// The existing server registers its generic API-404 handler before listen().
+// Promote our upload routes ahead of that handler so they can actually match.
+function promoteImageRoutes(app) {
+  const stack = app?._router?.stack;
+  if (!Array.isArray(stack)) return;
+
+  const routeLayers = [];
+  const remaining = [];
+
+  for (const layer of stack) {
+    const path = layer?.route?.path;
+    if (
+      path === "/api/seller/products/:id/image" ||
+      path === "/api/admin/products/:id/image"
+    ) {
+      routeLayers.push(layer);
+    } else {
+      remaining.push(layer);
+    }
+  }
+
+  if (!routeLayers.length) return;
+
+  let insertAt = remaining.findIndex(layer => {
+    if (layer?.route) return false;
+    const source = String(layer?.handle || "");
+    return source.includes("API endpoint not found");
+  });
+
+  if (insertAt < 0) {
+    insertAt = remaining.length;
+  }
+
+  remaining.splice(insertAt, 0, ...routeLayers);
+  app._router.stack = remaining;
+}
+
 // Install routes immediately before the existing server starts listening.
 express.application.listen = function (...args) {
   installImageRoutes(this);
+  promoteImageRoutes(this);
   return originalListen.apply(this, args);
 };
 
