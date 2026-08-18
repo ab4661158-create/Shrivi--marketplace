@@ -3339,18 +3339,15 @@ async function initializeDatabase() {
       ON orders(created_at DESC)
     `);
 
-    await client.query(
-      "COMMIT"
-    );
-try {
+        await client.query("COMMIT");
+
     console.log(
       "Database initialized successfully."
     );
-catch (error) {
 
-    await client.query(
-      "ROLLBACK"
-    );
+  } catch (error) {
+
+    await client.query("ROLLBACK");
 
     console.error(
       "Database initialization error:",
@@ -3364,9 +3361,7 @@ catch (error) {
     client.release();
 
   }
-
 }
-
 
 
 // =====================================================
@@ -3495,4 +3490,4 @@ async function startServer() {
 }
 
 startServer();
-  }
+  
