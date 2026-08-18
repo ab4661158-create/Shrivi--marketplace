@@ -1,49 +1,13 @@
 const express = require("express");
 const session = require("express-session");
 const bcrypt = require("bcryptjs");
-const path = require("path");
 const multer = require("multer");
-const { v2: cloudinary } = require("cloudinary");
+const path = require("path");
 const { Pool } = require("pg");
+const { v2: cloudinary } = require("cloudinary");
 
 const app = express();
 const PORT = process.env.PORT || 10000;
-
-// =====================================================
-// CLOUDINARY
-// =====================================================
-
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET
-});
-
-// =====================================================
-// IMAGE UPLOAD
-// =====================================================
-
-const imageUpload = multer({
-  storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 5 * 1024 * 1024
-  },
-  fileFilter: (req, file, cb) => {
-    const allowed = [
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ];
-
-    if (!allowed.includes(file.mimetype)) {
-      return cb(
-        new Error("Only JPG, PNG and WEBP images are allowed.")
-      );
-    }
-
-    cb(null, true);
-  }
-});
 
 // =====================================================
 // DATABASE
@@ -57,40 +21,20 @@ const pool = new Pool({
 });
 
 // =====================================================
-// ADMIN
+// CLOUDINARY
 // =====================================================
 
-const ADMIN_USER =
-  process.env.ADMIN_USER || "admin";
-
-const ADMIN_PASSWORD =
-  process.env.ADMIN_PASSWORD;
-
-let ADMIN_HASH = null;
-
-(async () => {
-  try {
-    if (ADMIN_PASSWORD) {
-      ADMIN_HASH = await bcrypt.hash(
-        ADMIN_PASSWORD,
-        10
-      );
-    } else {
-      console.error(
-        "ADMIN_PASSWORD environment variable is missing"
-      );
-    }
-  } catch (error) {
-    console.error(
-      "Admin password hash error:",
-      error
-    );
-  }
-})();
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // =====================================================
 // MIDDLEWARE
 // =====================================================
+
+app.set("trust proxy", 1);
 
 app.use(
   express.json({
@@ -105,8 +49,6 @@ app.use(
   })
 );
 
-app.set("trust proxy", 1);
-
 app.use(
   session({
     secret:
@@ -119,8 +61,12 @@ app.use(
 
     cookie: {
       httpOnly: true,
-      secure: true,
+
+      secure:
+        process.env.NODE_ENV === "production",
+
       sameSite: "lax",
+
       maxAge:
         24 * 60 * 60 * 1000
     }
@@ -128,31 +74,33 @@ app.use(
 );
 
 // =====================================================
-// PAGES
+// IMAGE UPLOAD
 // =====================================================
 
-app.get("/", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "admin.html")
-  );
-});
+const imageUpload = multer({
+  storage: multer.memoryStorage(),
 
-app.get("/shop", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "customer.html")
-  );
-});
+  limits: {
+    fileSize: 5 * 1024 * 1024
+  },
 
-app.get("/seller", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "seller.html")
-  );
-});
+  fileFilter: (req, file, cb) => {
+    const allowed = [
+      "image/jpeg",
+      "image/png",
+      "image/webp"
+    ];
 
-app.get("/app", (req, res) => {
-  res.sendFile(
-    path.join(__dirname, "app-v2.html")
-  );
+    if (!allowed.includes(file.mimetype)) {
+      return cb(
+        new Error(
+          "Only JPG, PNG and WEBP images are allowed."
+        )
+      );
+    }
+
+    cb(null, true);
+  }
 });
 
 // =====================================================
@@ -197,9 +145,11 @@ function calculateSalePrice(price, discount) {
   const p = Number(price) || 0;
   const d = Number(discount) || 0;
 
-  return Math.round(
-    (p - (p * d / 100)) * 100
-  ) / 100;
+  return (
+    Math.round(
+      (p - (p * d) / 100) * 100
+    ) / 100
+  );
 }
 
 function normalizeProduct(product) {
@@ -214,9 +164,11 @@ function normalizeProduct(product) {
 
     price,
 
-    original_price: price,
+    original_price:
+      price,
 
-    discount_percent: discount,
+    discount_percent:
+      discount,
 
     sale_price:
       calculateSalePrice(
@@ -277,100 +229,318 @@ function requireSeller(req, res, next) {
   next();
 }
 
+function requireCustomer(req, res, next) {
+  if (!req.session.customer) {
+    return res.status(401).json({
+      error: "Customer login required"
+    });
+  }
+
+  next();
+}
+
+// =====================================================
+// PRODUCT VALIDATION
+// =====================================================
+
+function validateProductInput(
+  body,
+  isEdit = false
+) {
+  const name =
+    clean(body?.name);
+
+  const price =
+    Number(body?.price);
+
+  const stock =
+    body?.stock === "" ||
+    body?.stock === undefined ||
+    body?.stock === null
+      ? isEdit
+        ? NaN
+        : 0
+      : Number(body.stock);
+
+  const discount =
+    body?.discount_percent === "" ||
+    body?.discount_percent ===
+      undefined ||
+    body?.discount_percent === null
+      ? 0
+      : Number(
+          body.discount_percent
+        );
+
+  if (!name) {
+    throw new Error(
+      "Product name is required"
+    );
+  }
+
+  if (
+    !Number.isFinite(price) ||
+    price < 0
+  ) {
+    throw new Error(
+      "Valid product price is required"
+    );
+  }
+
+  if (!validStock(stock)) {
+    throw new Error(
+      "Stock must be a whole number 0 or greater"
+    );
+  }
+
+  if (!validDiscount(discount)) {
+    throw new Error(
+      "Discount must be between 0 and 100"
+    );
+  }
+
+  return {
+    name,
+
+    price,
+
+    category:
+      clean(body?.category) ||
+      null,
+
+    image:
+      clean(body?.image) ||
+      null,
+
+    description:
+      clean(body?.description) ||
+      null,
+
+    stock,
+
+    discount
+  };
+}
+
+// =====================================================
+// PAGES
+// =====================================================
+
+app.get("/", (req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "admin.html"
+    )
+  );
+});
+
+app.get("/shop", (req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "customer.html"
+    )
+  );
+});
+
+app.get("/seller", (req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "seller.html"
+    )
+  );
+});
+
+app.get("/app", (req, res) => {
+  res.sendFile(
+    path.join(
+      __dirname,
+      "app-v2.html"
+    )
+  );
+});
+
+app.get(
+  "/manifest.json",
+  (req, res) => {
+    res.sendFile(
+      path.join(
+        __dirname,
+        "manifest.json"
+      )
+    );
+  }
+);
+
+// =====================================================
+// HEALTH
+// =====================================================
+
+app.get(
+  "/api/health",
+  async (req, res) => {
+    try {
+      await pool.query(
+        "SELECT 1"
+      );
+
+      res.json({
+        ok: true,
+        service:
+          "Shrivi Marketplace",
+        database:
+          "connected"
+      });
+    } catch (error) {
+      console.error(
+        "Health error:",
+        error
+      );
+
+      res.status(500).json({
+        ok: false,
+        service:
+          "Shrivi Marketplace",
+        database:
+          "error"
+      });
+    }
+  }
+);
+
 // =====================================================
 // ADMIN AUTH
 // =====================================================
 
-app.post("/api/login", async (req, res) => {
-  try {
-    const username =
-      clean(req.body?.username);
-
-    const password =
-      req.body?.password || "";
-
-    if (!ADMIN_HASH) {
-      return res.status(500).json({
-        error:
-          "Admin login is not configured"
-      });
-    }
-
-    const validUser =
-      username === ADMIN_USER;
-
-    const passwordOk =
-      await bcrypt.compare(
-        password,
-        ADMIN_HASH
-      );
-
-    if (!validUser || !passwordOk) {
-      return res.status(401).json({
-        error:
-          "Invalid username or password"
-      });
-    }
-
-    req.session.admin = {
-      username: ADMIN_USER
-    };
-
-    req.session.save(error => {
-      if (error) {
-        console.error(
-          "Session save error:",
-          error
+app.post(
+  "/api/login",
+  async (req, res) => {
+    try {
+      const username =
+        clean(
+          req.body?.username
         );
 
+      const password =
+        req.body?.password || "";
+
+      const adminUser =
+        process.env.ADMIN_USER ||
+        "admin";
+
+      const adminPassword =
+        process.env.ADMIN_PASSWORD;
+
+      if (!adminPassword) {
         return res.status(500).json({
-          error: "Session error"
+          error:
+            "Admin login is not configured"
         });
       }
 
-      res.json({
-        ok: true
+      if (
+        username !==
+        adminUser
+      ) {
+        return res.status(401).json({
+          error:
+            "Invalid username or password"
+        });
+      }
+
+      const passwordOk =
+        await bcrypt.compare(
+          password,
+          await bcrypt.hash(
+            adminPassword,
+            10
+          )
+        );
+
+      if (!passwordOk) {
+        return res.status(401).json({
+          error:
+            "Invalid username or password"
+        });
+      }
+
+      req.session.admin = {
+        username:
+          adminUser
+      };
+
+      req.session.save(
+        error => {
+          if (error) {
+            console.error(
+              "Admin session:",
+              error
+            );
+
+            return res.status(500).json({
+              error:
+                "Session error"
+            });
+          }
+
+          res.json({
+            ok: true
+          });
+        }
+      );
+    } catch (error) {
+      console.error(
+        "Admin login:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Login error"
       });
-    });
-  } catch (error) {
-    console.error(
-      "Login error:",
-      error
-    );
-
-    res.status(500).json({
-      error: "Login error"
-    });
+    }
   }
-});
+);
 
-app.post("/api/logout", (req, res) => {
-  req.session.destroy(error => {
-    if (error) {
-      return res.status(500).json({
-        error: "Logout error"
+app.post(
+  "/api/logout",
+  (req, res) => {
+    req.session.destroy(
+      error => {
+        if (error) {
+          return res.status(500).json({
+            error:
+              "Logout error"
+          });
+        }
+
+        res.json({
+          ok: true
+        });
+      }
+    );
+  }
+);
+
+app.get(
+  "/api/me",
+  (req, res) => {
+    if (!req.session.admin) {
+      return res.status(401).json({
+        loggedIn: false
       });
     }
 
     res.json({
-      ok: true
-    });
-  });
-});
+      loggedIn: true,
 
-app.get("/api/me", (req, res) => {
-  if (!req.session.admin) {
-    return res.status(401).json({
-      loggedIn: false
+      username:
+        req.session.admin.username
     });
   }
-
-  res.json({
-    loggedIn: true,
-    username:
-      req.session.admin.username
-  });
-});
+);
 
 // =====================================================
 // SELLER REGISTER
@@ -409,7 +579,9 @@ app.post(
 
       if (
         phone &&
-        !/^[0-9]{10}$/.test(phone)
+        !/^[0-9]{10}$/.test(
+          phone
+        )
       ) {
         return res.status(400).json({
           error:
@@ -433,14 +605,16 @@ app.post(
           [email]
         );
 
-      if (existing.rows.length) {
+      if (
+        existing.rows.length
+      ) {
         return res.status(409).json({
           error:
             "Seller email already exists"
         });
       }
 
-      const passwordHash =
+      const hash =
         await bcrypt.hash(
           password,
           10
@@ -449,45 +623,47 @@ app.post(
       const result =
         await pool.query(
           `INSERT INTO sellers
-           (name,email,phone,password_hash,status)
-           VALUES ($1,$2,$3,$4,'active')
+           (
+             name,
+             email,
+             phone,
+             password_hash,
+             status
+           )
+           VALUES
+           ($1,$2,$3,$4,'active')
            RETURNING
            id,name,email,phone,status,created_at`,
           [
             name,
             email,
             phone || null,
-            passwordHash
+            hash
           ]
         );
 
-      const seller =
+      req.session.seller =
         result.rows[0];
 
-      req.session.seller =
-        seller;
+      req.session.save(
+        error => {
+          if (error) {
+            return res.status(500).json({
+              error:
+                "Session error"
+            });
+          }
 
-      req.session.save(error => {
-        if (error) {
-          console.error(
-            "Seller session error:",
-            error
-          );
-
-          return res.status(500).json({
-            error:
-              "Seller session error"
+          res.status(201).json({
+            ok: true,
+            seller:
+              result.rows[0]
           });
         }
-
-        res.status(201).json({
-          ok: true,
-          seller
-        });
-      });
+      );
     } catch (error) {
       console.error(
-        "Seller register error:",
+        "Seller register:",
         error
       );
 
@@ -523,16 +699,16 @@ app.post(
 
       const result =
         await pool.query(
-          `SELECT
-           id,name,email,phone,
-           password_hash,status,created_at
+          `SELECT *
            FROM sellers
            WHERE LOWER(email)=LOWER($1)
            LIMIT 1`,
           [email]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -545,7 +721,8 @@ app.post(
       const passwordOk =
         await bcrypt.compare(
           password,
-          seller.password_hash || ""
+          seller.password_hash ||
+            ""
         );
 
       if (!passwordOk) {
@@ -556,7 +733,8 @@ app.post(
       }
 
       if (
-        seller.status !== "active"
+        seller.status !==
+        "active"
       ) {
         return res.status(403).json({
           error:
@@ -569,27 +747,24 @@ app.post(
       req.session.seller =
         seller;
 
-      req.session.save(error => {
-        if (error) {
-          console.error(
-            "Seller session save error:",
-            error
-          );
+      req.session.save(
+        error => {
+          if (error) {
+            return res.status(500).json({
+              error:
+                "Session error"
+            });
+          }
 
-          return res.status(500).json({
-            error:
-              "Session error"
+          res.json({
+            ok: true,
+            seller
           });
         }
-
-        res.json({
-          ok: true,
-          seller
-        });
-      });
+      );
     } catch (error) {
       console.error(
-        "Seller login error:",
+        "Seller login:",
         error
       );
 
@@ -601,31 +776,18 @@ app.post(
   }
 );
 
-// =====================================================
-// SELLER LOGOUT
-// =====================================================
-
 app.post(
   "/api/seller/logout",
   (req, res) => {
-    req.session.destroy(error => {
-      if (error) {
-        return res.status(500).json({
-          error:
-            "Logout error"
+    req.session.destroy(
+      () => {
+        res.json({
+          ok: true
         });
       }
-
-      res.json({
-        ok: true
-      });
-    });
+    );
   }
 );
-
-// =====================================================
-// SELLER ME
-// =====================================================
 
 app.get(
   "/api/seller/me",
@@ -635,15 +797,26 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-           id,name,email,phone,status,created_at
+             id,
+             name,
+             email,
+             phone,
+             status,
+             created_at
            FROM sellers
            WHERE id=$1
            LIMIT 1`,
-          [req.session.seller.id]
+          [
+            req.session
+              .seller.id
+          ]
         );
 
-      if (!result.rows.length) {
-        req.session.seller = null;
+      if (
+        !result.rows.length
+      ) {
+        req.session.seller =
+          null;
 
         return res.status(401).json({
           loggedIn: false
@@ -656,11 +829,6 @@ app.get(
           result.rows[0]
       });
     } catch (error) {
-      console.error(
-        "Seller session check error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to check seller session"
@@ -680,8 +848,8 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-           p.*,
-           s.name AS seller_name
+             p.*,
+             s.name AS seller_name
            FROM products p
            LEFT JOIN sellers s
            ON s.id=p.seller_id
@@ -695,7 +863,7 @@ app.get(
       );
     } catch (error) {
       console.error(
-        "Public products error:",
+        "Products:",
         error
       );
 
@@ -708,139 +876,20 @@ app.get(
 );
 
 // =====================================================
-// PRODUCT VALIDATION
-// =====================================================
-
-async function verifySellerId(sellerId) {
-  const id = Number(sellerId);
-
-  if (
-    !Number.isInteger(id) ||
-    id <= 0
-  ) {
-    throw new Error(
-      "Invalid seller ID"
-    );
-  }
-
-  const result =
-    await pool.query(
-      `SELECT id,status
-       FROM sellers
-       WHERE id=$1
-       LIMIT 1`,
-      [id]
-    );
-
-  if (!result.rows.length) {
-    throw new Error(
-      "Seller not found"
-    );
-  }
-
-  if (
-    result.rows[0].status !==
-    "active"
-  ) {
-    throw new Error(
-      "Seller is not active"
-    );
-  }
-
-  return id;
-}
-
-function validateProductInput(
-  body,
-  isEdit = false
-) {
-  const name =
-    clean(body?.name);
-
-  const price =
-    Number(body?.price);
-
-  const stock =
-    body?.stock === "" ||
-    body?.stock === undefined
-      ? (isEdit ? NaN : 0)
-      : Number(body.stock);
-
-  const discount =
-    body?.discount_percent === "" ||
-    body?.discount_percent === undefined
-      ? 0
-      : Number(
-          body.discount_percent
-        );
-
-  if (!name) {
-    throw new Error(
-      "Product name is required"
-    );
-  }
-
-  if (
-    !Number.isFinite(price) ||
-    price < 0
-  ) {
-    throw new Error(
-      "Valid product price is required"
-    );
-  }
-
-  if (!validStock(stock)) {
-    throw new Error(
-      "Stock must be a whole number 0 or greater"
-    );
-  }
-
-  if (!validDiscount(discount)) {
-    throw new Error(
-      "Discount must be between 0 and 100"
-    );
-  }
-
-  return {
-    name,
-    price,
-
-    category:
-      clean(body?.category) ||
-      null,
-
-    image:
-      clean(body?.image) ||
-      null,
-
-    description:
-      clean(body?.description) ||
-      null,
-
-    stock,
-
-    discount
-  };
-}
-
-// =====================================================
-// SELLER IMAGE UPLOAD
+// CLOUDINARY IMAGE UPLOAD
 // =====================================================
 
 app.post(
   "/api/seller/upload/image",
   requireSeller,
   (req, res) => {
-    imageUpload.single("image")(
+    imageUpload.single(
+      "image"
+    )(
       req,
       res,
       async error => {
         if (error) {
-          console.error(
-            "Image upload validation error:",
-            error
-          );
-
           return res.status(400).json({
             error:
               error.message ||
@@ -857,42 +906,52 @@ app.post(
           }
 
           if (
-            !process.env.CLOUDINARY_CLOUD_NAME ||
-            !process.env.CLOUDINARY_API_KEY ||
-            !process.env.CLOUDINARY_API_SECRET
+            !process.env
+              .CLOUDINARY_CLOUD_NAME ||
+            !process.env
+              .CLOUDINARY_API_KEY ||
+            !process.env
+              .CLOUDINARY_API_SECRET
           ) {
             return res.status(500).json({
               error:
-                "Image storage is not configured. Add Cloudinary environment variables in Render."
+                "Cloudinary is not configured in Render."
             });
           }
 
           const result =
             await new Promise(
-              (resolve, reject) => {
+              (
+                resolve,
+                reject
+              ) => {
                 const stream =
-                  cloudinary.uploader.upload_stream(
-                    {
-                      folder:
-                        "shrivi/products",
-                      resource_type:
-                        "image"
-                    },
-                    (
-                      uploadError,
-                      uploadResult
-                    ) => {
-                      if (uploadError) {
-                        reject(
+                  cloudinary
+                    .uploader
+                    .upload_stream(
+                      {
+                        folder:
+                          "shrivi/products",
+                        resource_type:
+                          "image"
+                      },
+                      (
+                        uploadError,
+                        uploadResult
+                      ) => {
+                        if (
                           uploadError
-                        );
-                      } else {
-                        resolve(
-                          uploadResult
-                        );
+                        ) {
+                          reject(
+                            uploadError
+                          );
+                        } else {
+                          resolve(
+                            uploadResult
+                          );
+                        }
                       }
-                    }
-                  );
+                    );
 
                 stream.end(
                   req.file.buffer
@@ -902,20 +961,22 @@ app.post(
 
           res.json({
             ok: true,
+
             image:
               result.secure_url,
+
             url:
               result.secure_url
           });
-        } catch (uploadError) {
+        } catch (error) {
           console.error(
-            "Cloudinary upload error:",
-            uploadError
+            "Cloudinary:",
+            error
           );
 
           res.status(500).json({
             error:
-              "Image upload failed. Please try again."
+              "Image upload failed"
           });
         }
       }
@@ -938,7 +999,10 @@ app.get(
            FROM products
            WHERE seller_id=$1
            ORDER BY id DESC`,
-          [req.session.seller.id]
+          [
+            req.session
+              .seller.id
+          ]
         );
 
       res.json(
@@ -947,11 +1011,6 @@ app.get(
         )
       );
     } catch (error) {
-      console.error(
-        "Seller products error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to load seller products"
@@ -994,12 +1053,14 @@ app.post(
             data.description,
             data.stock,
             data.discount,
-            req.session.seller.id
+            req.session
+              .seller.id
           ]
         );
 
       res.status(201).json({
         ok: true,
+
         product:
           normalizeProduct(
             result.rows[0]
@@ -1007,7 +1068,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "Seller product add error:",
+        "Seller add product:",
         error
       );
 
@@ -1028,16 +1089,6 @@ app.put(
       const id =
         Number(req.params.id);
 
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
-
       const data =
         validateProductInput(
           req.body,
@@ -1046,14 +1097,15 @@ app.put(
 
       const result =
         await pool.query(
-          `UPDATE products SET
-           name=$1,
-           price=$2,
-           category=$3,
-           image=$4,
-           description=$5,
-           stock=$6,
-           discount_percent=$7
+          `UPDATE products
+           SET
+             name=$1,
+             price=$2,
+             category=$3,
+             image=$4,
+             description=$5,
+             stock=$6,
+             discount_percent=$7
            WHERE id=$8
            AND seller_id=$9
            RETURNING *`,
@@ -1066,11 +1118,14 @@ app.put(
             data.stock,
             data.discount,
             id,
-            req.session.seller.id
+            req.session
+              .seller.id
           ]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -1079,17 +1134,13 @@ app.put(
 
       res.json({
         ok: true,
+
         product:
           normalizeProduct(
             result.rows[0]
           )
       });
     } catch (error) {
-      console.error(
-        "Seller product update error:",
-        error
-      );
-
       res.status(400).json({
         error:
           error.message ||
@@ -1104,19 +1155,6 @@ app.delete(
   requireSeller,
   async (req, res) => {
     try {
-      const id =
-        Number(req.params.id);
-
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
-
       const result =
         await pool.query(
           `DELETE FROM products
@@ -1124,12 +1162,18 @@ app.delete(
            AND seller_id=$2
            RETURNING id`,
           [
-            id,
-            req.session.seller.id
+            Number(
+              req.params.id
+            ),
+
+            req.session
+              .seller.id
           ]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -1140,11 +1184,6 @@ app.delete(
         ok: true
       });
     } catch (error) {
-      console.error(
-        "Seller product delete error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to delete product"
@@ -1163,127 +1202,111 @@ app.get(
   async (req, res) => {
     try {
       const sellerId =
-        req.session.seller.id;
+        Number(
+          req.session
+            .seller.id
+        );
 
-      const productsResult =
+      const products =
         await pool.query(
           `SELECT
              COUNT(*)::int AS products,
-             COALESCE(SUM(stock),0)::int AS stock
+             COALESCE(
+               SUM(stock),
+               0
+             )::int AS stock
            FROM products
            WHERE seller_id=$1`,
           [sellerId]
         );
 
-      let orders = 0;
+      const orders =
+        await pool.query(
+          `SELECT items
+           FROM orders
+           ORDER BY id DESC`
+        );
+
+      let orderCount = 0;
       let revenue = 0;
 
-      try {
-        const ordersResult =
-          await pool.query(
-            `SELECT
-               o.id,
-               o.items
-             FROM orders o
-             ORDER BY o.id DESC`
-          );
+      for (
+        const order
+        of orders.rows
+      ) {
+        let items =
+          order.items;
 
-        const orderIds =
-          new Set();
-
-        for (
-          const order of
-          ordersResult.rows
+        if (
+          typeof items ===
+          "string"
         ) {
-          let items =
-            order.items;
-
-          if (
-            typeof items === "string"
-          ) {
-            try {
-              items =
-                JSON.parse(items);
-            } catch {
-              items = [];
-            }
-          }
-
-          if (
-            !Array.isArray(items)
-          ) {
-            items = [];
-          }
-
-          const sellerItems =
-            items.filter(
-              item =>
-                Number(
-                  item?.seller_id
-                ) ===
-                Number(sellerId)
-            );
-
-          if (
-            sellerItems.length
-          ) {
-            orderIds.add(
-              order.id
-            );
-
-            revenue +=
-              sellerItems.reduce(
-                (sum, item) => {
-                  const total =
-                    Number(
-                      item?.item_total
-                    );
-
-                  if (
-                    Number.isFinite(total)
-                  ) {
-                    return (
-                      sum + total
-                    );
-                  }
-
-                  return sum;
-                },
-                0
+          try {
+            items =
+              JSON.parse(
+                items
               );
+          } catch {
+            items = [];
           }
         }
 
-        orders =
-          orderIds.size;
+        if (
+          !Array.isArray(
+            items
+          )
+        ) {
+          items = [];
+        }
 
-        revenue =
-          Math.round(
-            revenue * 100
-          ) / 100;
-      } catch (orderError) {
-        console.error(
-          "Seller dashboard order calculation error:",
-          orderError
-        );
+        const sellerItems =
+          items.filter(
+            item =>
+              Number(
+                item?.seller_id
+              ) === sellerId
+          );
+
+        if (
+          sellerItems.length
+        ) {
+          orderCount++;
+
+          revenue +=
+            sellerItems.reduce(
+              (
+                sum,
+                item
+              ) =>
+                sum +
+                (Number(
+                  item?.item_total
+                ) || 0),
+              0
+            );
+        }
       }
 
       res.json({
         products:
-          productsResult.rows[0]
+          products.rows[0]
             ?.products || 0,
 
         stock:
-          productsResult.rows[0]
+          products.rows[0]
             ?.stock || 0,
 
-        orders,
+        orders:
+          orderCount,
 
-        revenue
+        revenue:
+          Math.round(
+            revenue * 100
+          ) / 100
       });
     } catch (error) {
       console.error(
-        "Seller dashboard error:",
+        "Seller dashboard:",
         error
       );
 
@@ -1306,7 +1329,8 @@ app.get(
     try {
       const sellerId =
         Number(
-          req.session.seller.id
+          req.session
+            .seller.id
         );
 
       const result =
@@ -1316,35 +1340,40 @@ app.get(
            ORDER BY id DESC`
         );
 
-      const sellerOrders = [];
+      const sellerOrders =
+        [];
 
       for (
-        const order of result.rows
+        const order
+        of result.rows
       ) {
-        let rawItems =
+        let items =
           order.items;
 
         if (
-          typeof rawItems === "string"
+          typeof items ===
+          "string"
         ) {
           try {
-            rawItems =
+            items =
               JSON.parse(
-                rawItems
+                items
               );
           } catch {
-            rawItems = [];
+            items = [];
           }
         }
 
         if (
-          !Array.isArray(rawItems)
+          !Array.isArray(
+            items
+          )
         ) {
-          rawItems = [];
+          items = [];
         }
 
         const sellerItems =
-          rawItems.filter(
+          items.filter(
             item =>
               Number(
                 item?.seller_id
@@ -1357,43 +1386,9 @@ app.get(
           continue;
         }
 
-        const sellerTotal =
-          sellerItems.reduce(
-            (sum, item) => {
-              const total =
-                Number(
-                  item?.item_total
-                );
-
-              if (
-                Number.isFinite(total)
-              ) {
-                return (
-                  sum + total
-                );
-              }
-
-              const price =
-                Number(
-                  item?.price
-                ) || 0;
-
-              const quantity =
-                Number(
-                  item?.quantity
-                ) || 0;
-
-              return (
-                sum +
-                price *
-                quantity
-              );
-            },
-            0
-          );
-
         sellerOrders.push({
-          id: order.id,
+          id:
+            order.id,
 
           status:
             order.status ||
@@ -1404,17 +1399,14 @@ app.get(
 
           customer_name:
             order.customer_name ||
-            order.name ||
             "-",
 
           customer_phone:
             order.customer_phone ||
-            order.phone ||
             "-",
 
           customer_address:
             order.customer_address ||
-            order.address ||
             "-",
 
           items:
@@ -1422,7 +1414,17 @@ app.get(
 
           seller_total:
             Math.round(
-              sellerTotal * 100
+              sellerItems.reduce(
+                (
+                  sum,
+                  item
+                ) =>
+                  sum +
+                  (Number(
+                    item?.item_total
+                  ) || 0),
+                0
+              ) * 100
             ) / 100
         });
       }
@@ -1432,7 +1434,7 @@ app.get(
       );
     } catch (error) {
       console.error(
-        "Seller orders error:",
+        "Seller orders:",
         error
       );
 
@@ -1454,16 +1456,16 @@ app.put(
   async (req, res) => {
     try {
       const orderId =
-        Number(req.params.id);
+        Number(
+          req.params.id
+        );
 
-      const newStatus =
-        String(
-          req.body?.status || ""
-        )
-          .trim()
-          .toLowerCase();
+      const status =
+        clean(
+          req.body?.status
+        ).toLowerCase();
 
-      const allowedStatuses = [
+      const allowed = [
         "confirmed",
         "shipped",
         "delivered",
@@ -1471,18 +1473,11 @@ app.put(
       ];
 
       if (
-        !Number.isInteger(orderId) ||
-        orderId <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid order ID"
-        });
-      }
-
-      if (
-        !allowedStatuses.includes(
-          newStatus
+        !Number.isInteger(
+          orderId
+        ) ||
+        !allowed.includes(
+          status
         )
       ) {
         return res.status(400).json({
@@ -1495,55 +1490,53 @@ app.put(
         await pool.query(
           `SELECT *
            FROM orders
-           WHERE id=$1
-           LIMIT 1`,
+           WHERE id=$1`,
           [orderId]
         );
 
-      if (!orderResult.rows.length) {
+      if (
+        !orderResult.rows.length
+      ) {
         return res.status(404).json({
           error:
             "Order not found"
         });
       }
 
-      const order =
-        orderResult.rows[0];
-
       let items =
-        order.items;
+        orderResult.rows[0]
+          .items;
 
       if (
-        typeof items === "string"
+        typeof items ===
+        "string"
       ) {
         try {
           items =
-            JSON.parse(items);
+            JSON.parse(
+              items
+            );
         } catch {
           items = [];
         }
       }
 
-      if (
-        !Array.isArray(items)
-      ) {
-        items = [];
-      }
-
-      const sellerId =
-        Number(
-          req.session.seller.id
-        );
-
-      const belongsToSeller =
+      const belongs =
+        Array.isArray(
+          items
+        ) &&
         items.some(
           item =>
             Number(
               item?.seller_id
-            ) === sellerId
+            ) ===
+            Number(
+              req.session
+                .seller.id
+            )
         );
 
-      if (!belongsToSeller) {
+      if (!belongs) {
         return res.status(403).json({
           error:
             "You cannot update this order"
@@ -1557,22 +1550,20 @@ app.put(
            WHERE id=$2
            RETURNING *`,
           [
-            newStatus,
+            status,
             orderId
           ]
         );
 
       res.json({
         ok: true,
+
         order:
-          result.rows[0]
+          normalizeOrder(
+            result.rows[0]
+          )
       });
     } catch (error) {
-      console.error(
-        "Seller order status error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to update order status"
@@ -1618,7 +1609,9 @@ app.post(
 
       if (
         phone &&
-        !/^[0-9]{10}$/.test(phone)
+        !/^[0-9]{10}$/.test(
+          phone
+        )
       ) {
         return res.status(400).json({
           error:
@@ -1684,33 +1677,29 @@ app.post(
           ]
         );
 
-      const customer =
+      req.session.customer =
         result.rows[0];
 
-      req.session.customer =
-        customer;
+      req.session.save(
+        error => {
+          if (error) {
+            return res.status(500).json({
+              error:
+                "Session error"
+            });
+          }
 
-      req.session.save(error => {
-        if (error) {
-          console.error(
-            "Customer session error:",
-            error
-          );
+          res.status(201).json({
+            ok: true,
 
-          return res.status(500).json({
-            error:
-              "Session error"
+            customer:
+              result.rows[0]
           });
         }
-
-        res.status(201).json({
-          ok: true,
-          customer
-        });
-      });
+      );
     } catch (error) {
       console.error(
-        "Customer register error:",
+        "Customer register:",
         error
       );
 
@@ -1737,13 +1726,6 @@ app.post(
       const password =
         req.body?.password || "";
 
-      if (!validEmail(email)) {
-        return res.status(400).json({
-          error:
-            "Valid email is required"
-        });
-      }
-
       const result =
         await pool.query(
           `SELECT *
@@ -1765,13 +1747,14 @@ app.post(
       const customer =
         result.rows[0];
 
-      const valid =
+      const passwordOk =
         await bcrypt.compare(
           password,
-          customer.password_hash || ""
+          customer.password_hash ||
+            ""
         );
 
-      if (!valid) {
+      if (!passwordOk) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -1780,7 +1763,8 @@ app.post(
 
       if (
         customer.status &&
-        customer.status !== "active"
+        customer.status !==
+          "active"
       ) {
         return res.status(403).json({
           error:
@@ -1793,27 +1777,24 @@ app.post(
       req.session.customer =
         customer;
 
-      req.session.save(error => {
-        if (error) {
-          console.error(
-            "Customer session save error:",
-            error
-          );
+      req.session.save(
+        error => {
+          if (error) {
+            return res.status(500).json({
+              error:
+                "Session error"
+            });
+          }
 
-          return res.status(500).json({
-            error:
-              "Session error"
+          res.json({
+            ok: true,
+            customer
           });
         }
-
-        res.json({
-          ok: true,
-          customer
-        });
-      });
+      );
     } catch (error) {
       console.error(
-        "Customer login error:",
+        "Customer login:",
         error
       );
 
@@ -1825,31 +1806,18 @@ app.post(
   }
 );
 
-// =====================================================
-// CUSTOMER LOGOUT
-// =====================================================
-
 app.post(
   "/api/customer/logout",
   (req, res) => {
-    req.session.destroy(error => {
-      if (error) {
-        return res.status(500).json({
-          error:
-            "Logout failed"
+    req.session.destroy(
+      () => {
+        res.json({
+          ok: true
         });
       }
-
-      res.json({
-        ok: true
-      });
-    });
+    );
   }
 );
-
-// =====================================================
-// CUSTOMER SESSION
-// =====================================================
 
 app.get(
   "/api/customer/me",
@@ -1862,6 +1830,7 @@ app.get(
 
     res.json({
       loggedIn: true,
+
       customer:
         req.session.customer
     });
@@ -1874,25 +1843,19 @@ app.get(
 
 app.get(
   "/api/customer/orders",
+  requireCustomer,
   async (req, res) => {
     try {
-      if (!req.session.customer) {
-        return res.status(401).json({
-          error:
-            "Customer login required"
-        });
-      }
-
-      const customerId =
-        req.session.customer.id;
-
       const result =
         await pool.query(
           `SELECT *
            FROM orders
            WHERE customer_id=$1
            ORDER BY id DESC`,
-          [customerId]
+          [
+            req.session
+              .customer.id
+          ]
         );
 
       res.json(
@@ -1902,7 +1865,7 @@ app.get(
       );
     } catch (error) {
       console.error(
-        "Customer orders error:",
+        "Customer orders:",
         error
       );
 
@@ -1915,337 +1878,357 @@ app.get(
 );
 
 // =====================================================
-// CREATE CUSTOMER ORDER
+// CREATE ORDER
 // =====================================================
+
+async function createCustomerOrder(
+  req,
+  res
+) {
+  const client =
+    await pool.connect();
+
+  try {
+    if (!req.session.customer) {
+      return res.status(401).json({
+        error:
+          "Customer login required"
+      });
+    }
+
+    const incomingItems =
+      Array.isArray(
+        req.body?.items
+      )
+        ? req.body.items
+        : [];
+
+    if (
+      !incomingItems.length
+    ) {
+      return res.status(400).json({
+        error:
+          "Order items are required"
+      });
+    }
+
+    const productIds =
+      incomingItems
+        .map(
+          item =>
+            Number(item?.id)
+        )
+        .filter(
+          id =>
+            Number.isInteger(id)
+        );
+
+    const uniqueIds =
+      [
+        ...new Set(
+          productIds
+        )
+      ];
+
+    if (!uniqueIds.length) {
+      return res.status(400).json({
+        error:
+          "Invalid products"
+      });
+    }
+
+    await client.query(
+      "BEGIN"
+    );
+
+    const productsResult =
+      await client.query(
+        `SELECT *
+         FROM products
+         WHERE id=ANY($1::int[])
+         FOR UPDATE`,
+        [uniqueIds]
+      );
+
+    if (
+      productsResult.rows.length !==
+      uniqueIds.length
+    ) {
+      throw new Error(
+        "One or more products no longer exist"
+      );
+    }
+
+    const productMap =
+      new Map(
+        productsResult.rows.map(
+          product => [
+            Number(
+              product.id
+            ),
+            product
+          ]
+        )
+      );
+
+    const orderItems =
+      [];
+
+    for (
+      const incoming
+      of incomingItems
+    ) {
+      const product =
+        productMap.get(
+          Number(
+            incoming?.id
+          )
+        );
+
+      if (!product) {
+        continue;
+      }
+
+      const quantity =
+        Number(
+          incoming?.quantity
+        );
+
+      if (
+        !Number.isInteger(
+          quantity
+        ) ||
+        quantity <= 0
+      ) {
+        throw new Error(
+          "Invalid quantity"
+        );
+      }
+
+      const stock =
+        Number(
+          product.stock
+        ) || 0;
+
+      if (
+        quantity > stock
+      ) {
+        throw new Error(
+          `${product.name} has only ${stock} item(s) in stock`
+        );
+      }
+
+      const price =
+        Number(
+          product.price
+        ) || 0;
+
+      const discount =
+        Number(
+          product.discount_percent
+        ) || 0;
+
+      const currentPrice =
+        calculateSalePrice(
+          price,
+          discount
+        );
+
+      const itemTotal =
+        Math.round(
+          currentPrice *
+            quantity *
+            100
+        ) / 100;
+
+      orderItems.push({
+        id:
+          Number(
+            product.id
+          ),
+
+        product_id:
+          Number(
+            product.id
+          ),
+
+        name:
+          product.name,
+
+        image:
+          product.image ||
+          "",
+
+        price:
+          currentPrice,
+
+        original_price:
+          price,
+
+        quantity,
+
+        seller_id:
+          product.seller_id
+            ? Number(
+                product.seller_id
+              )
+            : null,
+
+        item_total:
+          itemTotal
+      });
+    }
+
+    if (!orderItems.length) {
+      throw new Error(
+        "No valid products in order"
+      );
+    }
+
+    const total =
+      Math.round(
+        orderItems.reduce(
+          (
+            sum,
+            item
+          ) =>
+            sum +
+            Number(
+              item.item_total
+            ),
+          0
+        ) * 100
+      ) / 100;
+
+    const customer =
+      req.session.customer;
+
+    const customerName =
+      clean(
+        req.body?.customer_name
+      ) ||
+      clean(
+        req.body?.name
+      ) ||
+      customer.name ||
+      "";
+
+    const customerPhone =
+      clean(
+        req.body?.customer_phone
+      ) ||
+      clean(
+        req.body?.phone
+      ) ||
+      customer.phone ||
+      "";
+
+    const customerAddress =
+      clean(
+        req.body?.customer_address
+      ) ||
+      clean(
+        req.body?.address
+      ) ||
+      "";
+
+    const orderResult =
+      await client.query(
+        `INSERT INTO orders
+         (
+           customer_id,
+           customer_name,
+           customer_phone,
+           customer_address,
+           items,
+           total,
+           status
+         )
+         VALUES
+         (
+           $1,$2,$3,$4,$5::jsonb,$6,'pending'
+         )
+         RETURNING *`,
+        [
+          customer.id,
+
+          customerName,
+
+          customerPhone,
+
+          customerAddress,
+
+          JSON.stringify(
+            orderItems
+          ),
+
+          total
+        ]
+      );
+
+    for (
+      const item
+      of orderItems
+    ) {
+      await client.query(
+        `UPDATE products
+         SET stock=stock-$1
+         WHERE id=$2`,
+        [
+          item.quantity,
+
+          item.product_id
+        ]
+      );
+    }
+
+    await client.query(
+      "COMMIT"
+    );
+
+    res.status(201).json({
+      ok: true,
+
+      order:
+        normalizeOrder(
+          orderResult.rows[0]
+        )
+    });
+  } catch (error) {
+    try {
+      await client.query(
+        "ROLLBACK"
+      );
+    } catch {}
+
+    console.error(
+      "Create order:",
+      error
+    );
+
+    res.status(400).json({
+      error:
+        error.message ||
+        "Failed to create order"
+    });
+  } finally {
+    client.release();
+  }
+}
+
+// IMPORTANT:
+// Both endpoints are supported.
+// This fixes older customer.html versions
+// that call /api/orders.
 
 app.post(
   "/api/customer/orders",
-  async (req, res) => {
-    try {
-      if (!req.session.customer) {
-        return res.status(401).json({
-          error:
-            "Customer login required"
-        });
-      }
+  createCustomerOrder
+);
 
-      const incomingItems =
-        Array.isArray(
-          req.body?.items
-        )
-          ? req.body.items
-          : [];
-
-      if (!incomingItems.length) {
-        return res.status(400).json({
-          error:
-            "Order items are required"
-        });
-      }
-
-      const productIds =
-        incomingItems
-          .map(
-            item =>
-              Number(item?.id)
-          )
-          .filter(
-            id =>
-              Number.isInteger(id)
-          );
-
-      if (!productIds.length) {
-        return res.status(400).json({
-          error:
-            "Invalid products"
-        });
-      }
-
-      const uniqueProductIds =
-        [
-          ...new Set(productIds)
-        ];
-
-      const productsResult =
-        await pool.query(
-          `SELECT *
-           FROM products
-           WHERE id=ANY($1::int[])`,
-          [uniqueProductIds]
-        );
-
-      const products =
-        productsResult.rows;
-
-      if (
-        products.length !==
-        uniqueProductIds.length
-      ) {
-        return res.status(400).json({
-          error:
-            "One or more products no longer exist"
-        });
-      }
-
-      const productMap =
-        new Map(
-          products.map(
-            p => [
-              Number(p.id),
-              p
-            ]
-          )
-        );
-
-      const orderItems = [];
-
-      for (
-        const incoming of
-        incomingItems
-      ) {
-        const product =
-          productMap.get(
-            Number(incoming?.id)
-          );
-
-        if (!product) {
-          continue;
-        }
-
-        const quantity =
-          Number(
-            incoming?.quantity
-          );
-
-        if (
-          !Number.isInteger(
-            quantity
-          ) ||
-          quantity <= 0
-        ) {
-          return res.status(400).json({
-            error:
-              "Invalid quantity"
-          });
-        }
-
-        const stock =
-          Number(product.stock) || 0;
-
-        if (
-          quantity > stock
-        ) {
-          return res.status(400).json({
-            error:
-              `${product.name} has only ${stock} item(s) in stock`
-          });
-        }
-
-        const price =
-          Number(product.price) || 0;
-
-        const discount =
-          Number(
-            product.discount_percent
-          ) || 0;
-
-        const salePrice =
-          calculateSalePrice(
-            price,
-            discount
-          );
-
-        const itemTotal =
-          Math.round(
-            salePrice *
-            quantity *
-            100
-          ) / 100;
-
-        orderItems.push({
-          product_id:
-            Number(product.id),
-
-          id:
-            Number(product.id),
-
-          name:
-            product.name,
-
-          image:
-            product.image || "",
-
-          price:
-            salePrice,
-
-          original_price:
-            price,
-
-          quantity,
-
-          seller_id:
-            product.seller_id
-              ? Number(
-                  product.seller_id
-                )
-              : null,
-
-          item_total:
-            itemTotal
-        });
-      }
-
-      if (!orderItems.length) {
-        return res.status(400).json({
-          error:
-            "No valid products in order"
-        });
-      }
-
-      const total =
-        Math.round(
-          orderItems.reduce(
-            (sum, item) =>
-              sum +
-              Number(
-                item.item_total
-              ),
-            0
-          ) * 100
-        ) / 100;
-
-      const customerId =
-        req.session.customer.id;
-
-      const client =
-        await pool.connect();
-
-      try {
-        await client.query(
-          "BEGIN"
-        );
-
-        for (
-          const item of orderItems
-        ) {
-          const stockResult =
-            await client.query(
-              `SELECT stock
-               FROM products
-               WHERE id=$1
-               FOR UPDATE`,
-              [item.product_id]
-            );
-
-          if (
-            !stockResult.rows.length
-          ) {
-            throw new Error(
-              "Product no longer exists"
-            );
-          }
-
-          const latestStock =
-            Number(
-              stockResult.rows[0].stock
-            ) || 0;
-
-          if (
-            item.quantity >
-            latestStock
-          ) {
-            throw new Error(
-              `${item.name} is out of stock`
-            );
-          }
-        }
-
-        const orderResult =
-          await client.query(
-            `INSERT INTO orders
-             (
-               customer_id,
-               customer_name,
-               customer_phone,
-               customer_address,
-               items,
-               total,
-               status
-             )
-             VALUES
-             (
-               $1,$2,$3,$4,$5::jsonb,$6,'pending'
-             )
-             RETURNING *`,
-            [
-              customerId,
-
-              req.body?.customer_name ||
-                req.session.customer.name ||
-                "",
-
-              req.body?.customer_phone ||
-                req.session.customer.phone ||
-                "",
-
-              req.body?.customer_address ||
-                "",
-
-              JSON.stringify(
-                orderItems
-              ),
-
-              total
-            ]
-          );
-
-        for (
-          const item of orderItems
-        ) {
-          await client.query(
-            `UPDATE products
-             SET stock=stock-$1
-             WHERE id=$2`,
-            [
-              item.quantity,
-              item.product_id
-            ]
-          );
-        }
-
-        await client.query(
-          "COMMIT"
-        );
-
-        res.status(201).json({
-          ok: true,
-          order:
-            normalizeOrder(
-              orderResult.rows[0]
-            )
-        });
-      } catch (transactionError) {
-        await client.query(
-          "ROLLBACK"
-        );
-
-        throw transactionError;
-      } finally {
-        client.release();
-      }
-    } catch (error) {
-      console.error(
-        "Create order error:",
-        error
-      );
-
-      res.status(400).json({
-        error:
-          error.message ||
-          "Failed to create order"
-      });
-    }
-  }
+app.post(
+  "/api/orders",
+  createCustomerOrder
 );
 
 // =====================================================
@@ -2276,7 +2259,7 @@ app.get(
       );
     } catch (error) {
       console.error(
-        "Admin products error:",
+        "Admin products:",
         error
       );
 
@@ -2287,6 +2270,54 @@ app.get(
     }
   }
 );
+
+// =====================================================
+// VERIFY SELLER
+// =====================================================
+
+async function verifySellerId(
+  sellerId
+) {
+  const id =
+    Number(sellerId);
+
+  if (
+    !Number.isInteger(id) ||
+    id <= 0
+  ) {
+    throw new Error(
+      "Invalid seller ID"
+    );
+  }
+
+  const result =
+    await pool.query(
+      `SELECT id,status
+       FROM sellers
+       WHERE id=$1
+       LIMIT 1`,
+      [id]
+    );
+
+  if (
+    !result.rows.length
+  ) {
+    throw new Error(
+      "Seller not found"
+    );
+  }
+
+  if (
+    result.rows[0].status !==
+    "active"
+  ) {
+    throw new Error(
+      "Seller is not active"
+    );
+  }
+
+  return id;
+}
 
 // =====================================================
 // ADMIN ADD PRODUCT
@@ -2348,6 +2379,7 @@ app.post(
 
       res.status(201).json({
         ok: true,
+
         product:
           normalizeProduct(
             result.rows[0]
@@ -2355,7 +2387,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "Admin add product error:",
+        "Admin add product:",
         error
       );
 
@@ -2378,7 +2410,9 @@ app.put(
   async (req, res) => {
     try {
       const id =
-        Number(req.params.id);
+        Number(
+          req.params.id
+        );
 
       if (
         !Number.isInteger(id) ||
@@ -2409,7 +2443,7 @@ app.put(
             sellerId
           );
       } else {
-        const existing =
+        const old =
           await pool.query(
             `SELECT seller_id
              FROM products
@@ -2418,7 +2452,9 @@ app.put(
             [id]
           );
 
-        if (!existing.rows.length) {
+        if (
+          !old.rows.length
+        ) {
           return res.status(404).json({
             error:
               "Product not found"
@@ -2426,13 +2462,14 @@ app.put(
         }
 
         sellerId =
-          existing.rows[0]
+          old.rows[0]
             .seller_id;
       }
 
       const result =
         await pool.query(
-          `UPDATE products SET
+          `UPDATE products
+           SET
              name=$1,
              price=$2,
              category=$3,
@@ -2456,7 +2493,9 @@ app.put(
           ]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -2465,6 +2504,7 @@ app.put(
 
       res.json({
         ok: true,
+
         product:
           normalizeProduct(
             result.rows[0]
@@ -2472,7 +2512,7 @@ app.put(
       });
     } catch (error) {
       console.error(
-        "Admin update product error:",
+        "Admin update:",
         error
       );
 
@@ -2495,17 +2535,9 @@ app.delete(
   async (req, res) => {
     try {
       const id =
-        Number(req.params.id);
-
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
+        Number(
+          req.params.id
+        );
 
       const result =
         await pool.query(
@@ -2515,7 +2547,9 @@ app.delete(
           [id]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -2527,7 +2561,7 @@ app.delete(
       });
     } catch (error) {
       console.error(
-        "Admin delete product error:",
+        "Admin delete:",
         error
       );
 
@@ -2565,11 +2599,6 @@ app.get(
         result.rows
       );
     } catch (error) {
-      console.error(
-        "Admin sellers error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to load sellers"
@@ -2604,11 +2633,6 @@ app.get(
         result.rows
       );
     } catch (error) {
-      console.error(
-        "Admin customers error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to load customers"
@@ -2639,11 +2663,6 @@ app.get(
         )
       );
     } catch (error) {
-      console.error(
-        "Admin orders error:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to load orders"
@@ -2724,18 +2743,12 @@ async function initializeDatabase() {
       )
     `);
 
-    // MISSING PRODUCT COLUMNS
+    // EXISTING DATABASE SAFETY
     await client.query(`
       ALTER TABLE products
       ADD COLUMN IF NOT EXISTS seller_id INTEGER
       REFERENCES sellers(id)
       ON DELETE SET NULL
-    `);
-
-    await client.query(`
-      ALTER TABLE products
-      ADD COLUMN IF NOT EXISTS discount_percent
-      NUMERIC(5,2) NOT NULL DEFAULT 0
     `);
 
     await client.query(`
@@ -2752,6 +2765,12 @@ async function initializeDatabase() {
       ALTER TABLE products
       ADD COLUMN IF NOT EXISTS stock
       INTEGER NOT NULL DEFAULT 0
+    `);
+
+    await client.query(`
+      ALTER TABLE products
+      ADD COLUMN IF NOT EXISTS discount_percent
+      NUMERIC(5,2) NOT NULL DEFAULT 0
     `);
 
     // INDEXES
@@ -2784,19 +2803,14 @@ async function initializeDatabase() {
     );
 
     console.log(
-      "Database initialized successfully."
+      "Shrivi database initialized successfully."
     );
   } catch (error) {
     try {
       await client.query(
         "ROLLBACK"
       );
-    } catch (rollbackError) {
-      console.error(
-        "Database rollback error:",
-        rollbackError
-      );
-    }
+    } catch {}
 
     console.error(
       "Database initialization error:",
@@ -2810,43 +2824,7 @@ async function initializeDatabase() {
 }
 
 // =====================================================
-// HEALTH CHECK
-// =====================================================
-
-app.get(
-  "/api/health",
-  async (req, res) => {
-    try {
-      await pool.query(
-        "SELECT 1"
-      );
-
-      res.json({
-        ok: true,
-        service:
-          "Shrivi Marketplace",
-        database:
-          "connected"
-      });
-    } catch (error) {
-      console.error(
-        "Health check error:",
-        error
-      );
-
-      res.status(500).json({
-        ok: false,
-        service:
-          "Shrivi Marketplace",
-        database:
-          "error"
-      });
-    }
-  }
-);
-
-// =====================================================
-// 404 API HANDLER
+// API 404
 // =====================================================
 
 app.use(
@@ -2854,7 +2832,10 @@ app.use(
   (req, res) => {
     res.status(404).json({
       error:
-        "API endpoint not found"
+        "API endpoint not found",
+
+      path:
+        req.originalUrl
     });
   }
 );
@@ -2871,7 +2852,8 @@ app.use(
     );
 
     if (
-      error instanceof multer.MulterError
+      error instanceof
+      multer.MulterError
     ) {
       if (
         error.code ===
@@ -2882,23 +2864,18 @@ app.use(
             "Image must be 5MB or smaller."
         });
       }
-
-      return res.status(400).json({
-        error:
-          error.message ||
-          "Image upload error"
-      });
     }
 
     res.status(500).json({
       error:
+        error.message ||
         "Internal server error"
     });
   }
 );
 
 // =====================================================
-// START SERVER
+// START
 // =====================================================
 
 async function startServer() {
