@@ -1,10 +1,10 @@
 {
   "name": "shrivi-marketplace",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Shrivi Fashion Marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node image-upload-bootstrap.js"
+    "start": "node image-upload-bootstrap-v2.js"
   },
   "engines": {
     "node": ">=18"
