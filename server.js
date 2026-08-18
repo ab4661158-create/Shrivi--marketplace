@@ -3342,7 +3342,7 @@ async function initializeDatabase() {
     await client.query(
       "COMMIT"
     );
-try {
+
     console.log(
       "Database initialized successfully."
     );
@@ -3365,7 +3365,7 @@ catch (error) {
 
   }
 
-}
+
 
 // =====================================================
 // HEALTH CHECK
