@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#111111">
 
 <title>Shrivi — Fashion Marketplace</title>
 
@@ -19,10 +20,7 @@ body{
   color:#171717;
 }
 
-button,
-input,
-textarea,
-select{
+button,input,textarea{
   font-family:inherit;
 }
 
@@ -35,8 +33,7 @@ a{
   color:inherit;
 }
 
-/* TOP BAR */
-
+/* TOP */
 .topbar{
   background:#111;
   color:#fff;
@@ -45,8 +42,7 @@ a{
   font-size:13px;
 }
 
-/* NAVBAR */
-
+/* NAV */
 nav{
   height:70px;
   border-bottom:1px solid #eee;
@@ -68,12 +64,8 @@ nav{
 
 .navlinks{
   display:flex;
-  gap:25px;
+  gap:24px;
   font-size:14px;
-}
-
-.navlinks a:hover{
-  opacity:.6;
 }
 
 .navright{
@@ -82,13 +74,19 @@ nav{
   gap:12px;
 }
 
+.accountbtn,
 .navbtn{
   border:0;
   background:none;
-  font-size:22px;
 }
 
-.cartbtn{
+.accountbtn{
+  font-size:14px;
+  font-weight:600;
+}
+
+.navbtn{
+  font-size:22px;
   position:relative;
 }
 
@@ -108,12 +106,11 @@ nav{
 }
 
 /* HERO */
-
 .hero{
   margin:25px 6%;
   min-height:430px;
   border-radius:18px;
-  padding:65px 7%;
+  padding:60px 7%;
   display:flex;
   align-items:center;
   background:linear-gradient(110deg,#f4eee8,#e8ddd4);
@@ -145,11 +142,9 @@ nav{
   padding:14px 25px;
   border-radius:5px;
   margin-top:20px;
-  font-size:14px;
 }
 
 /* SECTIONS */
-
 section{
   padding:30px 6%;
 }
@@ -171,7 +166,6 @@ section{
 }
 
 /* CATEGORIES */
-
 .categories{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -203,7 +197,6 @@ section{
 }
 
 /* SEARCH */
-
 .searchbox{
   display:flex;
   gap:10px;
@@ -227,7 +220,6 @@ section{
 }
 
 /* PRODUCTS */
-
 .products{
   display:grid;
   grid-template-columns:repeat(4,1fr);
@@ -301,6 +293,12 @@ section{
   margin-left:5px;
 }
 
+.stock{
+  color:#777;
+  font-size:12px;
+  margin-top:5px;
+}
+
 .addcart{
   width:100%;
   border:0;
@@ -311,8 +309,7 @@ section{
   border-radius:5px;
 }
 
-/* SELLER */
-
+/* SELL */
 .sellsection{
   background:#111;
   color:#fff;
@@ -340,11 +337,9 @@ section{
   border:0;
   padding:14px 24px;
   border-radius:5px;
-  white-space:nowrap;
 }
 
 /* FOOTER */
-
 footer{
   margin-top:35px;
   padding:45px 6%;
@@ -371,13 +366,12 @@ footer a{
   letter-spacing:2px;
 }
 
-/* CART DRAWER */
-
+/* OVERLAY */
 .overlay{
   display:none;
   position:fixed;
   inset:0;
-  background:rgba(0,0,0,.5);
+  background:rgba(0,0,0,.55);
   z-index:100;
 }
 
@@ -385,6 +379,7 @@ footer a{
   display:block;
 }
 
+/* CART */
 .cartdrawer{
   position:absolute;
   right:0;
@@ -396,7 +391,8 @@ footer a{
   overflow:auto;
 }
 
-.carthead{
+.carthead,
+.modalhead{
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -421,7 +417,6 @@ footer a{
   border-bottom:1px solid #eee;
 }
 
-.cartitem img,
 .cartitempic{
   width:70px;
   height:80px;
@@ -431,6 +426,14 @@ footer a{
   display:flex;
   align-items:center;
   justify-content:center;
+  flex-shrink:0;
+}
+
+.cartitempic img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  border-radius:6px;
 }
 
 .cartdetails{
@@ -474,7 +477,9 @@ footer a{
   font-weight:bold;
 }
 
-.checkoutbtn{
+.checkoutbtn,
+.placeorder,
+.authbtn{
   width:100%;
   margin-top:15px;
   padding:14px;
@@ -484,8 +489,7 @@ footer a{
   border-radius:5px;
 }
 
-/* CHECKOUT MODAL */
-
+/* MODALS */
 .modal{
   display:none;
   position:fixed;
@@ -508,13 +512,6 @@ footer a{
   overflow:auto;
   border-radius:12px;
   padding:25px;
-}
-
-.modalhead{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
 }
 
 .formgroup{
@@ -542,40 +539,81 @@ footer a{
   resize:vertical;
 }
 
-.placeorder{
-  width:100%;
-  padding:14px;
+/* AUTH */
+.auth-tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  margin:20px 0;
+  border-bottom:1px solid #ddd;
+}
+
+.auth-tab{
   border:0;
+  background:#fff;
+  padding:13px;
+  font-weight:bold;
+}
+
+.auth-tab.active{
+  border-bottom:2px solid #111;
+}
+
+.auth-message{
+  min-height:20px;
+  margin-top:12px;
+  font-size:13px;
+}
+
+.account-card{
+  text-align:center;
+}
+
+.account-avatar{
+  width:65px;
+  height:65px;
+  margin:0 auto 12px;
+  border-radius:50%;
   background:#111;
   color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  font-weight:bold;
+}
+
+.secondarybtn{
+  width:100%;
+  margin-top:10px;
+  padding:13px;
+  border:1px solid #111;
+  background:#fff;
+  color:#111;
   border-radius:5px;
-  margin-top:5px;
 }
 
-/* ACCOUNT */
-
-.accountbtn{
-  border:0;
-  background:none;
-  font-size:14px;
+.order-card{
+  border:1px solid #eee;
+  padding:14px;
+  border-radius:8px;
+  margin-top:10px;
 }
 
-/* LOADING */
-
-.loading{
-  text-align:center;
-  padding:50px;
-  color:#777;
+.order-status{
+  font-size:12px;
+  color:#16803c;
+  font-weight:bold;
 }
 
+/* STATES */
+.loading,
 .empty{
   text-align:center;
-  padding:40px 10px;
+  padding:50px 10px;
   color:#777;
 }
 
 /* MOBILE */
-
 @media(max-width:900px){
 
   .navlinks{
@@ -603,7 +641,6 @@ footer a{
     grid-template-columns:1fr 1fr;
     padding:35px 4%;
   }
-
 }
 
 @media(max-width:550px){
@@ -666,11 +703,6 @@ footer a{
   .sellbtn{
     margin-top:18px;
   }
-
-  footer{
-    grid-template-columns:1fr 1fr;
-  }
-
 }
 </style>
 </head>
@@ -683,9 +715,7 @@ footer a{
 
 <nav>
 
-  <div class="logo">
-    SHRIVI
-  </div>
+  <div class="logo">SHRIVI</div>
 
   <div class="navlinks">
     <a href="#shop">Shop</a>
@@ -696,11 +726,16 @@ footer a{
 
   <div class="navright">
 
-    <button class="accountbtn" onclick="openAccount()">
-      Account
+    <button
+      class="accountbtn"
+      id="accountButton"
+      onclick="openAccount()">
+      👤 Login
     </button>
 
-    <button class="navbtn cartbtn" onclick="openCart()">
+    <button
+      class="navbtn"
+      onclick="openCart()">
       🛒
       <span class="cartcount" id="cartCount">0</span>
     </button>
@@ -709,16 +744,13 @@ footer a{
 
 </nav>
 
-
 <!-- HERO -->
 
 <div class="hero">
 
   <div>
 
-    <small>
-      NEW SEASON • CURATED FOR YOU
-    </small>
+    <small>NEW SEASON • CURATED FOR YOU</small>
 
     <h1>
       Style that<br>
@@ -738,42 +770,34 @@ footer a{
 
 </div>
 
-
 <!-- CATEGORIES -->
 
 <section id="categories">
 
   <div class="sectiontitle">
-
-    <h2>
-      Shop by category
-    </h2>
-
-    <span class="muted">
-      Explore collection
-    </span>
-
+    <h2>Shop by category</h2>
+    <span class="muted">Explore collection</span>
   </div>
 
   <div class="categories">
 
     <div class="category"
-         onclick="filterCategory('Fashion')">
+      onclick="filterCategory('Fashion')">
       Fashion
     </div>
 
     <div class="category"
-         onclick="filterCategory('Jewellery')">
+      onclick="filterCategory('Jewellery')">
       Jewellery
     </div>
 
     <div class="category"
-         onclick="filterCategory('Co-ord Sets')">
+      onclick="filterCategory('Co-ord Sets')">
       Co-ord Sets
     </div>
 
     <div class="category"
-         onclick="filterCategory('Accessories')">
+      onclick="filterCategory('Accessories')">
       Accessories
     </div>
 
@@ -781,23 +805,21 @@ footer a{
 
 </section>
 
-
 <!-- SHOP -->
 
 <section id="shop">
 
   <div class="sectiontitle">
 
-    <h2>
-      Trending on Shrivi
-    </h2>
+    <h2>Trending on Shrivi</h2>
 
-    <span class="muted" id="productStatus">
+    <span
+      class="muted"
+      id="productStatus">
       Loading products...
     </span>
 
   </div>
-
 
   <div class="searchbox">
 
@@ -805,8 +827,7 @@ footer a{
       id="searchInput"
       type="text"
       placeholder="Search products..."
-      oninput="searchProducts()"
-    >
+      oninput="searchProducts()">
 
     <button onclick="searchProducts()">
       Search
@@ -814,11 +835,9 @@ footer a{
 
   </div>
 
-
   <div
     id="products"
-    class="products"
-  >
+    class="products">
 
     <div class="loading">
       Loading Shrivi products...
@@ -828,7 +847,6 @@ footer a{
 
 </section>
 
-
 <!-- SELLER -->
 
 <section id="seller">
@@ -837,9 +855,7 @@ footer a{
 
     <div>
 
-      <h2>
-        Sell on Shrivi
-      </h2>
+      <h2>Sell on Shrivi</h2>
 
       <p>
         Apne fashion aur jewellery products ko
@@ -851,8 +867,7 @@ footer a{
 
     <button
       class="sellbtn"
-      onclick="window.location.href='/seller'"
-    >
+      onclick="window.location.href='/seller'">
       BECOME A SELLER →
     </button>
 
@@ -860,96 +875,53 @@ footer a{
 
 </section>
 
-
 <!-- FOOTER -->
 
 <footer id="about">
 
   <div>
-
-    <div class="footerlogo">
-      SHRIVI
-    </div>
-
-    <p class="muted">
-      Fashion Marketplace
-    </p>
-
+    <div class="footerlogo">SHRIVI</div>
+    <p class="muted">Fashion Marketplace</p>
   </div>
 
   <div>
-
     <h4>Shop</h4>
-
-    <a href="#categories">
-      Fashion
-    </a>
-
-    <a href="#categories">
-      Jewellery
-    </a>
-
-    <a href="#categories">
-      Accessories
-    </a>
-
+    <a href="#categories">Fashion</a>
+    <a href="#categories">Jewellery</a>
+    <a href="#categories">Accessories</a>
   </div>
 
   <div>
-
     <h4>Sell</h4>
-
-    <a href="/seller">
-      Become a Seller
-    </a>
-
-    <a href="/seller">
-      Seller Login
-    </a>
-
+    <a href="/seller">Become a Seller</a>
+    <a href="/seller">Seller Login</a>
   </div>
 
   <div>
-
     <h4>Help</h4>
-
-    <a href="#">
-      Contact Us
-    </a>
-
-    <a href="#">
-      Shipping
-    </a>
-
-    <a href="#">
-      Returns
-    </a>
-
+    <a href="#about">Contact Us</a>
+    <a href="#about">Shipping</a>
+    <a href="#about">Returns</a>
   </div>
 
 </footer>
-
 
 <!-- CART -->
 
 <div
   id="cartOverlay"
   class="overlay"
-  onclick="closeCartOutside(event)"
->
+  onclick="closeCartOutside(event)">
 
   <div class="cartdrawer">
 
     <div class="carthead">
 
-      <h2>
-        Your Cart
-      </h2>
+      <h2>Your Cart</h2>
 
       <button
         class="close"
-        onclick="closeCart()"
-      >
+        onclick="closeCart()">
         ×
       </button>
 
@@ -957,19 +929,16 @@ footer a{
 
     <div
       id="cartItems"
-      class="cartitems"
-    ></div>
+      class="cartitems">
+    </div>
 
     <div
       id="cartTotalBox"
-      style="display:none"
-    >
+      style="display:none">
 
       <div class="carttotal">
 
-        <span>
-          Total
-        </span>
+        <span>Total</span>
 
         <span id="cartTotal">
           ₹0
@@ -979,8 +948,7 @@ footer a{
 
       <button
         class="checkoutbtn"
-        onclick="openCheckout()"
-      >
+        onclick="openCheckout()">
         PROCEED TO CHECKOUT
       </button>
 
@@ -990,125 +958,260 @@ footer a{
 
 </div>
 
+<!-- AUTH MODAL -->
+
+<div
+  id="accountModal"
+  class="modal">
+
+  <div class="modalbox">
+
+    <div class="modalhead">
+
+      <h2 id="authTitle">
+        Customer Account
+      </h2>
+
+      <button
+        class="close"
+        onclick="closeAccount()">
+        ×
+      </button>
+
+    </div>
+
+    <div id="authArea">
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          onclick="showLogin()">
+          LOGIN
+        </button>
+
+        <button
+          id="registerTab"
+          class="auth-tab"
+          onclick="showRegister()">
+          REGISTER
+        </button>
+
+      </div>
+
+      <!-- LOGIN -->
+
+      <div id="loginForm">
+
+        <div class="formgroup">
+
+          <label>Email</label>
+
+          <input
+            id="loginEmail"
+            type="email"
+            placeholder="Enter email">
+
+        </div>
+
+        <div class="formgroup">
+
+          <label>Password</label>
+
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Enter password">
+
+        </div>
+
+        <button
+          class="authbtn"
+          onclick="customerLogin()">
+          LOGIN
+        </button>
+
+        <div
+          id="loginMessage"
+          class="auth-message">
+        </div>
+
+        <p
+          style="text-align:center;margin-top:15px;font-size:13px;color:#777">
+          New customer?
+          <button
+            onclick="showRegister()"
+            style="border:0;background:none;text-decoration:underline">
+            Create account
+          </button>
+        </p>
+
+      </div>
+
+      <!-- REGISTER -->
+
+      <div
+        id="registerForm"
+        style="display:none">
+
+        <div class="formgroup">
+
+          <label>Full Name</label>
+
+          <input
+            id="registerName"
+            type="text"
+            placeholder="Your full name">
+
+        </div>
+
+        <div class="formgroup">
+
+          <label>Email</label>
+
+          <input
+            id="registerEmail"
+            type="email"
+            placeholder="Your email">
+
+        </div>
+
+        <div class="formgroup">
+
+          <label>Mobile Number</label>
+
+          <input
+            id="registerPhone"
+            type="tel"
+            maxlength="10"
+            placeholder="10-digit mobile number">
+
+        </div>
+
+        <div class="formgroup">
+
+          <label>Password</label>
+
+          <input
+            id="registerPassword"
+            type="password"
+            placeholder="Minimum 6 characters">
+
+        </div>
+
+        <button
+          class="authbtn"
+          onclick="customerRegister()">
+          CREATE ACCOUNT
+        </button>
+
+        <div
+          id="registerMessage"
+          class="auth-message">
+        </div>
+
+        <p
+          style="text-align:center;margin-top:15px;font-size:13px;color:#777">
+          Already have an account?
+          <button
+            onclick="showLogin()"
+            style="border:0;background:none;text-decoration:underline">
+            Login
+          </button>
+        </p>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
 
 <!-- CHECKOUT -->
 
 <div
   id="checkoutModal"
-  class="modal"
->
+  class="modal">
 
   <div class="modalbox">
 
     <div class="modalhead">
 
-      <h2>
-        Checkout
-      </h2>
+      <h2>Checkout</h2>
 
       <button
         class="close"
-        onclick="closeCheckout()"
-      >
+        onclick="closeCheckout()">
         ×
       </button>
 
     </div>
 
-    <div class="formgroup">
+    <div id="checkoutLoginNotice"
+      style="display:none;text-align:center;padding:15px;background:#f5f5f5;border-radius:7px;margin-bottom:15px">
 
-      <label>
-        Full Name
-      </label>
+      <b>Login required</b>
 
-      <input
-        id="customerName"
-        type="text"
-        placeholder="Enter your name"
-      >
-
-    </div>
-
-    <div class="formgroup">
-
-      <label>
-        Mobile Number
-      </label>
-
-      <input
-        id="customerPhone"
-        type="tel"
-        maxlength="10"
-        placeholder="10-digit mobile number"
-      >
-
-    </div>
-
-    <div class="formgroup">
-
-      <label>
-        Delivery Address
-      </label>
-
-      <textarea
-        id="customerAddress"
-        placeholder="Enter complete delivery address"
-      ></textarea>
-
-    </div>
-
-    <div
-      id="checkoutMessage"
-      style="font-size:13px;margin-bottom:10px"
-    ></div>
-
-    <button
-      class="placeorder"
-      onclick="placeOrder()"
-    >
-      PLACE ORDER
-    </button>
-
-  </div>
-
-</div>
-
-
-<!-- ACCOUNT -->
-
-<div
-  id="accountModal"
-  class="modal"
->
-
-  <div class="modalbox">
-
-    <div class="modalhead">
-
-      <h2>
-        Shrivi Account
-      </h2>
-
-      <button
-        class="close"
-        onclick="closeAccount()"
-      >
-        ×
-      </button>
-
-    </div>
-
-    <div id="accountContent">
-
-      <p class="muted">
-        Customer account features are being connected.
+      <p
+        style="font-size:13px;color:#777;margin-top:6px">
+        Please login to place your order.
       </p>
 
       <button
-        class="primary"
-        onclick="window.location.href='/app'"
-      >
-        OPEN SHRIVI APP
+        class="authbtn"
+        onclick="closeCheckout();openAccount()">
+        LOGIN / REGISTER
+      </button>
+
+    </div>
+
+    <div id="checkoutForm">
+
+      <div class="formgroup">
+
+        <label>Full Name</label>
+
+        <input
+          id="customerName"
+          type="text"
+          placeholder="Enter your name">
+
+      </div>
+
+      <div class="formgroup">
+
+        <label>Mobile Number</label>
+
+        <input
+          id="customerPhone"
+          type="tel"
+          maxlength="10"
+          placeholder="10-digit mobile number">
+
+      </div>
+
+      <div class="formgroup">
+
+        <label>Delivery Address</label>
+
+        <textarea
+          id="customerAddress"
+          placeholder="Enter complete delivery address">
+        </textarea>
+
+      </div>
+
+      <div
+        id="checkoutMessage"
+        style="font-size:13px;margin-bottom:10px">
+      </div>
+
+      <button
+        class="placeorder"
+        onclick="placeOrder()">
+        PLACE ORDER
       </button>
 
     </div>
@@ -1117,27 +1220,653 @@ footer a{
 
 </div>
 
+<!-- ORDERS -->
+
+<div
+  id="ordersModal"
+  class="modal">
+
+  <div class="modalbox">
+
+    <div class="modalhead">
+
+      <h2>My Orders</h2>
+
+      <button
+        class="close"
+        onclick="closeOrders()">
+        ×
+      </button>
+
+    </div>
+
+    <div id="ordersContent">
+      Loading orders...
+    </div>
+
+  </div>
+
+</div>
 
 <script>
 
-/* =========================================
-   SHRIVI CUSTOMER JAVASCRIPT
-   PART 2 CONTINUES BELOW
-   ========================================= */
+/* ==========================================
+   SHRIVI CUSTOMER SYSTEM
+========================================== */
 
 let products = [];
 let cart = [];
+let currentCustomer = null;
 
 try{
   cart = JSON.parse(
     localStorage.getItem("shrivi_cart") || "[]"
   );
-}catch(error){
+}catch(e){
   cart = [];
 }
 
 updateCartCount();
 
+/* ==========================================
+   CUSTOMER AUTH
+========================================== */
+
+async function checkCustomer(){
+
+  try{
+
+    const response =
+      await fetch("/api/customer/me",{
+        credentials:"include"
+      });
+
+    if(!response.ok){
+
+      currentCustomer = null;
+      updateAccountButton();
+      return;
+
+    }
+
+    const data =
+      await response.json();
+
+    currentCustomer =
+      data.customer ||
+      data.user ||
+      data;
+
+    updateAccountButton();
+
+  }catch(error){
+
+    console.log("Customer session check failed");
+
+    currentCustomer = null;
+
+    updateAccountButton();
+
+  }
+
+}
+
+
+function updateAccountButton(){
+
+  const button =
+    document.getElementById("accountButton");
+
+  if(!button) return;
+
+  if(currentCustomer){
+
+    const name =
+      currentCustomer.name ||
+      currentCustomer.full_name ||
+      currentCustomer.email ||
+      "Account";
+
+    button.textContent =
+      "👤 " +
+      String(name).split(" ")[0];
+
+  }else{
+
+    button.textContent =
+      "👤 Login";
+
+  }
+
+}
+
+
+function openAccount(){
+
+  document
+    .getElementById("accountModal")
+    .classList.add("show");
+
+  renderAccount();
+
+}
+
+
+function closeAccount(){
+
+  document
+    .getElementById("accountModal")
+    .classList.remove("show");
+
+}
+
+
+function renderAccount(){
+
+  const area =
+    document.getElementById("authArea");
+
+  const title =
+    document.getElementById("authTitle");
+
+  if(!currentCustomer){
+
+    title.textContent =
+      "Customer Account";
+
+    area.innerHTML = `
+
+      <div class="auth-tabs">
+
+        <button
+          id="loginTab"
+          class="auth-tab active"
+          onclick="showLogin()">
+          LOGIN
+        </button>
+
+        <button
+          id="registerTab"
+          class="auth-tab"
+          onclick="showRegister()">
+          REGISTER
+        </button>
+
+      </div>
+
+      <div id="loginForm">
+
+        <div class="formgroup">
+          <label>Email</label>
+          <input
+            id="loginEmail"
+            type="email"
+            placeholder="Enter email">
+        </div>
+
+        <div class="formgroup">
+          <label>Password</label>
+          <input
+            id="loginPassword"
+            type="password"
+            placeholder="Enter password">
+        </div>
+
+        <button
+          class="authbtn"
+          onclick="customerLogin()">
+          LOGIN
+        </button>
+
+        <div
+          id="loginMessage"
+          class="auth-message">
+        </div>
+
+        <p style="text-align:center;margin-top:15px;font-size:13px;color:#777">
+          New customer?
+          <button
+            onclick="showRegister()"
+            style="border:0;background:none;text-decoration:underline">
+            Create account
+          </button>
+        </p>
+
+      </div>
+
+      <div
+        id="registerForm"
+        style="display:none">
+
+        <div class="formgroup">
+          <label>Full Name</label>
+          <input
+            id="registerName"
+            type="text"
+            placeholder="Your full name">
+        </div>
+
+        <div class="formgroup">
+          <label>Email</label>
+          <input
+            id="registerEmail"
+            type="email"
+            placeholder="Your email">
+        </div>
+
+        <div class="formgroup">
+          <label>Mobile Number</label>
+          <input
+            id="registerPhone"
+            type="tel"
+            maxlength="10"
+            placeholder="10-digit mobile number">
+        </div>
+
+        <div class="formgroup">
+          <label>Password</label>
+          <input
+            id="registerPassword"
+            type="password"
+            placeholder="Minimum 6 characters">
+        </div>
+
+        <button
+          class="authbtn"
+          onclick="customerRegister()">
+          CREATE ACCOUNT
+        </button>
+
+        <div
+          id="registerMessage"
+          class="auth-message">
+        </div>
+
+        <p style="text-align:center;margin-top:15px;font-size:13px;color:#777">
+          Already have an account?
+          <button
+            onclick="showLogin()"
+            style="border:0;background:none;text-decoration:underline">
+            Login
+          </button>
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+  }
+
+
+  const name =
+    currentCustomer.name ||
+    currentCustomer.full_name ||
+    "Customer";
+
+  const email =
+    currentCustomer.email ||
+    "";
+
+  title.textContent =
+    "My Account";
+
+  area.innerHTML = `
+
+    <div class="account-card">
+
+      <div class="account-avatar">
+        ${escapeHtml(name.charAt(0).toUpperCase())}
+      </div>
+
+      <h3>
+        ${escapeHtml(name)}
+      </h3>
+
+      <p
+        class="muted"
+        style="margin-top:5px">
+        ${escapeHtml(email)}
+      </p>
+
+      <button
+        class="authbtn"
+        onclick="openOrders()">
+        📦 MY ORDERS
+      </button>
+
+      <button
+        class="secondarybtn"
+        onclick="customerLogout()">
+        LOGOUT
+      </button>
+
+      <div
+        id="accountMessage"
+        class="auth-message">
+      </div>
+
+    </div>
+
+  `;
+
+}
+
+
+function showLogin(){
+
+  const login =
+    document.getElementById("loginForm");
+
+  const register =
+    document.getElementById("registerForm");
+
+  if(!login || !register) return;
+
+  login.style.display =
+    "block";
+
+  register.style.display =
+    "none";
+
+  const lt =
+    document.getElementById("loginTab");
+
+  const rt =
+    document.getElementById("registerTab");
+
+  if(lt) lt.classList.add("active");
+  if(rt) rt.classList.remove("active");
+
+}
+
+
+function showRegister(){
+
+  const login =
+    document.getElementById("loginForm");
+
+  const register =
+    document.getElementById("registerForm");
+
+  if(!login || !register) return;
+
+  login.style.display =
+    "none";
+
+  register.style.display =
+    "block";
+
+  const lt =
+    document.getElementById("loginTab");
+
+  const rt =
+    document.getElementById("registerTab");
+
+  if(lt) lt.classList.remove("active");
+  if(rt) rt.classList.add("active");
+
+}
+
+
+async function customerLogin(){
+
+  const email =
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("loginPassword")
+      .value;
+
+  const message =
+    document.getElementById("loginMessage");
+
+  message.style.color =
+    "#b00020";
+
+  if(!email || !password){
+
+    message.textContent =
+      "Please enter email and password.";
+
+    return;
+  }
+
+  message.textContent =
+    "Logging in...";
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/customer/login",
+        {
+          method:"POST",
+          credentials:"include",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+          body:JSON.stringify({
+            email,
+            password
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Login failed"
+      );
+
+    }
+
+    currentCustomer =
+      data.customer ||
+      data.user ||
+      data;
+
+    updateAccountButton();
+
+    renderAccount();
+
+    message.textContent =
+      "";
+
+    alert("Login successful!");
+
+  }catch(error){
+
+    console.error(error);
+
+    message.style.color =
+      "#b00020";
+
+    message.textContent =
+      error.message ||
+      "Login failed.";
+
+  }
+
+}
+
+
+async function customerRegister(){
+
+  const name =
+    document
+      .getElementById("registerName")
+      .value
+      .trim();
+
+  const email =
+    document
+      .getElementById("registerEmail")
+      .value
+      .trim();
+
+  const phone =
+    document
+      .getElementById("registerPhone")
+      .value
+      .trim();
+
+  const password =
+    document
+      .getElementById("registerPassword")
+      .value;
+
+  const message =
+    document
+      .getElementById("registerMessage");
+
+  message.style.color =
+    "#b00020";
+
+  if(!name){
+
+    message.textContent =
+      "Please enter your name.";
+
+    return;
+  }
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
+    message.textContent =
+      "Enter a valid email.";
+
+    return;
+  }
+
+  if(phone && !/^[0-9]{10}$/.test(phone)){
+
+    message.textContent =
+      "Enter a valid 10-digit mobile number.";
+
+    return;
+  }
+
+  if(password.length < 6){
+
+    message.textContent =
+      "Password must be at least 6 characters.";
+
+    return;
+  }
+
+  message.style.color =
+    "#555";
+
+  message.textContent =
+    "Creating account...";
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/customer/register",
+        {
+          method:"POST",
+          credentials:"include",
+          headers:{
+            "Content-Type":
+              "application/json"
+          },
+          body:JSON.stringify({
+            name,
+            email,
+            phone,
+            password
+          })
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        data.message ||
+        "Registration failed"
+      );
+
+    }
+
+    currentCustomer =
+      data.customer ||
+      data.user ||
+      data;
+
+    updateAccountButton();
+
+    renderAccount();
+
+    alert(
+      "Customer account created successfully!"
+    );
+
+  }catch(error){
+
+    console.error(error);
+
+    message.style.color =
+      "#b00020";
+
+    message.textContent =
+      error.message ||
+      "Registration failed.";
+
+  }
+
+}
+
+
+async function customerLogout(){
+
+  try{
+
+    await fetch(
+      "/api/customer/logout",
+      {
+        method:"POST",
+        credentials:"include"
+      }
+    );
+
+  }catch(error){
+
+    console.log(error);
+
+  }
+
+  currentCustomer =
+    null;
+
+  updateAccountButton();
+
+  renderAccount();
+
+  alert("Logged out successfully.");
+
+}
+
+
+/* ==========================================
+   PRODUCTS
+========================================== */
 
 async function loadProducts(){
 
@@ -1147,7 +1876,9 @@ async function loadProducts(){
   try{
 
     const response =
-      await fetch("/api/products");
+      await fetch("/api/products",{
+        credentials:"include"
+      });
 
     if(!response.ok){
       throw new Error("Products API failed");
@@ -1158,7 +1889,9 @@ async function loadProducts(){
 
     renderProducts(products);
 
-    document.getElementById("productStatus").textContent =
+    document
+      .getElementById("productStatus")
+      .textContent =
       products.length + " products";
 
   }catch(error){
@@ -1172,9 +1905,13 @@ async function loadProducts(){
       </div>
     `;
 
-    document.getElementById("productStatus").textContent =
+    document
+      .getElementById("productStatus")
+      .textContent =
       "Unable to load products";
+
   }
+
 }
 
 
@@ -1195,7 +1932,6 @@ function renderProducts(list){
     return;
   }
 
-
   container.innerHTML =
     list.map(product => {
 
@@ -1203,10 +1939,17 @@ function renderProducts(list){
         Number(product.price) || 0;
 
       const salePrice =
-        Number(product.sale_price) || price;
+        Number(
+          product.sale_price
+        ) || price;
 
       const discount =
-        Number(product.discount_percent) || 0;
+        Number(
+          product.discount_percent
+        ) || 0;
+
+      const stock =
+        Number(product.stock);
 
       const image =
         product.image || "";
@@ -1221,14 +1964,12 @@ function renderProducts(list){
               image
               ?
               `<img
-                 src="${escapeHtml(image)}"
-                 alt="${escapeHtml(product.name || "Shrivi product")}"
-                 onerror="this.style.display='none';this.parentElement.innerHTML='<div class=\\'placeholder\\'>🛍️</div>'"
-               >`
+                src="${escapeHtml(image)}"
+                alt="${escapeHtml(product.name || "Shrivi product")}"
+                onerror="this.style.display='none'">
+              `
               :
-              `<div class="placeholder">
-                 🛍️
-               </div>`
+              `<div class="placeholder">🛍️</div>`
             }
 
           </div>
@@ -1236,11 +1977,18 @@ function renderProducts(list){
           <div class="productinfo">
 
             <div class="productname">
-              ${escapeHtml(product.name || "Product")}
+              ${escapeHtml(
+                product.name ||
+                "Product"
+              )}
             </div>
 
             <div class="seller">
-              Sold by ${escapeHtml(product.seller_name || "Shrivi")}
+              Sold by
+              ${escapeHtml(
+                product.seller_name ||
+                "Shrivi"
+              )}
             </div>
 
             <div class="price">
@@ -1250,32 +1998,54 @@ function renderProducts(list){
               ${
                 discount > 0
                 ?
-                `<span class="oldprice">
-                   ₹${formatMoney(price)}
-                 </span>
+                `
+                <span class="oldprice">
+                  ₹${formatMoney(price)}
+                </span>
 
-                 <span class="discount">
-                   ${formatMoney(discount)}% OFF
-                 </span>`
+                <span class="discount">
+                  ${formatMoney(discount)}% OFF
+                </span>
+                `
                 :
                 ""
               }
 
             </div>
 
+            <div class="stock">
+              ${
+                stock > 0
+                ? stock + " in stock"
+                : "Out of stock"
+              }
+            </div>
+
             <button
               class="addcart"
-              onclick="addToCart(${Number(product.id)})"
-            >
-              ADD TO CART
+              ${
+                stock <= 0
+                ? "disabled"
+                : ""
+              }
+              onclick="addToCart(${Number(product.id)})">
+
+              ${
+                stock <= 0
+                ? "OUT OF STOCK"
+                : "ADD TO CART"
+              }
+
             </button>
 
           </div>
 
         </div>
+
       `;
 
     }).join("");
+
 }
 
 
@@ -1312,6 +2082,7 @@ function searchProducts(){
     });
 
   renderProducts(filtered);
+
 }
 
 
@@ -1319,52 +2090,37 @@ function filterCategory(category){
 
   document
     .getElementById("searchInput")
-    .value = category;
+    .value =
+    category;
 
-  const value =
-    category.toLowerCase();
-
-  const filtered =
-    products.filter(product =>
-      String(product.category || "")
-        .toLowerCase()
-        .includes(value)
-    );
-
-  if(!filtered.length){
-
-    const fallback =
-      products.filter(product =>
-        String(product.name || "")
-          .toLowerCase()
-          .includes(value)
-      );
-
-    renderProducts(fallback);
-
-  }else{
-
-    renderProducts(filtered);
-
-  }
+  searchProducts();
 
   document
     .getElementById("shop")
     .scrollIntoView({
       behavior:"smooth"
     });
+
 }
 
+
+/* ==========================================
+   CART
+========================================== */
 
 function addToCart(id){
 
   const product =
     products.find(
-      p => Number(p.id) === Number(id)
+      p =>
+        Number(p.id) ===
+        Number(id)
     );
 
   if(!product){
-    alert("Product not found");
+
+    alert("Product not found.");
+
     return;
   }
 
@@ -1372,23 +2128,31 @@ function addToCart(id){
     Number(product.stock);
 
   if(stock <= 0){
+
     alert("This product is out of stock.");
+
     return;
   }
 
   const existing =
     cart.find(
       item =>
-        Number(item.id) === Number(id)
+        Number(item.id) ===
+        Number(id)
     );
 
   if(existing){
 
-    if(existing.quantity >= stock){
+    if(
+      existing.quantity >=
+      stock
+    ){
 
-      alert("Maximum available stock reached.");
+      alert(
+        "Maximum available stock reached."
+      );
+
       return;
-
     }
 
     existing.quantity++;
@@ -1396,12 +2160,23 @@ function addToCart(id){
   }else{
 
     cart.push({
+
       id:Number(product.id),
+
       name:product.name,
-      price:Number(product.sale_price || product.price || 0),
+
+      price:Number(
+        product.sale_price ||
+        product.price ||
+        0
+      ),
+
       image:product.image || "",
+
       quantity:1,
+
       stock:stock
+
     });
 
   }
@@ -1418,7 +2193,8 @@ function removeFromCart(id){
   cart =
     cart.filter(
       item =>
-        Number(item.id) !== Number(id)
+        Number(item.id) !==
+        Number(id)
     );
 
   saveCart();
@@ -1428,25 +2204,24 @@ function removeFromCart(id){
 }
 
 
-function changeQuantity(id, change){
+function changeQuantity(id,change){
 
   const item =
     cart.find(
       item =>
-        Number(item.id) === Number(id)
+        Number(item.id) ===
+        Number(id)
     );
 
-  if(!item){
-    return;
-  }
+  if(!item) return;
 
   item.quantity += change;
 
   if(item.quantity <= 0){
 
     removeFromCart(id);
-    return;
 
+    return;
   }
 
   if(item.quantity > item.stock){
@@ -1486,15 +2261,23 @@ function updateCartCount(){
   const total =
     cart.reduce(
       (sum,item) =>
-        sum + Number(item.quantity || 0),
+        sum +
+        Number(
+          item.quantity || 0
+        ),
       0
     );
 
   const badge =
-    document.getElementById("cartCount");
+    document.getElementById(
+      "cartCount"
+    );
 
   if(badge){
-    badge.textContent = total;
+
+    badge.textContent =
+      total;
+
   }
 
 }
@@ -1505,10 +2288,8 @@ function getCartTotal(){
   return cart.reduce(
     (sum,item) =>
       sum +
-      (
-        Number(item.price || 0) *
-        Number(item.quantity || 0)
-      ),
+      Number(item.price || 0) *
+      Number(item.quantity || 0),
     0
   );
 
@@ -1518,20 +2299,22 @@ function getCartTotal(){
 function renderCart(){
 
   const container =
-    document.getElementById("cartItems");
+    document.getElementById(
+      "cartItems"
+    );
 
   const totalBox =
-    document.getElementById("cartTotalBox");
-
-  const total =
-    getCartTotal();
-
+    document.getElementById(
+      "cartTotalBox"
+    );
 
   if(!cart.length){
 
     container.innerHTML = `
       <div class="empty">
-        <div style="font-size:45px">🛒</div>
+        <div style="font-size:45px">
+          🛒
+        </div>
         <h3>Your cart is empty</h3>
         <p>Add products to your cart.</p>
       </div>
@@ -1543,38 +2326,29 @@ function renderCart(){
     return;
   }
 
-
   totalBox.style.display =
     "block";
 
-
   container.innerHTML =
     cart.map(item => {
-
-      const image =
-        item.image || "";
 
       return `
 
         <div class="cartitem">
 
-          ${
-            image
-            ?
-            `<img
-              src="${escapeHtml(image)}"
-              alt=""
-              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-            >`
-            :
-            ""
-          }
+          <div class="cartitempic">
 
-          <div
-            class="cartitempic"
-            style="${image ? "display:none" : ""}"
-          >
-            🛍️
+            ${
+              item.image
+              ?
+              `<img
+                src="${escapeHtml(item.image)}"
+                onerror="this.style.display='none'">
+              `
+              :
+              "🛍️"
+            }
+
           </div>
 
           <div class="cartdetails">
@@ -1590,8 +2364,7 @@ function renderCart(){
             <div class="qty">
 
               <button
-                onclick="changeQuantity(${item.id},-1)"
-              >
+                onclick="changeQuantity(${item.id},-1)">
                 −
               </button>
 
@@ -1600,8 +2373,7 @@ function renderCart(){
               </span>
 
               <button
-                onclick="changeQuantity(${item.id},1)"
-              >
+                onclick="changeQuantity(${item.id},1)">
                 +
               </button>
 
@@ -1609,8 +2381,7 @@ function renderCart(){
 
             <button
               class="remove"
-              onclick="removeFromCart(${item.id})"
-            >
+              onclick="removeFromCart(${item.id})">
               Remove
             </button>
 
@@ -1622,9 +2393,13 @@ function renderCart(){
 
     }).join("");
 
-
-  document.getElementById("cartTotal").textContent =
-    "₹" + formatMoney(total);
+  document
+    .getElementById("cartTotal")
+    .textContent =
+    "₹" +
+    formatMoney(
+      getCartTotal()
+    );
 
 }
 
@@ -1663,18 +2438,86 @@ function closeCartOutside(event){
 }
 
 
+/* ==========================================
+   CHECKOUT
+========================================== */
+
 function openCheckout(){
 
   if(!cart.length){
 
     alert("Your cart is empty.");
-    return;
 
+    return;
   }
 
   document
     .getElementById("checkoutModal")
     .classList.add("show");
+
+  const notice =
+    document.getElementById(
+      "checkoutLoginNotice"
+    );
+
+  const form =
+    document.getElementById(
+      "checkoutForm"
+    );
+
+  if(!currentCustomer){
+
+    notice.style.display =
+      "block";
+
+    form.style.display =
+      "none";
+
+    return;
+
+  }
+
+  notice.style.display =
+    "none";
+
+  form.style.display =
+    "block";
+
+  fillCustomerDetails();
+
+}
+
+
+function fillCustomerDetails(){
+
+  if(!currentCustomer)
+    return;
+
+  const name =
+    currentCustomer.name ||
+    currentCustomer.full_name ||
+    "";
+
+  const phone =
+    currentCustomer.phone ||
+    currentCustomer.mobile ||
+    "";
+
+  const nameInput =
+    document.getElementById(
+      "customerName"
+    );
+
+  const phoneInput =
+    document.getElementById(
+      "customerPhone"
+    );
+
+  if(nameInput && !nameInput.value)
+    nameInput.value = name;
+
+  if(phoneInput && !phoneInput.value)
+    phoneInput.value = phone;
 
 }
 
@@ -1689,6 +2532,15 @@ function closeCheckout(){
 
 
 async function placeOrder(){
+
+  if(!currentCustomer){
+
+    closeCheckout();
+
+    openAccount();
+
+    return;
+  }
 
   const name =
     document
@@ -1713,10 +2565,8 @@ async function placeOrder(){
       "checkoutMessage"
     );
 
-
   message.style.color =
     "#b00020";
-
 
   if(!name){
 
@@ -1724,9 +2574,7 @@ async function placeOrder(){
       "Please enter your name.";
 
     return;
-
   }
-
 
   if(!/^[0-9]{10}$/.test(phone)){
 
@@ -1734,9 +2582,7 @@ async function placeOrder(){
       "Enter a valid 10-digit mobile number.";
 
     return;
-
   }
-
 
   if(!address){
 
@@ -1744,19 +2590,7 @@ async function placeOrder(){
       "Please enter your delivery address.";
 
     return;
-
   }
-
-
-  if(!cart.length){
-
-    message.textContent =
-      "Your cart is empty.";
-
-    return;
-
-  }
-
 
   const items =
     cart.map(item => ({
@@ -1764,13 +2598,11 @@ async function placeOrder(){
       quantity:Number(item.quantity)
     }));
 
-
   message.style.color =
     "#555";
 
   message.textContent =
     "Placing your order...";
-
 
   try{
 
@@ -1779,6 +2611,7 @@ async function placeOrder(){
         "/api/orders",
         {
           method:"POST",
+          credentials:"include",
           headers:{
             "Content-Type":
               "application/json"
@@ -1792,20 +2625,18 @@ async function placeOrder(){
         }
       );
 
-
     const data =
       await response.json();
-
 
     if(!response.ok){
 
       throw new Error(
         data.error ||
+        data.message ||
         "Order failed"
       );
 
     }
-
 
     cart = [];
 
@@ -1815,28 +2646,20 @@ async function placeOrder(){
 
     closeCart();
 
-
     alert(
-      "Order placed successfully! Order ID: " +
-      data.order.id
+      "Order placed successfully!\nOrder ID: " +
+      (
+        data.order?.id ||
+        data.id ||
+        ""
+      )
     );
-
-
-    document.getElementById(
-      "customerName"
-    ).value = "";
-
-    document.getElementById(
-      "customerPhone"
-    ).value = "";
 
     document.getElementById(
       "customerAddress"
     ).value = "";
 
-
     await loadProducts();
-
 
   }catch(error){
 
@@ -1854,23 +2677,156 @@ async function placeOrder(){
 }
 
 
-function openAccount(){
+/* ==========================================
+   ORDERS
+========================================== */
+
+async function openOrders(){
+
+  if(!currentCustomer){
+
+    openAccount();
+
+    return;
+  }
+
+  closeAccount();
 
   document
-    .getElementById("accountModal")
+    .getElementById("ordersModal")
     .classList.add("show");
+
+  const content =
+    document.getElementById(
+      "ordersContent"
+    );
+
+  content.innerHTML =
+    `<div class="loading">Loading orders...</div>`;
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/customer/orders",
+        {
+          credentials:"include"
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data.error ||
+        "Unable to load orders."
+      );
+
+    }
+
+    const orders =
+      Array.isArray(data)
+      ? data
+      : (
+          data.orders ||
+          []
+        );
+
+    if(!orders.length){
+
+      content.innerHTML = `
+        <div class="empty">
+          <div style="font-size:45px">
+            📦
+          </div>
+          <h3>No orders yet</h3>
+          <p>Your orders will appear here.</p>
+        </div>
+      `;
+
+      return;
+    }
+
+    content.innerHTML =
+      orders.map(order => `
+
+        <div class="order-card">
+
+          <div style="display:flex;justify-content:space-between;gap:10px">
+
+            <b>
+              Order #${escapeHtml(order.id)}
+            </b>
+
+            <span class="order-status">
+              ${escapeHtml(
+                order.status ||
+                "Pending"
+              )}
+            </span>
+
+          </div>
+
+          <div
+            style="margin-top:8px;font-size:13px;color:#777">
+
+            ${
+              order.created_at
+              ?
+              new Date(
+                order.created_at
+              ).toLocaleString("en-IN")
+              :
+              ""
+            }
+
+          </div>
+
+          <div
+            style="margin-top:8px;font-weight:bold">
+
+            ₹${formatMoney(
+              order.total ||
+              order.total_amount ||
+              0
+            )}
+
+          </div>
+
+        </div>
+
+      `).join("");
+
+  }catch(error){
+
+    console.error(error);
+
+    content.innerHTML = `
+      <div class="empty">
+        <h3>Unable to load orders</h3>
+        <p>${escapeHtml(error.message)}</p>
+      </div>
+    `;
+
+  }
 
 }
 
 
-function closeAccount(){
+function closeOrders(){
 
   document
-    .getElementById("accountModal")
+    .getElementById("ordersModal")
     .classList.remove("show");
 
 }
 
+
+/* ==========================================
+   HELPERS
+========================================== */
 
 function formatMoney(value){
 
@@ -1888,17 +2844,23 @@ function formatMoney(value){
 
 function escapeHtml(value){
 
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+  return String(
+    value ?? ""
+  )
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
 
 }
 
 
-/* START */
+/* ==========================================
+   START
+========================================== */
+
+checkCustomer();
 
 loadProducts();
 
