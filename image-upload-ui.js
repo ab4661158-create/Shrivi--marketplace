@@ -1,191 +1,459 @@
 (() => {
-  const isSeller = location.pathname === '/seller';
-  const createUrl = isSeller ? '/api/seller/products' : '/api/products';
-  const imageUrl = isSeller ? '/api/seller/products/' : '/api/admin/products/';
-  let pendingFile = null;
-  let pendingStatus = null;
-  let fetchHookInstalled = false;
+  "use strict";
 
-  const okTypes = ['image/jpeg', 'image/png', 'image/webp'];
+  const MAX_SIZE = 5 * 1024 * 1024;
+  const ALLOWED_TYPES = [
+    "image/jpeg",
+    "image/png",
+    "image/webp"
+  ];
 
-  function makeUploadBox(label, onFile) {
-    const box = document.createElement('div');
-    box.className = 'shrivi-image-upload-box';
-    box.style.cssText = 'margin-top:10px;padding:12px;border:1px solid #d1d5db;border-radius:9px;background:#f9fafb;display:block';
+  function showMessage(message, type = "info") {
+    let box = document.getElementById(
+      "shrivi-image-upload-message"
+    );
 
-    const labelEl = document.createElement('label');
-    labelEl.textContent = label;
-    labelEl.style.cssText = 'display:block;font-weight:bold;margin-bottom:8px';
+    if (!box) {
+      box = document.createElement("div");
 
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/jpeg,image/png,image/webp';
-    input.style.cssText = 'display:block;width:100%;padding:8px;background:#fff;border:1px solid #d1d5db;border-radius:7px';
+      box.id =
+        "shrivi-image-upload-message";
 
-    const status = document.createElement('div');
-    status.style.cssText = 'margin-top:8px;font-size:13px;min-height:18px';
+      box.style.cssText = `
+        position:fixed;
+        right:20px;
+        bottom:20px;
+        z-index:999999;
+        max-width:360px;
+        padding:14px 18px;
+        border-radius:12px;
+        background:#111;
+        color:#fff;
+        font-family:Arial,sans-serif;
+        font-size:14px;
+        box-shadow:0 8px 30px rgba(0,0,0,.2);
+      `;
 
-    input.addEventListener('change', () => {
-      const file = input.files && input.files[0];
-      if (!file) return;
-      if (!okTypes.includes(file.type)) {
-        input.value = '';
-        status.textContent = 'Only JPG, PNG and WEBP images are allowed.';
-        status.style.color = '#991b1b';
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        input.value = '';
-        status.textContent = 'Image must be 5MB or smaller.';
-        status.style.color = '#991b1b';
-        return;
-      }
-      onFile(file, status, input);
-    });
+      document.body.appendChild(box);
+    }
 
-    box.append(labelEl, input, status);
-    return { box, input, status };
+    box.textContent = message;
+
+    if (type === "error") {
+      box.style.background = "#b91c1c";
+    } else if (type === "success") {
+      box.style.background = "#15803d";
+    } else {
+      box.style.background = "#111";
+    }
+
+    clearTimeout(
+      box.__shriviTimer
+    );
+
+    box.__shriviTimer =
+      setTimeout(() => {
+        box.remove();
+      }, 3500);
   }
 
-  async function uploadProductImage(id, file, status, input) {
-    if (!id || !file) return false;
-    status.textContent = 'Uploading image...';
-    status.style.color = '#92400e';
-    try {
-      const fd = new FormData();
-      fd.append('image', file);
-      const r = await fetch(imageUrl + encodeURIComponent(id) + '/image', {
-        method: 'POST',
-        body: fd,
-        credentials: 'same-origin'
-      });
-      const data = await r.json().catch(() => ({}));
-      if (!r.ok || !data.ok) throw new Error(data.error || 'Image upload failed');
-      status.textContent = '✓ Image uploaded successfully.';
-      status.style.color = '#166534';
-      if (input) input.value = '';
-      setTimeout(() => location.reload(), 250);
-      return true;
-    } catch (e) {
-      status.textContent = e.message || 'Image upload failed';
-      status.style.color = '#991b1b';
+  function isValidImage(file) {
+    if (!file) {
+      showMessage(
+        "Please select an image.",
+        "error"
+      );
       return false;
+    }
+
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      showMessage(
+        "Only JPG, PNG and WEBP images are allowed.",
+        "error"
+      );
+      return false;
+    }
+
+    if (file.size > MAX_SIZE) {
+      showMessage(
+        "Image must be 5MB or smaller.",
+        "error"
+      );
+      return false;
+    }
+
+    return true;
+  }
+
+  async function uploadImage(
+    url,
+    productId,
+    file,
+    button
+  ) {
+    if (!isValidImage(file)) {
+      return null;
+    }
+
+    const formData =
+      new FormData();
+
+    formData.append(
+      "image",
+      file
+    );
+
+    const originalText =
+      button.textContent;
+
+    button.disabled = true;
+    button.textContent =
+      "Uploading...";
+
+    try {
+      const response =
+        await fetch(
+          url.replace(
+            ":id",
+            encodeURIComponent(
+              productId
+            )
+          ),
+          {
+            method: "POST",
+            body: formData,
+            credentials: "same-origin"
+          }
+        );
+
+      const data =
+        await response
+          .json()
+          .catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ||
+            "Image upload failed"
+        );
+      }
+
+      showMessage(
+        "Image uploaded successfully.",
+        "success"
+      );
+
+      button.textContent =
+        "Uploaded ✓";
+
+      return data;
+    } catch (error) {
+      console.error(
+        "Shrivi image upload:",
+        error
+      );
+
+      showMessage(
+        error.message ||
+          "Image upload failed.",
+        "error"
+      );
+
+      button.textContent =
+        originalText;
+
+      return null;
+    } finally {
+      button.disabled = false;
     }
   }
 
-  function productIdFromButton(btn) {
-    const onclick = btn.getAttribute('onclick') || '';
-    const m = onclick.match(/(?:editProduct|deleteProduct|toggleEdit)\s*\(\s*(\d+)\s*\)/i);
-    if (m) return m[1];
-    const card = btn.closest('.product-card,.product,article,li');
-    if (!card) return null;
-    return card.dataset.productId || card.dataset.id || null;
-  }
+  function createUploader(
+    productId,
+    sellerMode = false
+  ) {
+    const wrapper =
+      document.createElement("div");
 
-  function addNewProductPicker() {
-    const urlInput = document.getElementById('productImage');
-    if (!urlInput || document.getElementById('shrivi-new-image-picker')) return;
+    wrapper.className =
+      "shrivi-image-uploader";
 
-    const holder = document.createElement('div');
-    holder.id = 'shrivi-new-image-picker';
-    const picker = makeUploadBox(
-      'Product Image — select JPG / PNG / WEBP (max 5MB)',
-      (file, status, input) => {
-        pendingFile = file;
-        pendingStatus = status;
-        status.textContent = '✓ Image selected. Click Add Product; image will upload automatically after the product is created.';
-        status.style.color = '#166534';
+    wrapper.style.cssText = `
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      margin-top:8px;
+    `;
+
+    const input =
+      document.createElement("input");
+
+    input.type = "file";
+    input.accept =
+      "image/jpeg,image/png,image/webp";
+    input.style.display = "none";
+
+    const button =
+      document.createElement("button");
+
+    button.type = "button";
+    button.textContent =
+      "Upload Image";
+
+    button.style.cssText = `
+      border:0;
+      border-radius:8px;
+      padding:9px 13px;
+      cursor:pointer;
+      background:#111;
+      color:#fff;
+      font-size:13px;
+    `;
+
+    const filename =
+      document.createElement("span");
+
+    filename.style.cssText = `
+      font-size:12px;
+      color:#666;
+    `;
+
+    button.addEventListener(
+      "click",
+      () => {
+        input.click();
       }
     );
-    holder.appendChild(picker.box);
-    const parent = urlInput.closest('.form-group') || urlInput.parentElement;
-    if (parent) parent.insertAdjacentElement('afterend', holder);
+
+    input.addEventListener(
+      "change",
+      async () => {
+        const file =
+          input.files &&
+          input.files[0];
+
+        if (!file) return;
+
+        filename.textContent =
+          file.name;
+
+        const url =
+          sellerMode
+            ? "/api/seller/products/:id/image"
+            : "/api/admin/products/:id/image";
+
+        const result =
+          await uploadImage(
+            url,
+            productId,
+            file,
+            button
+          );
+
+        if (
+          result &&
+          result.product &&
+          result.product.image
+        ) {
+          updateProductImage(
+            productId,
+            result.product.image
+          );
+
+          input.value = "";
+        }
+      }
+    );
+
+    wrapper.appendChild(
+      input
+    );
+
+    wrapper.appendChild(
+      button
+    );
+
+    wrapper.appendChild(
+      filename
+    );
+
+    return wrapper;
   }
 
-  function addExistingProductPickers() {
-    document.querySelectorAll('button').forEach(btn => {
-      const text = (btn.textContent || '').toLowerCase();
-      const onclick = (btn.getAttribute('onclick') || '').toLowerCase();
-      if (!text.includes('edit product') && !onclick.includes('editproduct') && !onclick.includes('toggleedit')) return;
+  function updateProductImage(
+    productId,
+    imageUrl
+  ) {
+    const selectors = [
+      `[data-product-id="${productId}"] img`,
+      `[data-id="${productId}"] img`,
+      `img[data-product-id="${productId}"]`
+    ];
 
-      const card = btn.closest('.product-card,.product,article,li');
-      if (!card || card.querySelector('.shrivi-existing-image-upload')) return;
+    selectors.forEach(
+      selector => {
+        document
+          .querySelectorAll(
+            selector
+          )
+          .forEach(img => {
+            img.src =
+              imageUrl;
+          });
+      }
+    );
 
-      const id = productIdFromButton(btn);
-      if (!id) return;
+    window.dispatchEvent(
+      new CustomEvent(
+        "shrivi:image-uploaded",
+        {
+          detail: {
+            productId,
+            imageUrl
+          }
+        }
+      )
+    );
+  }
 
-      const target = card.querySelector('.product-content,.product-body,.edit-box') || card;
-      const picker = makeUploadBox(
-        'Upload / Replace Product Image (max 5MB)',
-        (file, status, input) => uploadProductImage(id, file, status, input)
+  function getProductId(element) {
+    if (!element) {
+      return null;
+    }
+
+    const value =
+      element.dataset.productId ||
+      element.dataset.id ||
+      element.getAttribute(
+        "data-product-id"
+      ) ||
+      element.getAttribute(
+        "data-id"
       );
-      picker.box.classList.add('shrivi-existing-image-upload');
-      target.appendChild(picker.box);
+
+    const id =
+      Number(value);
+
+    return Number.isInteger(id) &&
+      id > 0
+      ? id
+      : null;
+  }
+
+  function findProductIdFromRow(
+    row
+  ) {
+    if (!row) {
+      return null;
+    }
+
+    const direct =
+      getProductId(row);
+
+    if (direct) {
+      return direct;
+    }
+
+    const elements =
+      row.querySelectorAll(
+        "[data-product-id],[data-id]"
+      );
+
+    for (const element of elements) {
+      const id =
+        getProductId(element);
+
+      if (id) {
+        return id;
+      }
+    }
+
+    return null;
+  }
+
+  function injectIntoProductRows() {
+    const sellerMode =
+      location.pathname
+        .toLowerCase()
+        .includes("seller");
+
+    const rows =
+      document.querySelectorAll(
+        "tr, .product-card, .product-item, .product-row, [data-product-id], [data-id]"
+      );
+
+    rows.forEach(row => {
+      if (
+        row.querySelector(
+          ".shrivi-image-uploader"
+        )
+      ) {
+        return;
+      }
+
+      const productId =
+        findProductIdFromRow(row);
+
+      if (!productId) {
+        return;
+      }
+
+      const uploader =
+        createUploader(
+          productId,
+          sellerMode
+        );
+
+      row.appendChild(
+        uploader
+      );
     });
   }
 
-  function installCreateHook() {
-    if (fetchHookInstalled) return;
-    fetchHookInstalled = true;
-    const originalFetch = window.fetch.bind(window);
+  function watchPage() {
+    injectIntoProductRows();
 
-    window.fetch = async (input, options = {}) => {
-      const url = typeof input === 'string' ? input : (input && input.url) || '';
-      const method = String(options.method || (typeof input !== 'string' && input && input.method) || 'GET').toUpperCase();
-      const creating = method === 'POST' && (url === createUrl || url.endsWith(createUrl));
-
-      const response = await originalFetch(input, options);
-
-      if (creating && pendingFile) {
-        const file = pendingFile;
-        const status = pendingStatus;
-        pendingFile = null;
-        pendingStatus = null;
-
-        try {
-          const data = await response.clone().json();
-          const id = data?.id || data?.product?.id || data?.data?.id || data?.data?.product?.id;
-          if (!response.ok) return response;
-          if (!id) {
-            if (status) {
-              status.textContent = 'Product created, but product ID was not returned for image upload.';
-              status.style.color = '#991b1b';
-            }
-            return response;
-          }
-          await uploadProductImage(id, file, status || { set textContent(v) {}, style: {} }, null);
-        } catch (e) {
-          if (status) {
-            status.textContent = 'Product created, but image upload failed: ' + (e.message || 'unknown error');
-            status.style.color = '#991b1b';
-          }
+    const observer =
+      new MutationObserver(
+        () => {
+          injectIntoProductRows();
         }
+      );
+
+    observer.observe(
+      document.body,
+      {
+        childList: true,
+        subtree: true
       }
-      return response;
+    );
+  }
+
+  function exposeAPI() {
+    window.ShriviImageUpload = {
+      uploadImage,
+      createUploader,
+      updateProductImage
     };
   }
 
-  function start() {
-    addNewProductPicker();
-    addExistingProductPickers();
-    installCreateHook();
+  function init() {
+    exposeAPI();
 
-    const observer = new MutationObserver(() => {
-      addNewProductPicker();
-      addExistingProductPickers();
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true });
-
-    [300, 1000, 2500, 5000].forEach(ms => setTimeout(() => {
-      addNewProductPicker();
-      addExistingProductPickers();
-      installCreateHook();
-    }, ms));
+    if (
+      document.readyState ===
+      "loading"
+    ) {
+      document.addEventListener(
+        "DOMContentLoaded",
+        watchPage,
+        { once: true }
+      );
+    } else {
+      watchPage();
+    }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start, { once: true });
-  } else {
-    start();
-  }
+  init();
 })();
