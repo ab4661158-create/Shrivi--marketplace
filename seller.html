@@ -8,78 +8,30 @@
 
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-
-body{
-  font-family:Arial,Helvetica,sans-serif;
-  background:#f3f4f6;
-  color:#111827;
-}
-
+body{font-family:Arial,Helvetica,sans-serif;background:#f3f4f6;color:#111827}
 button,input,textarea,select{font:inherit}
 button{border:0;cursor:pointer;font-weight:700}
 .hidden{display:none!important}
 
-header{
-  background:#111827;
-  color:#fff;
-  position:sticky;
-  top:0;
-  z-index:100;
-  box-shadow:0 2px 12px rgba(0,0,0,.15);
-}
-
-.header-inner{
-  max-width:1200px;
-  margin:auto;
-  min-height:68px;
-  padding:12px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:15px;
-}
-
+header{background:#111827;color:#fff;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header-inner{max-width:1200px;margin:auto;min-height:68px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;gap:15px}
 .brand{display:flex;align-items:center;gap:10px}
-.brand-icon{
-  width:40px;height:40px;border-radius:10px;
-  background:#2563eb;display:flex;
-  align-items:center;justify-content:center;font-size:21px;
-}
+.brand-icon{width:40px;height:40px;border-radius:10px;background:#2563eb;display:flex;align-items:center;justify-content:center;font-size:21px}
 .brand-title{font-size:20px;font-weight:800}
 .brand-sub{color:#9ca3af;font-size:12px;margin-top:2px}
-
 .header-user{display:flex;align-items:center;gap:12px}
 .seller-name{font-size:14px;color:#e5e7eb}
 .logout{background:#ef4444;color:#fff;padding:10px 14px;border-radius:8px}
 
 .container{max-width:1200px;margin:auto;padding:20px}
-
-.card{
-  background:#fff;border-radius:16px;padding:20px;
-  box-shadow:0 3px 16px rgba(0,0,0,.06);
-  margin-bottom:18px;
-}
-
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 3px 16px rgba(0,0,0,.06);margin-bottom:18px}
 .auth-card{max-width:480px;margin:50px auto}
 h1,h2,h3{margin-bottom:10px}
 p{line-height:1.5}
 
-label{
-  display:block;font-weight:700;font-size:14px;
-  margin-top:12px;margin-bottom:5px;
-}
-
-input,textarea,select{
-  width:100%;padding:12px 13px;
-  border:1px solid #d1d5db;border-radius:9px;
-  outline:none;background:#fff;
-}
-
-input:focus,textarea:focus,select:focus{
-  border-color:#2563eb;
-  box-shadow:0 0 0 3px rgba(37,99,235,.1);
-}
-
+label{display:block;font-weight:700;font-size:14px;margin-top:12px;margin-bottom:5px}
+input,textarea,select{width:100%;padding:12px 13px;border:1px solid #d1d5db;border-radius:9px;outline:none;background:#fff}
+input:focus,textarea:focus,select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,.1)}
 textarea{min-height:100px;resize:vertical}
 
 .btn{padding:11px 16px;border-radius:9px}
@@ -90,61 +42,22 @@ textarea{min-height:100px;resize:vertical}
 .secondary{background:#e5e7eb;color:#111827}
 .dark{background:#111827;color:#fff}
 
-.message{
-  display:none;padding:13px;border-radius:10px;
-  margin-bottom:16px;font-weight:600;
-}
+.message{display:none;padding:13px;border-radius:10px;margin-bottom:16px;font-weight:600}
+.message.success-message{display:block;background:#dcfce7;color:#166534}
+.message.error-message{display:block;background:#fee2e2;color:#991b1b}
 
-.message.success-message{
-  display:block;background:#dcfce7;color:#166534;
-}
-
-.message.error-message{
-  display:block;background:#fee2e2;color:#991b1b;
-}
-
-.tabs{
-  display:flex;gap:8px;overflow-x:auto;
-  padding-bottom:3px;margin-bottom:20px;
-}
-
-.tab{
-  white-space:nowrap;background:#fff;color:#111827;
-  padding:11px 17px;border-radius:9px;
-}
-
+.tabs{display:flex;gap:8px;overflow-x:auto;padding-bottom:3px;margin-bottom:20px}
+.tab{white-space:nowrap;background:#fff;color:#111827;padding:11px 17px;border-radius:9px}
 .tab.active{background:#2563eb;color:#fff}
 
-.stats{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:15px;
-}
-
-.stat-card{
-  background:#fff;padding:20px;border-radius:15px;
-  box-shadow:0 3px 15px rgba(0,0,0,.06);
-}
-
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+.stat-card{background:#fff;padding:20px;border-radius:15px;box-shadow:0 3px 15px rgba(0,0,0,.06)}
 .stat-label{color:#6b7280;font-size:13px;font-weight:600}
 .stat-value{font-size:29px;font-weight:800;margin-top:8px}
 
-.product-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:18px;
-}
-
-.product-card{
-  background:#fff;border-radius:15px;overflow:hidden;
-  box-shadow:0 3px 15px rgba(0,0,0,.06);
-}
-
-.product-image{
-  width:100%;height:210px;
-  object-fit:cover;background:#e5e7eb;
-}
-
+.product-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.product-card{background:#fff;border-radius:15px;overflow:hidden;box-shadow:0 3px 15px rgba(0,0,0,.06)}
+.product-image{width:100%;height:210px;object-fit:cover;background:#e5e7eb}
 .product-content{padding:16px}
 .product-title{font-size:17px;font-weight:800}
 .product-category{color:#6b7280;font-size:13px;margin-top:5px}
@@ -154,161 +67,61 @@ textarea{min-height:100px;resize:vertical}
 .stock{margin-top:9px;font-size:14px}
 .product-actions{display:flex;gap:8px;margin-top:14px}
 
-.order-card{
-  background:#fff;border-radius:15px;padding:18px;
-  margin-bottom:15px;
-  box-shadow:0 3px 15px rgba(0,0,0,.06);
-}
-
-.order-top{
-  display:flex;align-items:center;
-  justify-content:space-between;gap:10px;
-  flex-wrap:wrap;
-}
-
-.status{
-  padding:6px 10px;border-radius:20px;
-  font-size:12px;font-weight:800;background:#e5e7eb;
-}
-
+.order-card{background:#fff;border-radius:15px;padding:18px;margin-bottom:15px;box-shadow:0 3px 15px rgba(0,0,0,.06)}
+.order-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.status{padding:6px 10px;border-radius:20px;font-size:12px;font-weight:800;background:#e5e7eb}
 .status.confirmed{background:#dbeafe;color:#1d4ed8}
 .status.shipped{background:#fef3c7;color:#92400e}
 .status.delivered{background:#dcfce7;color:#166534}
 .status.cancelled{background:#fee2e2;color:#991b1b}
-
-.order-info{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:8px;font-size:14px;
-}
-
-.order-items{
-  margin-top:15px;background:#f9fafb;
-  border-radius:10px;padding:12px;
-}
-
-.order-item{
-  padding:9px 0;border-bottom:1px solid #e5e7eb;
-}
-
+.order-info{margin-top:12px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px;font-size:14px}
+.order-items{margin-top:15px;background:#f9fafb;border-radius:10px;padding:12px}
+.order-item{padding:9px 0;border-bottom:1px solid #e5e7eb}
 .order-item:last-child{border-bottom:0}
 .order-total{font-size:18px;font-weight:800;margin-top:13px}
 
-.profile-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:15px;
-}
-
-.profile-item{
-  background:#f9fafb;padding:15px;border-radius:10px;
-}
-
+.profile-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:15px}
+.profile-item{background:#f9fafb;padding:15px;border-radius:10px}
 .profile-label{color:#6b7280;font-size:12px}
 .profile-value{font-weight:700;margin-top:5px}
 
-.modal{
-  position:fixed;inset:0;background:rgba(0,0,0,.65);
-  z-index:500;display:flex;
-  align-items:center;justify-content:center;padding:15px;
-}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:500;display:flex;align-items:center;justify-content:center;padding:15px}
+.modal-box{background:#fff;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;border-radius:16px;padding:22px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.close-btn{width:35px;height:35px;border-radius:8px;background:#e5e7eb}
 
-.modal-box{
-  background:#fff;width:100%;max-width:600px;
-  max-height:92vh;overflow-y:auto;
-  border-radius:16px;padding:22px;
-}
+.preview{width:100%;height:220px;object-fit:contain;background:#f3f4f6;border-radius:10px;margin-top:10px;display:none}
 
-.modal-header{
-  display:flex;align-items:center;
-  justify-content:space-between;margin-bottom:10px;
-}
-
-.close-btn{
-  width:35px;height:35px;border-radius:8px;
-  background:#e5e7eb;
-}
-
-.preview{
-  width:100%;height:220px;object-fit:contain;
-  background:#f3f4f6;border-radius:10px;
-  margin-top:10px;display:none;
-}
-
-.image-upload-box{
-  border:2px dashed #cbd5e1;
-  border-radius:12px;
-  padding:18px;
-  margin-top:7px;
-  background:#f8fafc;
-  text-align:center;
-}
-
-.image-upload-box:hover{
-  border-color:#2563eb;
-  background:#eff6ff;
-}
-
-.image-upload-label{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap:8px;
-  background:#2563eb;
-  color:#fff;
-  padding:12px 18px;
-  border-radius:9px;
-  cursor:pointer;
-  font-weight:700;
-}
-
+.image-upload-box{border:2px dashed #cbd5e1;border-radius:12px;padding:18px;margin-top:7px;background:#f8fafc;text-align:center}
+.image-upload-box:hover{border-color:#2563eb;background:#eff6ff}
+.image-upload-label{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#2563eb;color:#fff;padding:12px 18px;border-radius:9px;cursor:pointer;font-weight:700}
 .image-upload-input{display:none}
+.selected-file{margin-top:10px;color:#374151;font-size:13px;word-break:break-word}
+.upload-status{margin-top:8px;font-size:13px;font-weight:700}
 
-.selected-file{
-  margin-top:10px;
-  color:#374151;
-  font-size:13px;
-  word-break:break-word;
-}
-
-.upload-status{
-  margin-top:8px;
-  font-size:13px;
-  font-weight:700;
-}
-
-.form-actions{
-  display:flex;gap:10px;margin-top:18px;
-}
-
-.empty{
-  text-align:center;padding:40px 20px;
-  color:#6b7280;background:#fff;border-radius:15px;
-}
-
+.form-actions{display:flex;gap:10px;margin-top:18px}
+.empty{text-align:center;padding:40px 20px;color:#6b7280;background:#fff;border-radius:15px}
 .empty h3{color:#111827}
 .loading{text-align:center;padding:30px;color:#6b7280}
 
 @media(max-width:900px){
-  .stats{grid-template-columns:repeat(2,1fr)}
-  .product-grid{grid-template-columns:repeat(2,1fr)}
+.stats{grid-template-columns:repeat(2,1fr)}
+.product-grid{grid-template-columns:repeat(2,1fr)}
 }
-
 @media(max-width:600px){
-  .container{padding:12px}
-  .header-inner{padding:11px 12px}
-  .seller-name{display:none}
-  .brand-title{font-size:17px}
-  .brand-sub{font-size:10px}
-  .stats{grid-template-columns:1fr 1fr;gap:10px}
-  .stat-card{padding:15px}
-  .stat-value{font-size:23px}
-  .product-grid{grid-template-columns:1fr}
-  .profile-grid{grid-template-columns:1fr}
-  .order-info{grid-template-columns:1fr}
-  .product-actions,.form-actions{flex-direction:column}
-  .product-actions button,.form-actions button{width:100%}
+.container{padding:12px}
+.header-inner{padding:11px 12px}
+.seller-name{display:none}
+.brand-title{font-size:17px}
+.brand-sub{font-size:10px}
+.stats{grid-template-columns:1fr 1fr;gap:10px}
+.stat-card{padding:15px}
+.stat-value{font-size:23px}
+.product-grid{grid-template-columns:1fr}
+.profile-grid{grid-template-columns:1fr}
+.order-info{grid-template-columns:1fr}
+.product-actions,.form-actions{flex-direction:column}
+.product-actions button,.form-actions button{width:100%}
 }
 </style>
 </head>
@@ -316,365 +129,328 @@ textarea{min-height:100px;resize:vertical}
 <body>
 
 <header>
-  <div class="header-inner">
-    <div class="brand">
-      <div class="brand-icon">🛍️</div>
-      <div>
-        <div class="brand-title">SHRIVI Seller Center</div>
-        <div class="brand-sub">Manage your marketplace store</div>
-      </div>
-    </div>
+<div class="header-inner">
+<div class="brand">
+<div class="brand-icon">🛍️</div>
+<div>
+<div class="brand-title">SHRIVI Seller Center</div>
+<div class="brand-sub">Manage your marketplace store</div>
+</div>
+</div>
 
-    <div class="header-user">
-      <span id="sellerNameHeader" class="seller-name"></span>
-      <button id="logoutBtn" class="logout hidden" onclick="logoutSeller()">Logout</button>
-    </div>
-  </div>
+<div class="header-user">
+<span id="sellerNameHeader" class="seller-name"></span>
+<button id="logoutBtn" class="logout hidden" onclick="logoutSeller()">Logout</button>
+</div>
+</div>
 </header>
 
 <main class="container">
 
 <section id="authSection">
+<div class="card auth-card">
 
-  <div class="card auth-card">
+<div id="authMessage" class="message"></div>
 
-    <div id="authMessage" class="message"></div>
+<div id="loginBox">
+<h2>Seller Login</h2>
+<p style="color:#6b7280;margin-bottom:18px">
+Login to manage your Shrivi store.
+</p>
 
-    <div id="loginBox">
-      <h2>Seller Login</h2>
+<label>Email</label>
+<input id="loginEmail" type="email" autocomplete="email" placeholder="seller@example.com">
 
-      <p style="color:#6b7280;margin-bottom:18px">
-        Login to manage your Shrivi store.
-      </p>
+<label>Password</label>
+<input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password">
 
-      <label>Email</label>
-      <input id="loginEmail" type="email" autocomplete="email" placeholder="seller@example.com">
+<button id="loginButton" class="btn primary" style="width:100%;margin-top:8px" onclick="sellerLogin()">Login</button>
 
-      <label>Password</label>
-      <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Your password">
+<button class="btn secondary" style="width:100%;margin-top:10px" onclick="showRegister()">Create Seller Account</button>
+</div>
 
-      <button id="loginButton" class="btn primary" style="width:100%;margin-top:8px" onclick="sellerLogin()">
-        Login
-      </button>
+<div id="registerBox" class="hidden">
+<h2>Create Seller Account</h2>
+<p style="color:#6b7280;margin-bottom:18px">
+Start selling on Shrivi.
+</p>
 
-      <button class="btn secondary" style="width:100%;margin-top:10px" onclick="showRegister()">
-        Create Seller Account
-      </button>
-    </div>
+<label>Seller / Business Name</label>
+<input id="registerName" type="text" placeholder="Your name or business name">
 
-    <div id="registerBox" class="hidden">
-      <h2>Create Seller Account</h2>
+<label>Email</label>
+<input id="registerEmail" type="email" placeholder="seller@example.com">
 
-      <p style="color:#6b7280;margin-bottom:18px">
-        Start selling on Shrivi.
-      </p>
+<label>Phone</label>
+<input id="registerPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number">
 
-      <label>Seller / Business Name</label>
-      <input id="registerName" type="text" placeholder="Your name or business name">
+<label>Password</label>
+<input id="registerPassword" type="password" placeholder="Minimum 8 characters">
 
-      <label>Email</label>
-      <input id="registerEmail" type="email" placeholder="seller@example.com">
+<button id="registerButton" class="btn success" style="width:100%;margin-top:8px" onclick="registerSeller()">Create Seller Account</button>
 
-      <label>Phone</label>
-      <input id="registerPhone" type="tel" inputmode="numeric" maxlength="10" placeholder="10 digit mobile number">
+<button class="btn secondary" style="width:100%;margin-top:10px" onclick="showLogin()">Already have an account? Login</button>
+</div>
 
-      <label>Password</label>
-      <input id="registerPassword" type="password" placeholder="Minimum 8 characters">
-
-      <button id="registerButton" class="btn success" style="width:100%;margin-top:8px" onclick="registerSeller()">
-        Create Seller Account
-      </button>
-
-      <button class="btn secondary" style="width:100%;margin-top:10px" onclick="showLogin()">
-        Already have an account? Login
-      </button>
-    </div>
-
-  </div>
+</div>
 </section>
 
 <section id="sellerSection" class="hidden">
 
-  <div id="mainMessage" class="message"></div>
+<div id="mainMessage" class="message"></div>
 
-  <div class="tabs">
-    <button id="tabDashboard" class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
-    <button id="tabProducts" class="tab" onclick="showTab('products')">📦 Products</button>
-    <button id="tabOrders" class="tab" onclick="showTab('orders')">🛒 Orders</button>
-    <button id="tabProfile" class="tab" onclick="showTab('profile')">👤 Profile</button>
-  </div>
+<div class="tabs">
+<button id="tabDashboard" class="tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
+<button id="tabProducts" class="tab" onclick="showTab('products')">📦 Products</button>
+<button id="tabOrders" class="tab" onclick="showTab('orders')">🛒 Orders</button>
+<button id="tabProfile" class="tab" onclick="showTab('profile')">👤 Profile</button>
+</div>
 
-  <section id="dashboardTab">
+<section id="dashboardTab">
 
-    <div class="card">
-      <h2>Seller Dashboard</h2>
-      <p style="color:#6b7280">
-        Welcome back, <strong id="dashboardSellerName">Seller</strong>
-      </p>
-    </div>
+<div class="card">
+<h2>Seller Dashboard</h2>
+<p style="color:#6b7280">
+Welcome back, <strong id="dashboardSellerName">Seller</strong>
+</p>
+</div>
 
-    <div class="stats">
+<div class="stats">
 
-      <div class="stat-card">
-        <div class="stat-label">TOTAL PRODUCTS</div>
-        <div id="statProducts" class="stat-value">0</div>
-      </div>
+<div class="stat-card">
+<div class="stat-label">TOTAL PRODUCTS</div>
+<div id="statProducts" class="stat-value">0</div>
+</div>
 
-      <div class="stat-card">
-        <div class="stat-label">TOTAL STOCK</div>
-        <div id="statStock" class="stat-value">0</div>
-      </div>
+<div class="stat-card">
+<div class="stat-label">TOTAL STOCK</div>
+<div id="statStock" class="stat-value">0</div>
+</div>
 
-      <div class="stat-card">
-        <div class="stat-label">ORDERS</div>
-        <div id="statOrders" class="stat-value">0</div>
-      </div>
+<div class="stat-card">
+<div class="stat-label">ORDERS</div>
+<div id="statOrders" class="stat-value">0</div>
+</div>
 
-      <div class="stat-card">
-        <div class="stat-label">REVENUE</div>
-        <div id="statRevenue" class="stat-value">₹0</div>
-      </div>
+<div class="stat-card">
+<div class="stat-label">REVENUE</div>
+<div id="statRevenue" class="stat-value">₹0</div>
+</div>
 
-    </div>
+</div>
 
-    <br>
+<br>
 
-    <div class="card">
+<div class="card">
+<h3>Quick Actions</h3>
 
-      <h3>Quick Actions</h3>
+<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
 
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+<button class="btn primary" onclick="showTab('products');openAddProduct()">+ Add Product</button>
 
-        <button class="btn primary" onclick="showTab('products');openAddProduct()">
-          + Add Product
-        </button>
+<button class="btn dark" onclick="showTab('orders')">🛒 View Orders</button>
 
-        <button class="btn dark" onclick="showTab('orders')">
-          🛒 View Orders
-        </button>
+<button class="btn secondary" onclick="refreshAll()">🔄 Refresh</button>
 
-        <button class="btn secondary" onclick="refreshAll()">
-          🔄 Refresh
-        </button>
+</div>
+</div>
+</section>
 
-      </div>
+<section id="productsTab" class="hidden">
 
-    </div>
+<div class="card">
 
-  </section>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
 
-  <section id="productsTab" class="hidden">
+<div>
+<h2>My Products</h2>
+<p style="color:#6b7280">Manage products sold through Shrivi.</p>
+</div>
 
-    <div class="card">
+<div style="display:flex;gap:8px">
 
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+<button class="btn secondary" onclick="loadProducts()">🔄</button>
 
-        <div>
-          <h2>My Products</h2>
-          <p style="color:#6b7280">Manage products sold through Shrivi.</p>
-        </div>
+<button class="btn primary" onclick="openAddProduct()">+ Add Product</button>
 
-        <div style="display:flex;gap:8px">
+</div>
+</div>
+</div>
 
-          <button class="btn secondary" onclick="loadProducts()">🔄</button>
-
-          <button class="btn primary" onclick="openAddProduct()">
-            + Add Product
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <div id="productsGrid" class="product-grid"></div>
-
-  </section>
-
-  <section id="ordersTab" class="hidden">
-
-    <div class="card">
-
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-
-        <div>
-          <h2>My Orders</h2>
-          <p style="color:#6b7280">Orders containing your products.</p>
-        </div>
-
-        <button class="btn secondary" onclick="loadOrders()">🔄 Refresh</button>
-
-      </div>
-
-    </div>
-
-    <div id="ordersList"></div>
-
-  </section>
-
-  <section id="profileTab" class="hidden">
-
-    <div class="card">
-
-      <h2>Seller Profile</h2>
-
-      <p style="color:#6b7280;margin-bottom:18px">
-        Your Shrivi seller account information.
-      </p>
-
-      <div class="profile-grid">
-
-        <div class="profile-item">
-          <div class="profile-label">SELLER NAME</div>
-          <div id="profileName" class="profile-value">-</div>
-        </div>
-
-        <div class="profile-item">
-          <div class="profile-label">EMAIL</div>
-          <div id="profileEmail" class="profile-value">-</div>
-        </div>
-
-        <div class="profile-item">
-          <div class="profile-label">PHONE</div>
-          <div id="profilePhone" class="profile-value">-</div>
-        </div>
-
-        <div class="profile-item">
-          <div class="profile-label">ACCOUNT STATUS</div>
-          <div id="profileStatus" class="profile-value">-</div>
-        </div>
-
-        <div class="profile-item">
-          <div class="profile-label">SELLER ID</div>
-          <div id="profileId" class="profile-value">-</div>
-        </div>
-
-      </div>
-
-    </div>
-
-  </section>
+<div id="productsGrid" class="product-grid"></div>
 
 </section>
 
-</main>
+<section id="ordersTab" class="hidden">
 
-<!-- PRODUCT MODAL -->
+<div class="card">
+
+<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+
+<div>
+<h2>My Orders</h2>
+<p style="color:#6b7280">Orders containing your products.</p>
+</div>
+
+<button class="btn secondary" onclick="loadOrders()">🔄 Refresh</button>
+
+</div>
+</div>
+
+<div id="ordersList"></div>
+
+</section>
+
+<section id="profileTab" class="hidden">
+
+<div class="card">
+
+<h2>Seller Profile</h2>
+
+<p style="color:#6b7280;margin-bottom:18px">
+Your Shrivi seller account information.
+</p>
+
+<div class="profile-grid">
+
+<div class="profile-item">
+<div class="profile-label">SELLER NAME</div>
+<div id="profileName" class="profile-value">-</div>
+</div>
+
+<div class="profile-item">
+<div class="profile-label">EMAIL</div>
+<div id="profileEmail" class="profile-value">-</div>
+</div>
+
+<div class="profile-item">
+<div class="profile-label">PHONE</div>
+<div id="profilePhone" class="profile-value">-</div>
+</div>
+
+<div class="profile-item">
+<div class="profile-label">ACCOUNT STATUS</div>
+<div id="profileStatus" class="profile-value">-</div>
+</div>
+
+<div class="profile-item">
+<div class="profile-label">SELLER ID</div>
+<div id="profileId" class="profile-value">-</div>
+</div>
+
+</div>
+</div>
+</section>
+
+</section>
+</main>
 
 <div id="productModal" class="modal hidden">
 
-  <div class="modal-box">
+<div class="modal-box">
 
-    <div class="modal-header">
+<div class="modal-header">
+<h2 id="productModalTitle">Add Product</h2>
+<button class="close-btn" onclick="closeProductModal()">✕</button>
+</div>
 
-      <h2 id="productModalTitle">Add Product</h2>
+<input id="productId" type="hidden">
 
-      <button class="close-btn" onclick="closeProductModal()">✕</button>
+<label>Product Name *</label>
+<input id="productName" type="text" maxlength="150" placeholder="Example: Premium Black Hoodie">
 
-    </div>
+<label>Price ₹ *</label>
+<input id="productPrice" type="number" min="0" step="0.01" placeholder="999" oninput="updateSalePreview()">
 
-    <input id="productId" type="hidden">
+<label>Category *</label>
+<input id="productCategory" type="text" maxlength="80" placeholder="Fashion">
 
-    <label>Product Name *</label>
-    <input id="productName" type="text" maxlength="150" placeholder="Example: Premium Black Hoodie">
+<label>Product Image</label>
 
-    <label>Price ₹ *</label>
-    <input id="productPrice" type="number" min="0" step="0.01" placeholder="999" oninput="updateSalePreview()">
+<div class="image-upload-box">
 
-    <label>Category *</label>
-    <input id="productCategory" type="text" maxlength="80" placeholder="Fashion">
+<label for="productImageFile" class="image-upload-label">
+📷 Select Product Image
+</label>
 
-    <!-- NEW IMAGE SELECT -->
+<input
+id="productImageFile"
+class="image-upload-input"
+type="file"
+accept="image/jpeg,image/png,image/webp"
+onchange="handleImageSelect(event)"
+>
 
-    <label>Product Image</label>
+<div id="selectedFileName" class="selected-file">
+No image selected
+</div>
 
-    <div class="image-upload-box">
+<div style="font-size:12px;color:#6b7280;margin-top:7px">
+JPG, PNG or WEBP • Maximum 5MB
+</div>
 
-      <label for="productImageFile" class="image-upload-label">
-        📷 Select Product Image
-      </label>
+<div id="imageUploadStatus" class="upload-status"></div>
 
-      <input
-        id="productImageFile"
-        class="image-upload-input"
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        onchange="handleImageSelect(event)"
-      >
+</div>
 
-      <div id="selectedFileName" class="selected-file">
-        No image selected
-      </div>
+<img id="productImagePreview" class="preview" alt="Product Preview">
 
-      <div style="font-size:12px;color:#6b7280;margin-top:7px">
-        JPG, PNG or WEBP • Maximum 5MB
-      </div>
+<label>Or Image URL</label>
 
-      <div id="imageUploadStatus" class="upload-status"></div>
+<input
+id="productImage"
+type="url"
+placeholder="https://..."
+oninput="previewProductImage()"
+>
 
-    </div>
+<label>Description</label>
 
-    <img id="productImagePreview" class="preview" alt="Product Preview">
+<textarea
+id="productDescription"
+maxlength="2000"
+placeholder="Describe your product..."
+></textarea>
 
-    <label>Or Image URL</label>
+<label>Stock *</label>
 
-    <input
-      id="productImage"
-      type="url"
-      placeholder="https://..."
-      oninput="previewProductImage()"
-    >
+<input
+id="productStock"
+type="number"
+min="0"
+step="1"
+placeholder="100"
+>
 
-    <label>Description</label>
+<label>Discount %</label>
 
-    <textarea
-      id="productDescription"
-      maxlength="2000"
-      placeholder="Describe your product..."
-    ></textarea>
+<input
+id="productDiscount"
+type="number"
+min="0"
+max="99.99"
+step="0.01"
+placeholder="10"
+oninput="updateSalePreview()"
+>
 
-    <label>Stock *</label>
+<div id="salePreview" style="background:#f9fafb;padding:12px;border-radius:9px;margin-top:10px">
+Sale price preview: <strong>₹0.00</strong>
+</div>
 
-    <input
-      id="productStock"
-      type="number"
-      min="0"
-      step="1"
-      placeholder="100"
-    >
+<div class="form-actions">
 
-    <label>Discount %</label>
+<button id="saveProductButton" class="btn success" onclick="saveProduct()">
+Save Product
+</button>
 
-    <input
-      id="productDiscount"
-      type="number"
-      min="0"
-      max="99.99"
-      step="0.01"
-      placeholder="10"
-      oninput="updateSalePreview()"
-    >
+<button class="btn secondary" onclick="closeProductModal()">
+Cancel
+</button>
 
-    <div id="salePreview" style="background:#f9fafb;padding:12px;border-radius:9px;margin-top:10px">
-      Sale price preview:
-      <strong>₹0.00</strong>
-    </div>
+</div>
 
-    <div class="form-actions">
-
-      <button id="saveProductButton" class="btn success" onclick="saveProduct()">
-        Save Product
-      </button>
-
-      <button class="btn secondary" onclick="closeProductModal()">
-        Cancel
-      </button>
-
-    </div>
-
-  </div>
-
+</div>
 </div>
 
 <script>
@@ -683,1161 +459,1211 @@ let currentSeller=null;
 let currentProducts=[];
 
 function $(id){
-  return document.getElementById(id);
+return document.getElementById(id);
 }
 
 function escapeHtml(value){
-  return String(value ?? "")
-    .replace(/&/g,"&amp;")
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;")
-    .replace(/"/g,"&quot;")
-    .replace(/'/g,"&#039;");
+return String(value ?? "")
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
 }
 
 function money(value){
-  return Number(value||0).toLocaleString("en-IN",{
-    minimumFractionDigits:2,
-    maximumFractionDigits:2
-  });
+return Number(value||0).toLocaleString("en-IN",{
+minimumFractionDigits:2,
+maximumFractionDigits:2
+});
 }
 
 function showMessage(id,message,type="success"){
-  const el=$(id);
-  if(!el)return;
-  el.textContent=message;
-  el.className="message "+(
-    type==="error"?"error-message":"success-message"
-  );
+const el=$(id);
+if(!el)return;
+el.textContent=message;
+el.className="message "+(
+type==="error"?"error-message":"success-message"
+);
 }
 
 function clearMessage(id){
-  const el=$(id);
-  if(!el)return;
-  el.textContent="";
-  el.className="message";
+const el=$(id);
+if(!el)return;
+el.textContent="";
+el.className="message";
 }
 
 async function getJson(response){
 
-  let data={};
+let data={};
 
-  try{
-    data=await response.json();
-  }catch(e){}
+try{
+data=await response.json();
+}catch(e){}
 
-  if(!response.ok){
-    throw new Error(data.error||"Something went wrong");
-  }
+if(!response.ok){
+throw new Error(data.error||"Something went wrong");
+}
 
-  return data;
+return data;
 }
 
 /* AUTH */
 
 function showRegister(){
-  $("loginBox").classList.add("hidden");
-  $("registerBox").classList.remove("hidden");
-  clearMessage("authMessage");
+$("loginBox").classList.add("hidden");
+$("registerBox").classList.remove("hidden");
+clearMessage("authMessage");
 }
 
 function showLogin(){
-  $("registerBox").classList.add("hidden");
-  $("loginBox").classList.remove("hidden");
-  clearMessage("authMessage");
+$("registerBox").classList.add("hidden");
+$("loginBox").classList.remove("hidden");
+clearMessage("authMessage");
 }
 
 async function registerSeller(){
 
-  clearMessage("authMessage");
+clearMessage("authMessage");
 
-  const name=$("registerName").value.trim();
-  const email=$("registerEmail").value.trim();
-  const phone=$("registerPhone").value.trim();
-  const password=$("registerPassword").value;
+const name=$("registerName").value.trim();
+const email=$("registerEmail").value.trim();
+const phone=$("registerPhone").value.trim();
+const password=$("registerPassword").value;
 
-  if(!name)
-    return showMessage("authMessage","Seller name is required.","error");
+if(!name)
+return showMessage("authMessage","Seller name is required.","error");
 
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return showMessage("authMessage","Enter a valid email.","error");
+if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+return showMessage("authMessage","Enter a valid email.","error");
 
-  if(phone && !/^[0-9]{10}$/.test(phone))
-    return showMessage("authMessage","Phone must be 10 digits.","error");
+if(phone && !/^[0-9]{10}$/.test(phone))
+return showMessage("authMessage","Phone must be 10 digits.","error");
 
-  if(password.length<8)
-    return showMessage("authMessage","Password must be at least 8 characters.","error");
+if(password.length<8)
+return showMessage("authMessage","Password must be at least 8 characters.","error");
 
-  const button=$("registerButton");
-  button.disabled=true;
-  button.textContent="Creating account...";
+const button=$("registerButton");
 
-  try{
+button.disabled=true;
+button.textContent="Creating account...";
 
-    const response=await fetch("/api/seller/register",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      credentials:"include",
-      body:JSON.stringify({name,email,phone,password})
-    });
+try{
 
-    const data=await getJson(response);
+const response=await fetch("/api/seller/register",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+credentials:"include",
+body:JSON.stringify({name,email,phone,password})
+});
 
-    currentSeller=data.seller;
-    showSellerApp();
+const data=await getJson(response);
 
-    showMessage(
-      "mainMessage",
-      "Seller account created successfully!"
-    );
+currentSeller=data.seller;
+showSellerApp();
 
-    await refreshAll();
+showMessage("mainMessage","Seller account created successfully!");
 
-  }catch(error){
+await refreshAll();
 
-    showMessage("authMessage",error.message,"error");
+}catch(error){
 
-  }finally{
+showMessage("authMessage",error.message,"error");
 
-    button.disabled=false;
-    button.textContent="Create Seller Account";
+}finally{
 
-  }
+button.disabled=false;
+button.textContent="Create Seller Account";
+
+}
 }
 
 async function sellerLogin(){
 
-  clearMessage("authMessage");
+clearMessage("authMessage");
 
-  const email=$("loginEmail").value.trim();
-  const password=$("loginPassword").value;
+const email=$("loginEmail").value.trim();
+const password=$("loginPassword").value;
 
-  if(!email || !password)
-    return showMessage("authMessage","Email and password are required.","error");
+if(!email || !password)
+return showMessage("authMessage","Email and password are required.","error");
 
-  const button=$("loginButton");
+const button=$("loginButton");
 
-  button.disabled=true;
-  button.textContent="Logging in...";
+button.disabled=true;
+button.textContent="Logging in...";
 
-  try{
+try{
 
-    const response=await fetch("/api/seller/login",{
-      method:"POST",
-      headers:{"Content-Type":"application/json"},
-      credentials:"include",
-      body:JSON.stringify({email,password})
-    });
+const response=await fetch("/api/seller/login",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+credentials:"include",
+body:JSON.stringify({email,password})
+});
 
-    const data=await getJson(response);
+const data=await getJson(response);
 
-    currentSeller=data.seller;
+currentSeller=data.seller;
 
-    showSellerApp();
-    await refreshAll();
+showSellerApp();
+await refreshAll();
 
-  }catch(error){
+}catch(error){
 
-    showMessage("authMessage",error.message,"error");
+showMessage("authMessage",error.message,"error");
 
-  }finally{
+}finally{
 
-    button.disabled=false;
-    button.textContent="Login";
+button.disabled=false;
+button.textContent="Login";
 
-  }
+}
 }
 
 /* SESSION */
 
 async function checkSellerSession(){
 
-  try{
+try{
 
-    const response=await fetch("/api/seller/me",{
-      credentials:"include"
-    });
+const response=await fetch("/api/seller/me",{
+credentials:"include"
+});
 
-    if(!response.ok)return;
+if(!response.ok)return;
 
-    const data=await response.json();
+const data=await response.json();
 
-    if(data.loggedIn && data.seller){
+if(data.loggedIn && data.seller){
 
-      currentSeller=data.seller;
+currentSeller=data.seller;
 
-      showSellerApp();
+showSellerApp();
 
-      await refreshAll();
+await refreshAll();
 
-    }
+}
 
-  }catch(error){
+}catch(error){
 
-    console.error("Seller session:",error);
+console.error("Seller session:",error);
 
-  }
+}
 }
 
 function showSellerApp(){
 
-  $("authSection").classList.add("hidden");
-  $("sellerSection").classList.remove("hidden");
-  $("logoutBtn").classList.remove("hidden");
+$("authSection").classList.add("hidden");
+$("sellerSection").classList.remove("hidden");
+$("logoutBtn").classList.remove("hidden");
 
-  $("sellerNameHeader").textContent=
-    currentSeller?.name||"";
+$("sellerNameHeader").textContent=currentSeller?.name||"";
+$("dashboardSellerName").textContent=currentSeller?.name||"Seller";
 
-  $("dashboardSellerName").textContent=
-    currentSeller?.name||"Seller";
-
-  updateProfile();
+updateProfile();
 }
 
 async function logoutSeller(){
 
-  try{
+try{
 
-    await fetch("/api/seller/logout",{
-      method:"POST",
-      credentials:"include"
-    });
+await fetch("/api/seller/logout",{
+method:"POST",
+credentials:"include"
+});
 
-  }catch(error){
-    console.error(error);
-  }
+}catch(error){
+console.error(error);
+}
 
-  currentSeller=null;
-  currentProducts=[];
+currentSeller=null;
+currentProducts=[];
 
-  $("sellerSection").classList.add("hidden");
-  $("authSection").classList.remove("hidden");
-  $("logoutBtn").classList.add("hidden");
-  $("sellerNameHeader").textContent="";
+$("sellerSection").classList.add("hidden");
+$("authSection").classList.remove("hidden");
+$("logoutBtn").classList.add("hidden");
+$("sellerNameHeader").textContent="";
 
-  showLogin();
+showLogin();
 }
 
 /* TABS */
 
 function showTab(tab){
 
-  const names=[
-    "dashboard",
-    "products",
-    "orders",
-    "profile"
-  ];
+const names=[
+"dashboard",
+"products",
+"orders",
+"profile"
+];
 
-  names.forEach(name=>{
+names.forEach(name=>{
 
-    const section=$(name+"Tab");
+const section=$(name+"Tab");
 
-    const button=$(
-      "tab"+
-      name.charAt(0).toUpperCase()+
-      name.slice(1)
-    );
+const button=$(
+"tab"+
+name.charAt(0).toUpperCase()+
+name.slice(1)
+);
 
-    if(name===tab){
+if(name===tab){
 
-      section.classList.remove("hidden");
-      button.classList.add("active");
+section.classList.remove("hidden");
+button.classList.add("active");
 
-    }else{
+}else{
 
-      section.classList.add("hidden");
-      button.classList.remove("active");
+section.classList.add("hidden");
+button.classList.remove("active");
 
-    }
+}
 
-  });
+});
 }
 
 /* REFRESH */
 
 async function refreshAll(){
 
-  await Promise.all([
-    loadDashboard(),
-    loadProducts(),
-    loadOrders()
-  ]);
+await Promise.all([
+loadDashboard(),
+loadProducts(),
+loadOrders()
+]);
 
-  updateProfile();
+updateProfile();
 }
 
 /* DASHBOARD */
 
 async function loadDashboard(){
 
-  try{
+try{
 
-    const response=await fetch(
-      "/api/seller/dashboard",
-      {credentials:"include"}
-    );
+const response=await fetch(
+"/api/seller/dashboard",
+{credentials:"include"}
+);
 
-    const data=await getJson(response);
+const data=await getJson(response);
 
-    $("statProducts").textContent=data.products||0;
-    $("statStock").textContent=data.stock||0;
-    $("statOrders").textContent=data.orders||0;
-    $("statRevenue").textContent="₹"+money(data.revenue);
+$("statProducts").textContent=data.products||0;
+$("statStock").textContent=data.stock||0;
+$("statOrders").textContent=data.orders||0;
+$("statRevenue").textContent="₹"+money(data.revenue);
 
-  }catch(error){
+}catch(error){
 
-    showMessage("mainMessage",error.message,"error");
+showMessage("mainMessage",error.message,"error");
 
-  }
+}
 }
 
 /* PRODUCTS */
 
 async function loadProducts(){
 
-  const grid=$("productsGrid");
+const grid=$("productsGrid");
 
-  grid.innerHTML=
-    `<div class="loading" style="grid-column:1/-1">
-      Loading products...
-    </div>`;
+grid.innerHTML=
+`<div class="loading" style="grid-column:1/-1">
+Loading products...
+</div>`;
 
-  try{
+try{
 
-    const response=await fetch(
-      "/api/seller/products",
-      {credentials:"include"}
-    );
+const response=await fetch(
+"/api/seller/products",
+{credentials:"include"}
+);
 
-    const data=await getJson(response);
+const data=await getJson(response);
 
-    currentProducts=Array.isArray(data)?data:[];
+currentProducts=Array.isArray(data)?data:[];
 
-    renderProducts();
+renderProducts();
 
-  }catch(error){
+}catch(error){
 
-    grid.innerHTML="";
+grid.innerHTML="";
 
-    showMessage("mainMessage",error.message,"error");
+showMessage("mainMessage",error.message,"error");
 
-  }
+}
 }
 
 function renderProducts(){
 
-  const grid=$("productsGrid");
+const grid=$("productsGrid");
 
-  if(!currentProducts.length){
+if(!currentProducts.length){
 
-    grid.innerHTML=`
+grid.innerHTML=`
 
-      <div class="empty" style="grid-column:1/-1">
+<div class="empty" style="grid-column:1/-1">
 
-        <h3>No products yet</h3>
+<h3>No products yet</h3>
 
-        <p style="margin:8px 0 18px">
-          Add your first product to start selling.
-        </p>
+<p style="margin:8px 0 18px">
+Add your first product to start selling.
+</p>
 
-        <button
-          class="btn primary"
-          onclick="openAddProduct()"
-        >
-          + Add Product
-        </button>
+<button class="btn primary" onclick="openAddProduct()">
++ Add Product
+</button>
 
-      </div>
+</div>
 
-    `;
+`;
 
-    return;
-  }
+return;
+}
 
-  grid.innerHTML=currentProducts.map(product=>{
+grid.innerHTML=currentProducts.map(product=>{
 
-    const image=
-      product.image ||
-      "https://via.placeholder.com/600x400?text=Shrivi";
+const image=
+product.image ||
+"https://via.placeholder.com/600x400?text=Shrivi";
 
-    const price=Number(product.price||0);
+const price=Number(product.price||0);
 
-    const salePrice=
-      Number(
-        product.sale_price ??
-        (
-          price-
-          price*
-          Number(product.discount_percent||0)/
-          100
-        )
-      );
+const salePrice=
+Number(
+product.sale_price ??
+(
+price-
+price*
+Number(product.discount_percent||0)/
+100
+)
+);
 
-    const discount=
-      Number(product.discount_percent||0);
+const discount=
+Number(product.discount_percent||0);
 
-    const stock=
-      Number(product.stock||0);
+const stock=
+Number(product.stock||0);
 
-    return `
+return `
 
-      <article class="product-card">
+<article class="product-card">
 
-        <img
-          class="product-image"
-          src="${escapeHtml(image)}"
-          alt="${escapeHtml(product.name||"Product")}"
-          onerror="this.src='https://via.placeholder.com/600x400?text=Shrivi'"
-        >
+<img
+class="product-image"
+src="${escapeHtml(image)}"
+alt="${escapeHtml(product.name||"Product")}"
+onerror="this.src='https://via.placeholder.com/600x400?text=Shrivi'"
+>
 
-        <div class="product-content">
+<div class="product-content">
 
-          <div class="product-title">
-            ${escapeHtml(product.name||"-")}
-          </div>
+<div class="product-title">
+${escapeHtml(product.name||"-")}
+</div>
 
-          <div class="product-category">
-            ${escapeHtml(product.category||"Uncategorized")}
-          </div>
+<div class="product-category">
+${escapeHtml(product.category||"Uncategorized")}
+</div>
 
-          <div class="product-price">
-            ₹${money(salePrice)}
-          </div>
+<div class="product-price">
+₹${money(salePrice)}
+</div>
 
-          ${
-            discount>0
-            ?`
-              <div class="old-price">
-                ₹${money(price)}
-              </div>
-              <div class="discount">
-                ${discount}% OFF
-              </div>
-            `
-            :""
-          }
+${
+discount>0
+?`
+<div class="old-price">
+₹${money(price)}
+</div>
+<div class="discount">
+${discount}% OFF
+</div>
+`
+:""
+}
 
-          <div class="stock">
-            Stock:
-            <strong>${stock}</strong>
-          </div>
+<div class="stock">
+Stock: <strong>${stock}</strong>
+</div>
 
-          <div class="product-actions">
+<div class="product-actions">
 
-            <button
-              class="btn warning"
-              onclick="editProduct(${Number(product.id)})"
-            >
-              Edit
-            </button>
+<button class="btn warning" onclick="editProduct(${Number(product.id)})">
+Edit
+</button>
 
-            <button
-              class="btn danger"
-              onclick="deleteProduct(${Number(product.id)})"
-            >
-              Delete
-            </button>
+<button class="btn danger" onclick="deleteProduct(${Number(product.id)})">
+Delete
+</button>
 
-          </div>
+</div>
 
-        </div>
+</div>
+</article>
 
-      </article>
+`;
 
-    `;
-
-  }).join("");
+}).join("");
 }
 
 /* PRODUCT MODAL */
 
 function openAddProduct(){
 
-  $("productModalTitle").textContent="Add Product";
+$("productModalTitle").textContent="Add Product";
 
-  $("productId").value="";
-  $("productName").value="";
-  $("productPrice").value="";
-  $("productCategory").value="";
-  $("productImage").value="";
-  $("productDescription").value="";
-  $("productStock").value="0";
-  $("productDiscount").value="0";
+$("productId").value="";
+$("productName").value="";
+$("productPrice").value="";
+$("productCategory").value="";
+$("productImage").value="";
+$("productDescription").value="";
+$("productStock").value="0";
+$("productDiscount").value="0";
 
-  $("productImageFile").value="";
-  $("selectedFileName").textContent="No image selected";
-  $("imageUploadStatus").textContent="";
+$("productImageFile").value="";
+$("selectedFileName").textContent="No image selected";
+$("imageUploadStatus").textContent="";
 
-  $("productImagePreview").style.display="none";
-  $("productImagePreview").removeAttribute("src");
+$("productImagePreview").style.display="none";
+$("productImagePreview").removeAttribute("src");
 
-  updateSalePreview();
+updateSalePreview();
 
-  $("productModal").classList.remove("hidden");
+$("productModal").classList.remove("hidden");
 }
 
 function editProduct(id){
 
-  const product=currentProducts.find(
-    p=>Number(p.id)===Number(id)
-  );
+const product=currentProducts.find(
+p=>Number(p.id)===Number(id)
+);
 
-  if(!product)return;
+if(!product)return;
 
-  $("productModalTitle").textContent="Edit Product";
+$("productModalTitle").textContent="Edit Product";
 
-  $("productId").value=product.id;
-  $("productName").value=product.name||"";
-  $("productPrice").value=product.price??"";
-  $("productCategory").value=product.category||"";
-  $("productImage").value=product.image||"";
-  $("productDescription").value=product.description||"";
-  $("productStock").value=product.stock??0;
-  $("productDiscount").value=product.discount_percent??0;
+$("productId").value=product.id;
+$("productName").value=product.name||"";
+$("productPrice").value=product.price??"";
+$("productCategory").value=product.category||"";
+$("productImage").value=product.image||"";
+$("productDescription").value=product.description||"";
+$("productStock").value=product.stock??0;
+$("productDiscount").value=product.discount_percent??0;
 
-  $("productImageFile").value="";
-  $("selectedFileName").textContent="Select a new image to replace current image.";
-  $("imageUploadStatus").textContent="";
+$("productImageFile").value="";
+$("selectedFileName").textContent="Select a new image to replace current image.";
+$("imageUploadStatus").textContent="";
 
-  previewProductImage();
-  updateSalePreview();
+previewProductImage();
+updateSalePreview();
 
-  $("productModal").classList.remove("hidden");
+$("productModal").classList.remove("hidden");
 }
 
 function closeProductModal(){
-  $("productModal").classList.add("hidden");
+$("productModal").classList.add("hidden");
 }
 
 /* IMAGE SELECT */
 
 function handleImageSelect(event){
 
-  const file=event.target.files?.[0];
+const file=event.target.files?.[0];
 
-  const preview=$("productImagePreview");
-  const name=$("selectedFileName");
-  const status=$("imageUploadStatus");
+const preview=$("productImagePreview");
+const name=$("selectedFileName");
+const status=$("imageUploadStatus");
 
-  status.textContent="";
+status.textContent="";
 
-  if(!file){
+if(!file){
 
-    name.textContent="No image selected";
-    preview.style.display="none";
-    return;
-  }
+name.textContent="No image selected";
+preview.style.display="none";
+return;
+}
 
-  const allowed=[
-    "image/jpeg",
-    "image/png",
-    "image/webp"
-  ];
+const allowed=[
+"image/jpeg",
+"image/png",
+"image/webp"
+];
 
-  if(!allowed.includes(file.type)){
+if(!allowed.includes(file.type)){
 
-    event.target.value="";
+event.target.value="";
+name.textContent="No image selected";
 
-    name.textContent="No image selected";
+return showMessage(
+"mainMessage",
+"Only JPG, PNG and WEBP images are allowed.",
+"error"
+);
+}
 
-    return showMessage(
-      "mainMessage",
-      "Only JPG, PNG and WEBP images are allowed.",
-      "error"
-    );
-  }
+if(file.size>5*1024*1024){
 
-  if(file.size>5*1024*1024){
+event.target.value="";
+name.textContent="No image selected";
 
-    event.target.value="";
+return showMessage(
+"mainMessage",
+"Image must be 5MB or smaller.",
+"error"
+);
+}
 
-    name.textContent="No image selected";
+name.textContent=
+file.name+
+" • "+
+(file.size/1024/1024).toFixed(2)+
+" MB";
 
-    return showMessage(
-      "mainMessage",
-      "Image must be 5MB or smaller.",
-      "error"
-    );
-  }
+const reader=new FileReader();
 
-  name.textContent=
-    file.name+
-    " • "+
-    (file.size/1024/1024).toFixed(2)+
-    " MB";
+reader.onload=function(e){
 
-  const reader=new FileReader();
+preview.src=e.target.result;
+preview.style.display="block";
 
-  reader.onload=function(e){
+};
 
-    preview.src=e.target.result;
-    preview.style.display="block";
-
-  };
-
-  reader.readAsDataURL(file);
-
+reader.readAsDataURL(file);
 }
 
 /* URL PREVIEW */
 
 function previewProductImage(){
 
-  const file=$("productImageFile").files?.[0];
+const file=$("productImageFile").files?.[0];
 
-  if(file)return;
+if(file)return;
 
-  const url=$("productImage").value.trim();
-  const preview=$("productImagePreview");
+const url=$("productImage").value.trim();
+const preview=$("productImagePreview");
 
-  if(!url){
+if(!url){
 
-    preview.style.display="none";
-    preview.removeAttribute("src");
-    return;
-  }
+preview.style.display="none";
+preview.removeAttribute("src");
+return;
+}
 
-  preview.src=url;
-  preview.style.display="block";
+preview.src=url;
+preview.style.display="block";
 
-  preview.onerror=function(){
-    preview.style.display="none";
-  };
+preview.onerror=function(){
+preview.style.display="none";
+};
 }
 
 /* SALE PRICE */
 
 function updateSalePreview(){
 
-  const price=Number($("productPrice").value||0);
-  const discount=Number($("productDiscount").value||0);
+const price=Number($("productPrice").value||0);
+const discount=Number($("productDiscount").value||0);
 
-  const sale=
-    price-(price*discount/100);
+const sale=
+price-(price*discount/100);
 
-  $("salePreview").innerHTML=
-    `Sale price preview:
-     <strong>₹${money(Math.max(0,sale))}</strong>`;
+$("salePreview").innerHTML=
+`Sale price preview:
+<strong>₹${money(Math.max(0,sale))}</strong>`;
 }
 
-/* SAVE PRODUCT */
+/* =========================================================
+   FIXED SAVE PRODUCT
+   ========================================================= */
 
 async function saveProduct(){
 
-  const id=$("productId").value.trim();
-  const name=$("productName").value.trim();
-  const price=Number($("productPrice").value);
-  const category=$("productCategory").value.trim();
-  const image=$("productImage").value.trim();
-  const description=$("productDescription").value.trim();
-  const stock=Number($("productStock").value);
-  const discount=Number($("productDiscount").value||0);
+const id=$("productId").value.trim();
+const name=$("productName").value.trim();
+const price=Number($("productPrice").value);
+const category=$("productCategory").value.trim();
 
-  const imageFile=$("productImageFile").files?.[0];
+let image=$("productImage").value.trim();
 
-  if(!name)
-    return alert("Product name is required.");
+const description=$("productDescription").value.trim();
+const stock=Number($("productStock").value);
+const discount=Number($("productDiscount").value||0);
 
-  if(!Number.isFinite(price)||price<0)
-    return alert("Enter a valid product price.");
+const imageFile=$("productImageFile").files?.[0];
 
-  if(!category)
-    return alert("Product category is required.");
+/* VALIDATION */
 
-  if(!Number.isInteger(stock)||stock<0)
-    return alert("Stock must be a whole number.");
+if(!name)
+return alert("Product name is required.");
 
-  if(!Number.isFinite(discount)||discount<0||discount>=100)
-    return alert("Discount must be between 0 and 99.99%.");
+if(!Number.isFinite(price)||price<0)
+return alert("Enter a valid product price.");
 
-  if(image && !imageFile){
+if(!category)
+return alert("Product category is required.");
 
-    try{
-      new URL(image);
-    }catch(e){
-      return alert("Please enter a valid image URL.");
-    }
+if(!Number.isInteger(stock)||stock<0)
+return alert("Stock must be a whole number.");
 
-  }
+if(!Number.isFinite(discount)||discount<0||discount>=100)
+return alert("Discount must be between 0 and 99.99%.");
 
-  if(imageFile){
+/* IMAGE VALIDATION */
 
-    const allowed=[
-      "image/jpeg",
-      "image/png",
-      "image/webp"
-    ];
+if(imageFile){
 
-    if(!allowed.includes(imageFile.type))
-      return alert("Only JPG, PNG and WEBP images are allowed.");
+const allowed=[
+"image/jpeg",
+"image/png",
+"image/webp"
+];
 
-    if(imageFile.size>5*1024*1024)
-      return alert("Image must be 5MB or smaller.");
+if(!allowed.includes(imageFile.type))
+return alert("Only JPG, PNG and WEBP images are allowed.");
 
-  }
+if(imageFile.size>5*1024*1024)
+return alert("Image must be 5MB or smaller.");
 
-  const button=$("saveProductButton");
+}
 
-  button.disabled=true;
-  button.textContent="Saving...";
+if(image && !imageFile){
 
-  try{
+try{
 
-    /*
-      STEP 1:
-      Product create/update
-    */
+new URL(image);
 
-    const url=
-      id
-      ?"/api/seller/products/"+id
-      :"/api/seller/products";
+}catch(error){
 
-    const method=id?"PUT":"POST";
+return alert("Please enter a valid image URL.");
 
-    const response=await fetch(url,{
-      method,
-      headers:{
-        "Content-Type":"application/json"
-      },
-      credentials:"include",
-      body:JSON.stringify({
-        name,
-        price,
-        category,
-        image:imageFile?"":image,
-        description,
-        stock,
-        discount_percent:discount
-      })
-    });
+}
 
-    const data=await getJson(response);
+}
 
-    /*
-      STEP 2:
-      Upload selected image
-    */
+/* BUTTON */
 
-    const productId=
-      id||
-      data?.product?.id||
-      data?.id;
+const button=$("saveProductButton");
 
-    if(imageFile && productId){
+button.disabled=true;
+button.textContent="Saving...";
 
-      $("imageUploadStatus").textContent=
-        "Uploading image...";
+try{
 
-      const formData=new FormData();
+/*
+==================================================
+STEP 1: UPLOAD IMAGE FIRST
+==================================================
+*/
 
-      formData.append(
-        "image",
-        imageFile
-      );
+if(imageFile){
 
-      const uploadResponse=await fetch(
-        "/api/seller/products/"+
-        productId+
-        "/image",
-        {
-          method:"POST",
-          credentials:"include",
-          body:formData
-        }
-      );
+$("imageUploadStatus").textContent=
+"Uploading image...";
 
-      await getJson(uploadResponse);
+const formData=new FormData();
 
-      $("imageUploadStatus").textContent=
-        "Image uploaded successfully.";
+formData.append(
+"image",
+imageFile
+);
 
-    }
+const uploadResponse=await fetch(
+"/api/seller/upload/image",
+{
+method:"POST",
+credentials:"include",
+body:formData
+}
+);
 
-    closeProductModal();
+const uploadData=
+await getJson(uploadResponse);
 
-    showMessage(
-      "mainMessage",
-      id
-      ?"Product updated successfully!"
-      :"Product added successfully!"
-    );
+console.log(
+"IMAGE UPLOAD RESPONSE:",
+uploadData
+);
 
-    await loadProducts();
-    await loadDashboard();
+/*
+Accept common image URL response formats.
+*/
 
-  }catch(error){
+image=
+uploadData.image ||
+uploadData.url ||
+uploadData.imageUrl ||
+uploadData.secure_url ||
+uploadData.data?.image ||
+uploadData.data?.url ||
+"";
 
-    showMessage(
-      "mainMessage",
-      error.message,
-      "error"
-    );
+if(!image){
 
-  }finally{
+throw new Error(
+"Image upload succeeded but image URL was not returned."
+);
 
-    button.disabled=false;
-    button.textContent="Save Product";
+}
 
-  }
+$("imageUploadStatus").textContent=
+"Image uploaded successfully.";
+
+}
+
+/*
+==================================================
+STEP 2: SAVE PRODUCT WITH IMAGE URL
+==================================================
+*/
+
+const url=id
+?"/api/seller/products/"+encodeURIComponent(id)
+:"/api/seller/products";
+
+const method=id?"PUT":"POST";
+
+const response=await fetch(
+url,
+{
+method:method,
+
+headers:{
+"Content-Type":"application/json"
+},
+
+credentials:"include",
+
+body:JSON.stringify({
+
+name:name,
+
+price:price,
+
+category:category,
+
+image:image,
+
+description:description,
+
+stock:stock,
+
+discount_percent:discount
+
+})
+}
+);
+
+const data=
+await getJson(response);
+
+console.log(
+"PRODUCT SAVE RESPONSE:",
+data
+);
+
+/*
+SUCCESS
+*/
+
+closeProductModal();
+
+showMessage(
+"mainMessage",
+id
+?"Product updated successfully!"
+:"Product added successfully!"
+);
+
+await loadProducts();
+await loadDashboard();
+
+}catch(error){
+
+console.error(
+"SAVE PRODUCT ERROR:",
+error
+);
+
+showMessage(
+"mainMessage",
+error.message||
+"Unable to save product.",
+"error"
+);
+
+}finally{
+
+button.disabled=false;
+button.textContent="Save Product";
+
+}
 }
 
 /* DELETE */
 
 async function deleteProduct(id){
 
-  const product=currentProducts.find(
-    p=>Number(p.id)===Number(id)
-  );
+const product=currentProducts.find(
+p=>Number(p.id)===Number(id)
+);
 
-  const name=product?.name||"this product";
+const name=product?.name||"this product";
 
-  if(!confirm(`Delete "${name}"?`))
-    return;
+if(!confirm(`Delete "${name}"?`))
+return;
 
-  try{
+try{
 
-    const response=await fetch(
-      "/api/seller/products/"+id,
-      {
-        method:"DELETE",
-        credentials:"include"
-      }
-    );
+const response=await fetch(
+"/api/seller/products/"+id,
+{
+method:"DELETE",
+credentials:"include"
+}
+);
 
-    await getJson(response);
+await getJson(response);
 
-    showMessage(
-      "mainMessage",
-      "Product deleted successfully!"
-    );
+showMessage(
+"mainMessage",
+"Product deleted successfully!"
+);
 
-    await loadProducts();
-    await loadDashboard();
+await loadProducts();
+await loadDashboard();
 
-  }catch(error){
+}catch(error){
 
-    showMessage(
-      "mainMessage",
-      error.message,
-      "error"
-    );
+showMessage(
+"mainMessage",
+error.message,
+"error"
+);
 
-  }
+}
 }
 
 /* ORDERS */
 
 async function loadOrders(){
 
-  const container=$("ordersList");
+const container=$("ordersList");
 
-  container.innerHTML=
-    `<div class="loading">Loading orders...</div>`;
+container.innerHTML=
+`<div class="loading">Loading orders...</div>`;
 
-  try{
+try{
 
-    const response=await fetch(
-      "/api/seller/orders",
-      {credentials:"include"}
-    );
+const response=await fetch(
+"/api/seller/orders",
+{credentials:"include"}
+);
 
-    const data=await getJson(response);
+const data=await getJson(response);
 
-    renderOrders(
-      Array.isArray(data)?data:[]
-    );
+renderOrders(
+Array.isArray(data)?data:[]
+);
 
-  }catch(error){
+}catch(error){
 
-    container.innerHTML="";
+container.innerHTML="";
 
-    showMessage(
-      "mainMessage",
-      error.message,
-      "error"
-    );
-  }
+showMessage(
+"mainMessage",
+error.message,
+"error"
+);
+
+}
 }
 
 function renderOrders(orders){
 
-  const container=$("ordersList");
+const container=$("ordersList");
 
-  if(!orders.length){
+if(!orders.length){
 
-    container.innerHTML=`
+container.innerHTML=`
 
-      <div class="empty">
+<div class="empty">
 
-        <h3>No orders yet</h3>
+<h3>No orders yet</h3>
 
-        <p>
-          Orders containing your products
-          will appear here.
-        </p>
+<p>
+Orders containing your products
+will appear here.
+</p>
 
-      </div>
+</div>
 
-    `;
+`;
 
-    return;
-  }
+return;
+}
 
-  container.innerHTML=orders.map(order=>{
+container.innerHTML=orders.map(order=>{
 
-    const items=
-      Array.isArray(order.items)
-      ?order.items
-      :[];
+const items=
+Array.isArray(order.items)
+?order.items
+:[];
 
-    const status=
-      String(order.status||"pending")
-      .toLowerCase();
+const status=
+String(order.status||"pending")
+.toLowerCase();
 
-    return `
+return `
 
-      <article class="order-card">
+<article class="order-card">
 
-        <div class="order-top">
+<div class="order-top">
 
-          <h3>
-            Order #${escapeHtml(order.id)}
-          </h3>
+<h3>
+Order #${escapeHtml(order.id)}
+</h3>
 
-          <span class="status ${escapeHtml(status)}">
-            ${escapeHtml(status.toUpperCase())}
-          </span>
+<span class="status ${escapeHtml(status)}">
+${escapeHtml(status.toUpperCase())}
+</span>
 
-        </div>
+</div>
 
-        <div class="order-info">
+<div class="order-info">
 
-          <div>
-            <strong>Customer:</strong>
-            ${escapeHtml(order.customer_name||"-")}
-          </div>
+<div>
+<strong>Customer:</strong>
+${escapeHtml(order.customer_name||"-")}
+</div>
 
-          <div>
-            <strong>Phone:</strong>
-            ${escapeHtml(order.customer_phone||"-")}
-          </div>
+<div>
+<strong>Phone:</strong>
+${escapeHtml(order.customer_phone||"-")}
+</div>
 
-          <div>
-            <strong>Address:</strong>
-            ${escapeHtml(order.customer_address||"-")}
-          </div>
+<div>
+<strong>Address:</strong>
+${escapeHtml(order.customer_address||"-")}
+</div>
 
-          <div>
-            <strong>Order Date:</strong>
-            ${escapeHtml(
-              order.created_at
-              ?new Date(order.created_at).toLocaleString("en-IN")
-              :""
-            )}
-          </div>
+<div>
+<strong>Order Date:</strong>
+${escapeHtml(
+order.created_at
+?new Date(order.created_at).toLocaleString("en-IN")
+:""
+)}
+</div>
 
-        </div>
+</div>
 
-        <div class="order-items">
+<div class="order-items">
 
-          <strong>Your Products</strong>
+<strong>Your Products</strong>
 
-          ${
-            items.length
-            ?items.map(item=>`
+${
+items.length
+?items.map(item=>`
 
-              <div class="order-item">
+<div class="order-item">
 
-                <div>
-                  <strong>
-                    ${escapeHtml(item.name||"-")}
-                  </strong>
-                </div>
+<div>
+<strong>
+${escapeHtml(item.name||"-")}
+</strong>
+</div>
 
-                <div style="color:#6b7280">
+<div style="color:#6b7280">
 
-                  Qty:
-                  ${Number(item.quantity||0)}
+Qty:
+${Number(item.quantity||0)}
 
-                  &nbsp; • &nbsp;
+&nbsp; • &nbsp;
 
-                  ₹${money(item.item_total||0)}
+₹${money(item.item_total||0)}
 
-                </div>
+</div>
 
-              </div>
+</div>
 
-            `).join("")
-            :"<p>No items</p>"
-          }
+`).join("")
+:"<p>No items</p>"
+}
 
-        </div>
+</div>
 
-        <div class="order-total">
-          Your Total:
-          ₹${money(order.seller_total||0)}
-        </div>
+<div class="order-total">
+Your Total:
+₹${money(order.seller_total||0)}
+</div>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:15px">
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:15px">
 
-          ${
-            status!=="confirmed" &&
-            status!=="shipped" &&
-            status!=="delivered" &&
-            status!=="cancelled"
-            ?`
-              <button
-                class="btn warning"
-                onclick="updateOrderStatus(${Number(order.id)},'confirmed')"
-              >
-                Confirm
-              </button>
-            `
-            :""
-          }
+${
+status!=="confirmed" &&
+status!=="shipped" &&
+status!=="delivered" &&
+status!=="cancelled"
+?`
+<button
+class="btn warning"
+onclick="updateOrderStatus(${Number(order.id)},'confirmed')"
+>
+Confirm
+</button>
+`
+:""
+}
 
-          ${
-            status==="confirmed"
-            ?`
-              <button
-                class="btn primary"
-                onclick="updateOrderStatus(${Number(order.id)},'shipped')"
-              >
-                Mark Shipped
-              </button>
-            `
-            :""
-          }
+${
+status==="confirmed"
+?`
+<button
+class="btn primary"
+onclick="updateOrderStatus(${Number(order.id)},'shipped')"
+>
+Mark Shipped
+</button>
+`
+:""
+}
 
-          ${
-            status==="shipped"
-            ?`
-              <button
-                class="btn success"
-                onclick="updateOrderStatus(${Number(order.id)},'delivered')"
-              >
-                Mark Delivered
-              </button>
-            `
-            :""
-          }
+${
+status==="shipped"
+?`
+<button
+class="btn success"
+onclick="updateOrderStatus(${Number(order.id)},'delivered')"
+>
+Mark Delivered
+</button>
+`
+:""
+}
 
-          ${
-            status!=="delivered" &&
-            status!=="cancelled"
-            ?`
-              <button
-                class="btn danger"
-                onclick="updateOrderStatus(${Number(order.id)},'cancelled')"
-              >
-                Cancel
-              </button>
-            `
-            :""
-          }
+${
+status!=="delivered" &&
+status!=="cancelled"
+?`
+<button
+class="btn danger"
+onclick="updateOrderStatus(${Number(order.id)},'cancelled')"
+>
+Cancel
+</button>
+`
+:""
+}
 
-        </div>
+</div>
 
-      </article>
+</article>
 
-    `;
+`;
 
-  }).join("");
+}).join("");
 }
 
 /* ORDER STATUS */
 
 async function updateOrderStatus(orderId,status){
 
-  const labels={
-    confirmed:"confirm this order",
-    shipped:"mark this order as shipped",
-    delivered:"mark this order as delivered",
-    cancelled:"cancel this order"
-  };
+const labels={
+confirmed:"confirm this order",
+shipped:"mark this order as shipped",
+delivered:"mark this order as delivered",
+cancelled:"cancel this order"
+};
 
-  if(!confirm(
-    `Are you sure you want to ${labels[status]}?`
-  ))return;
+if(!confirm(
+`Are you sure you want to ${labels[status]}?`
+))return;
 
-  try{
+try{
 
-    const response=await fetch(
-      "/api/seller/orders/"+orderId+"/status",
-      {
-        method:"PUT",
-        headers:{
-          "Content-Type":"application/json"
-        },
-        credentials:"include",
-        body:JSON.stringify({status})
-      }
-    );
+const response=await fetch(
+"/api/seller/orders/"+orderId+"/status",
+{
+method:"PUT",
+headers:{
+"Content-Type":"application/json"
+},
+credentials:"include",
+body:JSON.stringify({status})
+}
+);
 
-    await getJson(response);
+await getJson(response);
 
-    showMessage(
-      "mainMessage",
-      `Order #${orderId} updated to ${status}.`
-    );
+showMessage(
+"mainMessage",
+`Order #${orderId} updated to ${status}.`
+);
 
-    await loadOrders();
-    await loadDashboard();
+await loadOrders();
+await loadDashboard();
 
-  }catch(error){
+}catch(error){
 
-    showMessage(
-      "mainMessage",
-      error.message,
-      "error"
-    );
-  }
+showMessage(
+"mainMessage",
+error.message,
+"error"
+);
+
+}
 }
 
 /* PROFILE */
 
 function updateProfile(){
 
-  if(!currentSeller)return;
+if(!currentSeller)return;
 
-  $("profileName").textContent=
-    currentSeller.name||"-";
+$("profileName").textContent=
+currentSeller.name||"-";
 
-  $("profileEmail").textContent=
-    currentSeller.email||"-";
+$("profileEmail").textContent=
+currentSeller.email||"-";
 
-  $("profilePhone").textContent=
-    currentSeller.phone||"-";
+$("profilePhone").textContent=
+currentSeller.phone||"-";
 
-  $("profileStatus").textContent=
-    currentSeller.status||"-";
+$("profileStatus").textContent=
+currentSeller.status||"-";
 
-  $("profileId").textContent=
-    currentSeller.id||"-";
+$("profileId").textContent=
+currentSeller.id||"-";
 
-  $("dashboardSellerName").textContent=
-    currentSeller.name||"Seller";
+$("dashboardSellerName").textContent=
+currentSeller.name||"Seller";
 }
 
 /* ESC */
 
-document.addEventListener("keydown",event=>{
+document.addEventListener(
+"keydown",
+event=>{
 
-  if(event.key==="Escape"){
-    closeProductModal();
-  }
+if(event.key==="Escape"){
+closeProductModal();
+}
 
 });
 
 /* START */
 
 document.addEventListener(
-  "DOMContentLoaded",
-  ()=>{
-    checkSellerSession();
-  }
+"DOMContentLoaded",
+()=>{
+checkSellerSession();
+}
 );
 
 </script>
