@@ -345,9 +345,9 @@ function installImageRoutes(app) {
   app.__shriviImageRoutesInstalled =
     true;
 
-  // ----------------------------------------------------
-  // ADMIN IMAGE
-  // ----------------------------------------------------
+  // ====================================================
+  // ADMIN IMAGE UPLOAD
+  // ====================================================
 
   app.post(
     "/api/admin/products/:id/image",
@@ -425,6 +425,7 @@ function installImageRoutes(app) {
           product:
             result.rows[0]
         });
+
       } catch (error) {
         console.error(
           "Admin product image upload:",
@@ -444,9 +445,9 @@ function installImageRoutes(app) {
     }
   );
 
-  // ----------------------------------------------------
-  // SELLER IMAGE
-  // ----------------------------------------------------
+  // ====================================================
+  // SELLER IMAGE UPLOAD
+  // ====================================================
 
   app.post(
     "/api/seller/products/:id/image",
@@ -518,6 +519,7 @@ function installImageRoutes(app) {
           product:
             result.rows[0]
         });
+
       } catch (error) {
         console.error(
           "Seller product image upload:",
@@ -537,9 +539,9 @@ function installImageRoutes(app) {
     }
   );
 
-  // ----------------------------------------------------
+  // ====================================================
   // MULTER ERRORS
-  // ----------------------------------------------------
+  // ====================================================
 
   app.use(
     (
@@ -548,6 +550,7 @@ function installImageRoutes(app) {
       res,
       next
     ) => {
+
       if (
         error &&
         error.code ===
@@ -581,6 +584,7 @@ function installImageRoutes(app) {
 
 express.application.listen =
   function (...args) {
+
     installImageRoutes(this);
 
     return originalListen.apply(
