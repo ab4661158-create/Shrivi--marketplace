@@ -60,8 +60,11 @@ const pool = new Pool({
 // ADMIN
 // =====================================================
 
-const ADMIN_USER = process.env.ADMIN_USER || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+const ADMIN_USER =
+  process.env.ADMIN_USER || "admin";
+
+const ADMIN_PASSWORD =
+  process.env.ADMIN_PASSWORD;
 
 let ADMIN_HASH = null;
 
@@ -118,7 +121,8 @@ app.use(
       httpOnly: true,
       secure: true,
       sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge:
+        24 * 60 * 60 * 1000
     }
   })
 );
@@ -199,7 +203,8 @@ function calculateSalePrice(price, discount) {
 }
 
 function normalizeProduct(product) {
-  const price = Number(product.price) || 0;
+  const price =
+    Number(product.price) || 0;
 
   const discount =
     Number(product.discount_percent) || 0;
@@ -550,7 +555,9 @@ app.post(
         });
       }
 
-      if (seller.status !== "active") {
+      if (
+        seller.status !== "active"
+      ) {
         return res.status(403).json({
           error:
             "Seller account is not active"
@@ -617,7 +624,7 @@ app.post(
 );
 
 // =====================================================
-// SELLER SESSION
+// SELLER ME
 // =====================================================
 
 app.get(
@@ -763,7 +770,9 @@ function validateProductInput(
     body?.discount_percent === "" ||
     body?.discount_percent === undefined
       ? 0
-      : Number(body.discount_percent);
+      : Number(
+          body.discount_percent
+        );
 
   if (!name) {
     throw new Error(
@@ -809,6 +818,7 @@ function validateProductInput(
       null,
 
     stock,
+
     discount
   };
 }
@@ -1171,15 +1181,22 @@ app.get(
       try {
         const ordersResult =
           await pool.query(
-            `SELECT *
-             FROM orders
-             ORDER BY id DESC`
+            `SELECT
+               o.id,
+               o.items
+             FROM orders o
+             ORDER BY o.id DESC`
           );
 
+        const orderIds =
+          new Set();
+
         for (
-          const order of ordersResult.rows
+          const order of
+          ordersResult.rows
         ) {
-          let items = order.items;
+          let items =
+            order.items;
 
           if (
             typeof items === "string"
@@ -1192,7 +1209,9 @@ app.get(
             }
           }
 
-          if (!Array.isArray(items)) {
+          if (
+            !Array.isArray(items)
+          ) {
             items = [];
           }
 
@@ -1201,11 +1220,16 @@ app.get(
               item =>
                 Number(
                   item?.seller_id
-                ) === Number(sellerId)
+                ) ===
+                Number(sellerId)
             );
 
-          if (sellerItems.length) {
-            orders += 1;
+          if (
+            sellerItems.length
+          ) {
+            orderIds.add(
+              order.id
+            );
 
             revenue +=
               sellerItems.reduce(
@@ -1216,27 +1240,27 @@ app.get(
                     );
 
                   if (
-                    Number.isFinite(
-                      total
-                    )
+                    Number.isFinite(total)
                   ) {
-                    return sum + total;
+                    return (
+                      sum + total
+                    );
                   }
 
-                  return (
-                    sum +
-                    (Number(
-                      item?.price
-                    ) || 0) *
-                    (Number(
-                      item?.quantity
-                    ) || 0)
-                  );
+                  return sum;
                 },
                 0
               );
           }
         }
+
+        orders =
+          orderIds.size;
+
+        revenue =
+          Math.round(
+            revenue * 100
+          ) / 100;
       } catch (orderError) {
         console.error(
           "Seller dashboard order calculation error:",
@@ -1255,10 +1279,7 @@ app.get(
 
         orders,
 
-        revenue:
-          Math.round(
-            revenue * 100
-          ) / 100
+        revenue
       });
     } catch (error) {
       console.error(
@@ -1308,7 +1329,9 @@ app.get(
         ) {
           try {
             rawItems =
-              JSON.parse(rawItems);
+              JSON.parse(
+                rawItems
+              );
           } catch {
             rawItems = [];
           }
@@ -1328,7 +1351,9 @@ app.get(
               ) === sellerId
           );
 
-        if (!sellerItems.length) {
+        if (
+          !sellerItems.length
+        ) {
           continue;
         }
 
@@ -1343,7 +1368,9 @@ app.get(
               if (
                 Number.isFinite(total)
               ) {
-                return sum + total;
+                return (
+                  sum + total
+                );
               }
 
               const price =
@@ -1366,8 +1393,7 @@ app.get(
           );
 
         sellerOrders.push({
-          id:
-            order.id,
+          id: order.id,
 
           status:
             order.status ||
@@ -1395,7 +1421,9 @@ app.get(
             sellerItems,
 
           seller_total:
-            sellerTotal
+            Math.round(
+              sellerTotal * 100
+            ) / 100
         });
       }
 
@@ -1496,7 +1524,9 @@ app.put(
         }
       }
 
-      if (!Array.isArray(items)) {
+      if (
+        !Array.isArray(items)
+      ) {
         items = [];
       }
 
@@ -1552,7 +1582,7 @@ app.put(
 );
 
 // =====================================================
-// CUSTOMER AUTH
+// CUSTOMER REGISTER
 // =====================================================
 
 app.post(
@@ -1612,7 +1642,9 @@ app.post(
           [email]
         );
 
-      if (existing.rows.length) {
+      if (
+        existing.rows.length
+      ) {
         return res.status(409).json({
           error:
             "Email already registered"
@@ -1721,7 +1753,9 @@ app.post(
           [email]
         );
 
-      if (!result.rows.length) {
+      if (
+        !result.rows.length
+      ) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -1927,12 +1961,17 @@ app.post(
         });
       }
 
+      const uniqueProductIds =
+        [
+          ...new Set(productIds)
+        ];
+
       const productsResult =
         await pool.query(
           `SELECT *
            FROM products
            WHERE id=ANY($1::int[])`,
-          [productIds]
+          [uniqueProductIds]
         );
 
       const products =
@@ -1940,7 +1979,7 @@ app.post(
 
       if (
         products.length !==
-        new Set(productIds).size
+        uniqueProductIds.length
       ) {
         return res.status(400).json({
           error:
@@ -1961,7 +2000,8 @@ app.post(
       const orderItems = [];
 
       for (
-        const incoming of incomingItems
+        const incoming of
+        incomingItems
       ) {
         const product =
           productMap.get(
@@ -1978,7 +2018,9 @@ app.post(
           );
 
         if (
-          !Number.isInteger(quantity) ||
+          !Number.isInteger(
+            quantity
+          ) ||
           quantity <= 0
         ) {
           return res.status(400).json({
@@ -1990,7 +2032,9 @@ app.post(
         const stock =
           Number(product.stock) || 0;
 
-        if (quantity > stock) {
+        if (
+          quantity > stock
+        ) {
           return res.status(400).json({
             error:
               `${product.name} has only ${stock} item(s) in stock`
@@ -2041,7 +2085,9 @@ app.post(
 
           seller_id:
             product.seller_id
-              ? Number(product.seller_id)
+              ? Number(
+                  product.seller_id
+                )
               : null,
 
           item_total:
@@ -2075,7 +2121,9 @@ app.post(
         await pool.connect();
 
       try {
-        await client.query("BEGIN");
+        await client.query(
+          "BEGIN"
+        );
 
         for (
           const item of orderItems
@@ -2089,7 +2137,9 @@ app.post(
               [item.product_id]
             );
 
-          if (!stockResult.rows.length) {
+          if (
+            !stockResult.rows.length
+          ) {
             throw new Error(
               "Product no longer exists"
             );
@@ -2163,7 +2213,9 @@ app.post(
           );
         }
 
-        await client.query("COMMIT");
+        await client.query(
+          "COMMIT"
+        );
 
         res.status(201).json({
           ok: true,
@@ -2173,7 +2225,10 @@ app.post(
             )
         });
       } catch (transactionError) {
-        await client.query("ROLLBACK");
+        await client.query(
+          "ROLLBACK"
+        );
+
         throw transactionError;
       } finally {
         client.release();
@@ -2371,7 +2426,8 @@ app.put(
         }
 
         sellerId =
-          existing.rows[0].seller_id;
+          existing.rows[0]
+            .seller_id;
       }
 
       const result =
@@ -2605,12 +2661,11 @@ async function initializeDatabase() {
     await pool.connect();
 
   try {
-    await client.query("BEGIN");
+    await client.query(
+      "BEGIN"
+    );
 
-    // -------------------------------------------------
     // SELLERS
-    // -------------------------------------------------
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS sellers (
         id SERIAL PRIMARY KEY,
@@ -2623,10 +2678,7 @@ async function initializeDatabase() {
       )
     `);
 
-    // -------------------------------------------------
     // CUSTOMERS
-    // -------------------------------------------------
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
@@ -2639,10 +2691,7 @@ async function initializeDatabase() {
       )
     `);
 
-    // -------------------------------------------------
     // PRODUCTS
-    // -------------------------------------------------
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -2653,19 +2702,18 @@ async function initializeDatabase() {
         description TEXT,
         stock INTEGER NOT NULL DEFAULT 0,
         discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
-        seller_id INTEGER REFERENCES sellers(id) ON DELETE SET NULL,
+        seller_id INTEGER REFERENCES sellers(id)
+          ON DELETE SET NULL,
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
 
-    // -------------------------------------------------
     // ORDERS
-    // -------------------------------------------------
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
-        customer_id INTEGER REFERENCES customers(id) ON DELETE SET NULL,
+        customer_id INTEGER REFERENCES customers(id)
+          ON DELETE SET NULL,
         customer_name TEXT,
         customer_phone TEXT,
         customer_address TEXT,
@@ -2676,14 +2724,11 @@ async function initializeDatabase() {
       )
     `);
 
-    // -------------------------------------------------
-    // ADD MISSING PRODUCT COLUMNS
-    // -------------------------------------------------
-
+    // MISSING PRODUCT COLUMNS
     await client.query(`
       ALTER TABLE products
-      ADD COLUMN IF NOT EXISTS seller_id
-      INTEGER REFERENCES sellers(id)
+      ADD COLUMN IF NOT EXISTS seller_id INTEGER
+      REFERENCES sellers(id)
       ON DELETE SET NULL
     `);
 
@@ -2709,54 +2754,7 @@ async function initializeDatabase() {
       INTEGER NOT NULL DEFAULT 0
     `);
 
-    // -------------------------------------------------
-    // ADD MISSING ORDER COLUMNS
-    // -------------------------------------------------
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_id
-      INTEGER REFERENCES customers(id)
-      ON DELETE SET NULL
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_name TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_phone TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_address TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS items
-      JSONB NOT NULL DEFAULT '[]'::jsonb
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS total
-      NUMERIC(12,2) NOT NULL DEFAULT 0
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS status
-      TEXT NOT NULL DEFAULT 'pending'
-    `);
-
-    // -------------------------------------------------
     // INDEXES
-    // -------------------------------------------------
-
     await client.query(`
       CREATE INDEX IF NOT EXISTS
       idx_products_seller_id
@@ -2781,16 +2779,18 @@ async function initializeDatabase() {
       ON orders(created_at DESC)
     `);
 
-    await client.query("COMMIT");
+    await client.query(
+      "COMMIT"
+    );
 
     console.log(
       "Database initialized successfully."
     );
-
   } catch (error) {
-
     try {
-      await client.query("ROLLBACK");
+      await client.query(
+        "ROLLBACK"
+      );
     } catch (rollbackError) {
       console.error(
         "Database rollback error:",
@@ -2804,11 +2804,8 @@ async function initializeDatabase() {
     );
 
     throw error;
-
   } finally {
-
     client.release();
-
   }
 }
 
@@ -2820,7 +2817,9 @@ app.get(
   "/api/health",
   async (req, res) => {
     try {
-      await pool.query("SELECT 1");
+      await pool.query(
+        "SELECT 1"
+      );
 
       res.json({
         ok: true,
@@ -2830,6 +2829,11 @@ app.get(
           "connected"
       });
     } catch (error) {
+      console.error(
+        "Health check error:",
+        error
+      );
+
       res.status(500).json({
         ok: false,
         service:
@@ -2838,6 +2842,20 @@ app.get(
           "error"
       });
     }
+  }
+);
+
+// =====================================================
+// 404 API HANDLER
+// =====================================================
+
+app.use(
+  "/api",
+  (req, res) => {
+    res.status(404).json({
+      error:
+        "API endpoint not found"
+    });
   }
 );
 
@@ -2853,8 +2871,7 @@ app.use(
     );
 
     if (
-      error instanceof
-      multer.MulterError
+      error instanceof multer.MulterError
     ) {
       if (
         error.code ===
@@ -2896,9 +2913,7 @@ async function startServer() {
         );
       }
     );
-
   } catch (error) {
-
     console.error(
       "Server startup failed:",
       error
