@@ -2,326 +2,593 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta name="theme-color" content="#111827">
 
 <title>Shrivi Seller Center</title>
 
 <style>
-* {
-  box-sizing: border-box;
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
 }
 
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f6f8;
-  color: #172033;
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f3f4f6;
+  color:#111827;
 }
 
-header {
-  background: #111827;
-  color: white;
-  padding: 18px 22px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+button,
+input,
+textarea,
+select{
+  font:inherit;
 }
 
-.logo {
-  font-size: 25px;
-  font-weight: bold;
+button{
+  border:0;
+  cursor:pointer;
+  font-weight:700;
 }
 
-.logo span {
-  margin-right: 8px;
+.hidden{
+  display:none!important;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* HEADER */
+
+header{
+  background:#111827;
+  color:#fff;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 2px 12px rgba(0,0,0,.15);
 }
 
-button {
-  border: 0;
-  border-radius: 8px;
-  padding: 11px 16px;
-  cursor: pointer;
-  font-weight: bold;
+.header-inner{
+  max-width:1200px;
+  margin:auto;
+  min-height:68px;
+  padding:12px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:15px;
 }
 
-.logout-btn {
-  background: #ef4444;
-  color: white;
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
-.container {
-  max-width: 1150px;
-  margin: auto;
-  padding: 20px;
+.brand-icon{
+  width:40px;
+  height:40px;
+  border-radius:10px;
+  background:#2563eb;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:21px;
 }
 
-.hidden {
-  display: none !important;
+.brand-title{
+  font-size:20px;
+  font-weight:800;
 }
 
-.card {
-  background: white;
-  border-radius: 14px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 3px 14px rgba(0,0,0,.06);
+.brand-sub{
+  color:#9ca3af;
+  font-size:12px;
+  margin-top:2px;
 }
 
-.auth-box {
-  max-width: 480px;
-  margin: 45px auto;
+.header-user{
+  display:flex;
+  align-items:center;
+  gap:12px;
 }
 
-h1, h2, h3 {
-  margin-top: 0;
+.seller-name{
+  font-size:14px;
+  color:#e5e7eb;
+}
+
+.logout{
+  background:#ef4444;
+  color:#fff;
+  padding:10px 14px;
+  border-radius:8px;
+}
+
+/* CONTAINER */
+
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+
+/* CARD */
+
+.card{
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 3px 16px rgba(0,0,0,.06);
+  margin-bottom:18px;
+}
+
+.auth-card{
+  max-width:480px;
+  margin:50px auto;
+}
+
+h1,h2,h3{
+  margin-bottom:10px;
+}
+
+p{
+  line-height:1.5;
+}
+
+/* FORM */
+
+label{
+  display:block;
+  font-weight:700;
+  font-size:14px;
+  margin-top:12px;
+  margin-bottom:5px;
 }
 
 input,
 textarea,
-select {
-  width: 100%;
-  padding: 12px;
-  margin: 7px 0 13px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 15px;
+select{
+  width:100%;
+  padding:12px 13px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  outline:none;
+  background:#fff;
 }
 
-textarea {
-  min-height: 90px;
-  resize: vertical;
+input:focus,
+textarea:focus,
+select:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
 }
 
-.primary {
-  background: #2563eb;
-  color: white;
+textarea{
+  min-height:100px;
+  resize:vertical;
 }
 
-.success {
-  background: #16a34a;
-  color: white;
+/* BUTTONS */
+
+.btn{
+  padding:11px 16px;
+  border-radius:9px;
 }
 
-.warning {
-  background: #f59e0b;
-  color: white;
+.primary{
+  background:#2563eb;
+  color:#fff;
 }
 
-.danger {
-  background: #dc2626;
-  color: white;
+.success{
+  background:#16a34a;
+  color:#fff;
 }
 
-.secondary {
-  background: #e5e7eb;
-  color: #111827;
+.warning{
+  background:#f59e0b;
+  color:#fff;
 }
 
-.tabs {
-  display: flex;
-  gap: 8px;
-  overflow-x: auto;
-  margin-bottom: 20px;
+.danger{
+  background:#dc2626;
+  color:#fff;
 }
 
-.tab {
-  background: white;
-  color: #111827;
-  white-space: nowrap;
+.secondary{
+  background:#e5e7eb;
+  color:#111827;
 }
 
-.tab.active {
-  background: #2563eb;
-  color: white;
+.dark{
+  background:#111827;
+  color:#fff;
 }
 
-.stats {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 15px;
+/* MESSAGE */
+
+.message{
+  display:none;
+  padding:13px;
+  border-radius:10px;
+  margin-bottom:16px;
+  font-weight:600;
 }
 
-.stat {
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 3px 14px rgba(0,0,0,.06);
+.message.success-message{
+  display:block;
+  background:#dcfce7;
+  color:#166534;
 }
 
-.stat-title {
-  color: #6b7280;
-  font-size: 14px;
+.message.error-message{
+  display:block;
+  background:#fee2e2;
+  color:#991b1b;
 }
 
-.stat-value {
-  font-size: 30px;
-  font-weight: bold;
-  margin-top: 7px;
+/* TABS */
+
+.tabs{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding-bottom:3px;
+  margin-bottom:20px;
 }
 
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+.tab{
+  white-space:nowrap;
+  background:#fff;
+  color:#111827;
+  padding:11px 17px;
+  border-radius:9px;
 }
 
-.product {
-  background: white;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 3px 14px rgba(0,0,0,.06);
+.tab.active{
+  background:#2563eb;
+  color:#fff;
 }
 
-.product-image {
-  width: 100%;
-  height: 190px;
-  object-fit: cover;
-  background: #e5e7eb;
+/* DASHBOARD */
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
 }
 
-.product-body {
-  padding: 15px;
+.stat-card{
+  background:#fff;
+  padding:20px;
+  border-radius:15px;
+  box-shadow:0 3px 15px rgba(0,0,0,.06);
 }
 
-.price {
-  font-size: 20px;
-  font-weight: bold;
+.stat-label{
+  color:#6b7280;
+  font-size:13px;
+  font-weight:600;
 }
 
-.old-price {
-  color: #888;
-  text-decoration: line-through;
-  font-size: 14px;
+.stat-value{
+  font-size:29px;
+  font-weight:800;
+  margin-top:8px;
 }
 
-.discount {
-  color: #16a34a;
-  font-weight: bold;
+/* PRODUCT */
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
 }
 
-.actions {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-top: 12px;
+.product-card{
+  background:#fff;
+  border-radius:15px;
+  overflow:hidden;
+  box-shadow:0 3px 15px rgba(0,0,0,.06);
 }
 
-.order {
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  padding: 15px;
-  margin-bottom: 15px;
+.product-image{
+  width:100%;
+  height:210px;
+  object-fit:cover;
+  background:#e5e7eb;
 }
 
-.order-items {
-  background: #f9fafb;
-  padding: 12px;
-  border-radius: 8px;
-  margin-top: 10px;
+.product-content{
+  padding:16px;
 }
 
-.message {
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  display: none;
+.product-title{
+  font-size:17px;
+  font-weight:800;
 }
 
-.message.success-msg {
-  display: block;
-  background: #dcfce7;
-  color: #166534;
+.product-category{
+  color:#6b7280;
+  font-size:13px;
+  margin-top:5px;
 }
 
-.message.error-msg {
-  display: block;
-  background: #fee2e2;
-  color: #991b1b;
+.product-price{
+  font-size:21px;
+  font-weight:800;
+  margin-top:10px;
 }
 
-.profile-line {
-  margin: 8px 0;
+.old-price{
+  color:#9ca3af;
+  text-decoration:line-through;
+  font-size:13px;
 }
 
-.empty {
-  text-align: center;
-  padding: 30px;
-  color: #6b7280;
+.discount{
+  color:#16a34a;
+  font-weight:700;
+  font-size:13px;
+  margin-top:3px;
 }
 
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 100;
+.stock{
+  margin-top:9px;
+  font-size:14px;
 }
 
-.modal-box {
-  background: white;
-  width: 100%;
-  max-width: 550px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 14px;
-  padding: 20px;
+.product-actions{
+  display:flex;
+  gap:8px;
+  margin-top:14px;
 }
 
-.close {
-  float: right;
-  background: #e5e7eb;
+/* ORDERS */
+
+.order-card{
+  background:#fff;
+  border-radius:15px;
+  padding:18px;
+  margin-bottom:15px;
+  box-shadow:0 3px 15px rgba(0,0,0,.06);
 }
 
-@media (max-width: 850px) {
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
+.order-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.status{
+  padding:6px 10px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:800;
+  background:#e5e7eb;
+}
+
+.status.confirmed{
+  background:#dbeafe;
+  color:#1d4ed8;
+}
+
+.status.shipped{
+  background:#fef3c7;
+  color:#92400e;
+}
+
+.status.delivered{
+  background:#dcfce7;
+  color:#166534;
+}
+
+.status.cancelled{
+  background:#fee2e2;
+  color:#991b1b;
+}
+
+.order-info{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:8px;
+  font-size:14px;
+}
+
+.order-items{
+  margin-top:15px;
+  background:#f9fafb;
+  border-radius:10px;
+  padding:12px;
+}
+
+.order-item{
+  padding:9px 0;
+  border-bottom:1px solid #e5e7eb;
+}
+
+.order-item:last-child{
+  border-bottom:0;
+}
+
+.order-total{
+  font-size:18px;
+  font-weight:800;
+  margin-top:13px;
+}
+
+/* PROFILE */
+
+.profile-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:15px;
+}
+
+.profile-item{
+  background:#f9fafb;
+  padding:15px;
+  border-radius:10px;
+}
+
+.profile-label{
+  color:#6b7280;
+  font-size:12px;
+}
+
+.profile-value{
+  font-weight:700;
+  margin-top:5px;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.65);
+  z-index:500;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:15px;
+}
+
+.modal-box{
+  background:#fff;
+  width:100%;
+  max-width:600px;
+  max-height:92vh;
+  overflow-y:auto;
+  border-radius:16px;
+  padding:22px;
+}
+
+.modal-header{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:10px;
+}
+
+.close-btn{
+  width:35px;
+  height:35px;
+  border-radius:8px;
+  background:#e5e7eb;
+}
+
+.preview{
+  width:100%;
+  height:220px;
+  object-fit:contain;
+  background:#f3f4f6;
+  border-radius:10px;
+  margin-top:8px;
+  display:none;
+}
+
+.form-actions{
+  display:flex;
+  gap:10px;
+  margin-top:18px;
+}
+
+/* EMPTY */
+
+.empty{
+  text-align:center;
+  padding:40px 20px;
+  color:#6b7280;
+  background:#fff;
+  border-radius:15px;
+}
+
+.empty h3{
+  color:#111827;
+}
+
+/* LOADING */
+
+.loading{
+  text-align:center;
+  padding:30px;
+  color:#6b7280;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
   }
 
-  .product-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .product-grid{
+    grid-template-columns:repeat(2,1fr);
   }
 }
 
-@media (max-width: 600px) {
-  header {
-    padding: 15px;
+@media(max-width:600px){
+
+  .container{
+    padding:12px;
   }
 
-  .logo {
-    font-size: 20px;
+  .header-inner{
+    padding:11px 12px;
   }
 
-  .container {
-    padding: 12px;
+  .seller-name{
+    display:none;
   }
 
-  .stats {
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
+  .brand-title{
+    font-size:17px;
   }
 
-  .stat {
-    padding: 15px;
+  .brand-sub{
+    font-size:10px;
   }
 
-  .stat-value {
-    font-size: 24px;
+  .stats{
+    grid-template-columns:1fr 1fr;
+    gap:10px;
   }
 
-  .product-grid {
-    grid-template-columns: 1fr;
+  .stat-card{
+    padding:15px;
+  }
+
+  .stat-value{
+    font-size:23px;
+  }
+
+  .product-grid{
+    grid-template-columns:1fr;
+  }
+
+  .profile-grid{
+    grid-template-columns:1fr;
+  }
+
+  .order-info{
+    grid-template-columns:1fr;
+  }
+
+  .product-actions,
+  .form-actions{
+    flex-direction:column;
+  }
+
+  .product-actions button,
+  .form-actions button{
+    width:100%;
   }
 }
 </style>
@@ -329,122 +596,357 @@ textarea {
 
 <body>
 
+<!-- ================= HEADER ================= -->
+
 <header>
-  <div class="logo">
-    <span>🛍️</span> Shrivi Seller Center
+
+  <div class="header-inner">
+
+    <div class="brand">
+
+      <div class="brand-icon">
+        🛍️
+      </div>
+
+      <div>
+        <div class="brand-title">
+          SHRIVI Seller Center
+        </div>
+
+        <div class="brand-sub">
+          Manage your marketplace store
+        </div>
+      </div>
+
+    </div>
+
+    <div class="header-user">
+
+      <span
+        id="sellerNameHeader"
+        class="seller-name"
+      ></span>
+
+      <button
+        id="logoutBtn"
+        class="logout hidden"
+        onclick="logoutSeller()"
+      >
+        Logout
+      </button>
+
+    </div>
+
   </div>
 
-  <div class="header-right">
-    <span id="sellerNameHeader"></span>
-    <button
-      id="logoutBtn"
-      class="logout-btn hidden"
-      onclick="logoutSeller()"
-    >
-      Logout
-    </button>
-  </div>
 </header>
 
-<div class="container">
 
-  <!-- ================= AUTH ================= -->
+<main class="container">
 
-  <section id="authSection">
+<!-- ================= AUTH ================= -->
 
-    <div class="card auth-box">
+<section id="authSection">
 
-      <div id="authMessage" class="message"></div>
+  <div class="card auth-card">
 
-      <div id="loginBox">
+    <div
+      id="authMessage"
+      class="message"
+    ></div>
 
-        <h2>Seller Login</h2>
+    <!-- LOGIN -->
 
-        <p>Login to manage your Shrivi products and orders.</p>
+    <div id="loginBox">
 
-        <label>Email</label>
-        <input
-          id="loginEmail"
-          type="email"
-          placeholder="seller@example.com"
+      <h2>Seller Login</h2>
+
+      <p style="color:#6b7280;margin-bottom:18px">
+        Login to manage your Shrivi store.
+      </p>
+
+      <label>Email</label>
+
+      <input
+        id="loginEmail"
+        type="email"
+        autocomplete="email"
+        placeholder="seller@example.com"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="loginPassword"
+        type="password"
+        autocomplete="current-password"
+        placeholder="Your password"
+      >
+
+      <button
+        id="loginButton"
+        class="btn primary"
+        style="width:100%;margin-top:8px"
+        onclick="sellerLogin()"
+      >
+        Login
+      </button>
+
+      <button
+        class="btn secondary"
+        style="width:100%;margin-top:10px"
+        onclick="showRegister()"
+      >
+        Create Seller Account
+      </button>
+
+    </div>
+
+
+    <!-- REGISTER -->
+
+    <div
+      id="registerBox"
+      class="hidden"
+    >
+
+      <h2>Create Seller Account</h2>
+
+      <p style="color:#6b7280;margin-bottom:18px">
+        Start selling on Shrivi.
+      </p>
+
+      <label>Seller / Business Name</label>
+
+      <input
+        id="registerName"
+        type="text"
+        placeholder="Your name or business name"
+      >
+
+      <label>Email</label>
+
+      <input
+        id="registerEmail"
+        type="email"
+        placeholder="seller@example.com"
+      >
+
+      <label>Phone</label>
+
+      <input
+        id="registerPhone"
+        type="tel"
+        inputmode="numeric"
+        maxlength="10"
+        placeholder="10 digit mobile number"
+      >
+
+      <label>Password</label>
+
+      <input
+        id="registerPassword"
+        type="password"
+        placeholder="Minimum 8 characters"
+      >
+
+      <button
+        id="registerButton"
+        class="btn success"
+        style="width:100%;margin-top:8px"
+        onclick="registerSeller()"
+      >
+        Create Seller Account
+      </button>
+
+      <button
+        class="btn secondary"
+        style="width:100%;margin-top:10px"
+        onclick="showLogin()"
+      >
+        Already have an account? Login
+      </button>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ================= SELLER APP ================= -->
+
+<section
+  id="sellerSection"
+  class="hidden"
+>
+
+  <div
+    id="mainMessage"
+    class="message"
+  ></div>
+
+
+  <!-- TABS -->
+
+  <div class="tabs">
+
+    <button
+      id="tabDashboard"
+      class="tab active"
+      onclick="showTab('dashboard')"
+    >
+      📊 Dashboard
+    </button>
+
+    <button
+      id="tabProducts"
+      class="tab"
+      onclick="showTab('products')"
+    >
+      📦 Products
+    </button>
+
+    <button
+      id="tabOrders"
+      class="tab"
+      onclick="showTab('orders')"
+    >
+      🛒 Orders
+    </button>
+
+    <button
+      id="tabProfile"
+      class="tab"
+      onclick="showTab('profile')"
+    >
+      👤 Profile
+    </button>
+
+  </div>
+
+
+  <!-- ================= DASHBOARD ================= -->
+
+  <section id="dashboardTab">
+
+    <div class="card">
+
+      <h2>Seller Dashboard</h2>
+
+      <p style="color:#6b7280">
+        Welcome back,
+        <strong id="dashboardSellerName">
+          Seller
+        </strong>
+      </p>
+
+    </div>
+
+
+    <div class="stats">
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          TOTAL PRODUCTS
+        </div>
+
+        <div
+          id="statProducts"
+          class="stat-value"
         >
-
-        <label>Password</label>
-        <input
-          id="loginPassword"
-          type="password"
-          placeholder="Password"
-        >
-
-        <button
-          class="primary"
-          style="width:100%"
-          onclick="sellerLogin()"
-        >
-          Login
-        </button>
-
-        <br><br>
-
-        <button
-          class="secondary"
-          style="width:100%"
-          onclick="showRegister()"
-        >
-          Create Seller Account
-        </button>
+          0
+        </div>
 
       </div>
 
-      <div id="registerBox" class="hidden">
 
-        <h2>Create Seller Account</h2>
+      <div class="stat-card">
 
-        <label>Seller Name</label>
-        <input
-          id="registerName"
-          type="text"
-          placeholder="Your name / business name"
+        <div class="stat-label">
+          TOTAL STOCK
+        </div>
+
+        <div
+          id="statStock"
+          class="stat-value"
         >
+          0
+        </div>
 
-        <label>Email</label>
-        <input
-          id="registerEmail"
-          type="email"
-          placeholder="seller@example.com"
-        >
+      </div>
 
-        <label>Phone</label>
-        <input
-          id="registerPhone"
-          type="tel"
-          maxlength="10"
-          placeholder="10 digit mobile number"
-        >
 
-        <label>Password</label>
-        <input
-          id="registerPassword"
-          type="password"
-          placeholder="Minimum 8 characters"
+      <div class="stat-card">
+
+        <div class="stat-label">
+          ORDERS
+        </div>
+
+        <div
+          id="statOrders"
+          class="stat-value"
         >
+          0
+        </div>
+
+      </div>
+
+
+      <div class="stat-card">
+
+        <div class="stat-label">
+          REVENUE
+        </div>
+
+        <div
+          id="statRevenue"
+          class="stat-value"
+        >
+          ₹0
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <br>
+
+
+    <div class="card">
+
+      <h3>Quick Actions</h3>
+
+      <div
+        style="
+          display:flex;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-top:12px;
+        "
+      >
 
         <button
-          class="success"
-          style="width:100%"
-          onclick="registerSeller()"
+          class="btn primary"
+          onclick="showTab('products');openAddProduct()"
         >
-          Register
+          + Add Product
         </button>
 
-        <br><br>
+        <button
+          class="btn dark"
+          onclick="showTab('orders')"
+        >
+          🛒 View Orders
+        </button>
 
         <button
-          class="secondary"
-          style="width:100%"
-          onclick="showLogin()"
+          class="btn secondary"
+          onclick="refreshAll()"
         >
-          Already have an account? Login
+          🔄 Refresh
         </button>
 
       </div>
@@ -454,160 +956,46 @@ textarea {
   </section>
 
 
-  <!-- ================= SELLER APP ================= -->
+  <!-- ================= PRODUCTS ================= -->
 
-  <section id="sellerSection" class="hidden">
+  <section
+    id="productsTab"
+    class="hidden"
+  >
 
-    <div id="mainMessage" class="message"></div>
+    <div class="card">
 
-    <!-- TABS -->
-
-    <div class="tabs">
-
-      <button
-        id="tabDashboard"
-        class="tab active"
-        onclick="showTab('dashboard')"
-      >
-        📊 Dashboard
-      </button>
-
-      <button
-        id="tabProducts"
-        class="tab"
-        onclick="showTab('products')"
-      >
-        📦 Products
-      </button>
-
-      <button
-        id="tabOrders"
-        class="tab"
-        onclick="showTab('orders')"
-      >
-        🛒 Orders
-      </button>
-
-      <button
-        id="tabProfile"
-        class="tab"
-        onclick="showTab('profile')"
-      >
-        👤 Profile
-      </button>
-
-    </div>
-
-
-    <!-- ================= DASHBOARD ================= -->
-
-    <div id="dashboardTab">
-
-      <h2>Seller Dashboard</h2>
-
-      <div class="stats">
-
-        <div class="stat">
-          <div class="stat-title">
-            Products
-          </div>
-
-          <div
-            id="statProducts"
-            class="stat-value"
-          >
-            0
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-title">
-            Total Stock
-          </div>
-
-          <div
-            id="statStock"
-            class="stat-value"
-          >
-            0
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-title">
-            Orders
-          </div>
-
-          <div
-            id="statOrders"
-            class="stat-value"
-          >
-            0
-          </div>
-        </div>
-
-        <div class="stat">
-          <div class="stat-title">
-            Revenue
-          </div>
-
-          <div
-            id="statRevenue"
-            class="stat-value"
-          >
-            ₹0
-          </div>
-        </div>
-
-      </div>
-
-      <br>
-
-      <div class="card">
-
-        <h3>Quick Actions</h3>
-
-        <div class="actions">
-
-          <button
-            class="primary"
-            onclick="showTab('products'); openAddProduct()"
-          >
-            + Add Product
-          </button>
-
-          <button
-            class="secondary"
-            onclick="showTab('orders')"
-          >
-            View Orders
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-
-    <!-- ================= PRODUCTS ================= -->
-
-    <div id="productsTab" class="hidden">
-
-      <div class="card">
-
-        <div style="
+      <div
+        style="
           display:flex;
           justify-content:space-between;
           align-items:center;
           gap:10px;
           flex-wrap:wrap;
-        ">
+        "
+      >
+
+        <div>
 
           <h2>My Products</h2>
 
+          <p style="color:#6b7280">
+            Manage products sold through Shrivi.
+          </p>
+
+        </div>
+
+        <div style="display:flex;gap:8px">
+
           <button
-            class="primary"
+            class="btn secondary"
+            onclick="loadProducts()"
+          >
+            🔄
+          </button>
+
+          <button
+            class="btn primary"
             onclick="openAddProduct()"
           >
             + Add Product
@@ -617,75 +1005,158 @@ textarea {
 
       </div>
 
-      <div
-        id="productsGrid"
-        class="product-grid"
-      ></div>
-
     </div>
 
 
-    <!-- ================= ORDERS ================= -->
+    <div
+      id="productsGrid"
+      class="product-grid"
+    ></div>
 
-    <div id="ordersTab" class="hidden">
+  </section>
 
-      <div class="card">
 
-        <div style="
+  <!-- ================= ORDERS ================= -->
+
+  <section
+    id="ordersTab"
+    class="hidden"
+  >
+
+    <div class="card">
+
+      <div
+        style="
           display:flex;
           justify-content:space-between;
           align-items:center;
-        ">
+          gap:10px;
+          flex-wrap:wrap;
+        "
+      >
+
+        <div>
 
           <h2>My Orders</h2>
 
-          <button
-            class="secondary"
-            onclick="loadOrders()"
-          >
-            🔄 Refresh
-          </button>
+          <p style="color:#6b7280">
+            Orders containing your products.
+          </p>
 
         </div>
 
-      </div>
+        <button
+          class="btn secondary"
+          onclick="loadOrders()"
+        >
+          🔄 Refresh
+        </button>
 
-      <div id="ordersList"></div>
+      </div>
 
     </div>
 
 
-    <!-- ================= PROFILE ================= -->
+    <div id="ordersList"></div>
 
-    <div id="profileTab" class="hidden">
+  </section>
 
-      <div class="card">
 
-        <h2>Seller Profile</h2>
+  <!-- ================= PROFILE ================= -->
 
-        <div class="profile-line">
-          <strong>Name:</strong>
-          <span id="profileName"></span>
+  <section
+    id="profileTab"
+    class="hidden"
+  >
+
+    <div class="card">
+
+      <h2>Seller Profile</h2>
+
+      <p style="color:#6b7280;margin-bottom:18px">
+        Your Shrivi seller account information.
+      </p>
+
+
+      <div class="profile-grid">
+
+        <div class="profile-item">
+
+          <div class="profile-label">
+            SELLER NAME
+          </div>
+
+          <div
+            id="profileName"
+            class="profile-value"
+          >
+            -
+          </div>
+
         </div>
 
-        <div class="profile-line">
-          <strong>Email:</strong>
-          <span id="profileEmail"></span>
+
+        <div class="profile-item">
+
+          <div class="profile-label">
+            EMAIL
+          </div>
+
+          <div
+            id="profileEmail"
+            class="profile-value"
+          >
+            -
+          </div>
+
         </div>
 
-        <div class="profile-line">
-          <strong>Phone:</strong>
-          <span id="profilePhone"></span>
+
+        <div class="profile-item">
+
+          <div class="profile-label">
+            PHONE
+          </div>
+
+          <div
+            id="profilePhone"
+            class="profile-value"
+          >
+            -
+          </div>
+
         </div>
 
-        <div class="profile-line">
-          <strong>Status:</strong>
-          <span id="profileStatus"></span>
+
+        <div class="profile-item">
+
+          <div class="profile-label">
+            ACCOUNT STATUS
+          </div>
+
+          <div
+            id="profileStatus"
+            class="profile-value"
+          >
+            -
+          </div>
+
         </div>
 
-        <div class="profile-line">
-          <strong>Seller ID:</strong>
-          <span id="profileId"></span>
+
+        <div class="profile-item">
+
+          <div class="profile-label">
+            SELLER ID
+          </div>
+
+          <div
+            id="profileId"
+            class="profile-value"
+          >
+            -
+          </div>
+
         </div>
 
       </div>
@@ -694,7 +1165,9 @@ textarea {
 
   </section>
 
-</div>
+</section>
+
+</main>
 
 
 <!-- ================= PRODUCT MODAL ================= -->
@@ -706,64 +1179,97 @@ textarea {
 
   <div class="modal-box">
 
-    <button
-      class="close"
-      onclick="closeProductModal()"
-    >
-      ✕
-    </button>
+    <div class="modal-header">
 
-    <h2 id="productModalTitle">
-      Add Product
-    </h2>
+      <h2 id="productModalTitle">
+        Add Product
+      </h2>
+
+      <button
+        class="close-btn"
+        onclick="closeProductModal()"
+      >
+        ✕
+      </button>
+
+    </div>
+
 
     <input
       id="productId"
       type="hidden"
     >
 
-    <label>Product Name</label>
+
+    <label>
+      Product Name *
+    </label>
 
     <input
       id="productName"
       type="text"
-      placeholder="Product name"
+      maxlength="150"
+      placeholder="Example: Premium Black Hoodie"
     >
 
-    <label>Price</label>
+
+    <label>
+      Price ₹ *
+    </label>
 
     <input
       id="productPrice"
       type="number"
       min="0"
       step="0.01"
-      placeholder="399"
+      placeholder="999"
     >
 
-    <label>Category</label>
+
+    <label>
+      Category *
+    </label>
 
     <input
       id="productCategory"
       type="text"
-      placeholder="Electronics"
+      maxlength="80"
+      placeholder="Fashion"
     >
 
-    <label>Image URL</label>
+
+    <label>
+      Product Image URL
+    </label>
 
     <input
       id="productImage"
       type="url"
       placeholder="https://..."
+      oninput="previewProductImage()"
     >
 
-    <label>Description</label>
+    <img
+      id="productImagePreview"
+      class="preview"
+      alt="Product Preview"
+    >
+
+
+    <label>
+      Description
+    </label>
 
     <textarea
       id="productDescription"
-      placeholder="Product description"
+      maxlength="2000"
+      placeholder="Describe your product..."
     ></textarea>
 
-    <label>Stock</label>
+
+    <label>
+      Stock *
+    </label>
 
     <input
       id="productStock"
@@ -773,28 +1279,48 @@ textarea {
       placeholder="100"
     >
 
-    <label>Discount %</label>
+
+    <label>
+      Discount %
+    </label>
 
     <input
       id="productDiscount"
       type="number"
       min="0"
-      max="100"
+      max="99.99"
       step="0.01"
       placeholder="10"
+      oninput="updateSalePreview()"
     >
 
-    <div class="actions">
+
+    <div
+      id="salePreview"
+      style="
+        background:#f9fafb;
+        padding:12px;
+        border-radius:9px;
+        margin-top:10px;
+      "
+    >
+      Sale price preview:
+      <strong>₹0.00</strong>
+    </div>
+
+
+    <div class="form-actions">
 
       <button
-        class="success"
+        id="saveProductButton"
+        class="btn success"
         onclick="saveProduct()"
       >
         Save Product
       </button>
 
       <button
-        class="secondary"
+        class="btn secondary"
         onclick="closeProductModal()"
       >
         Cancel
@@ -814,161 +1340,195 @@ let currentProducts = [];
 
 
 /* =========================
+   HELPERS
+========================= */
+
+function $(id){
+  return document.getElementById(id);
+}
+
+
+function escapeHtml(value){
+
+  return String(value ?? "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+
+function money(value){
+
+  return Number(value || 0)
+    .toLocaleString("en-IN",{
+      minimumFractionDigits:2,
+      maximumFractionDigits:2
+    });
+}
+
+
+function showMessage(id,message,type="success"){
+
+  const el=$(id);
+
+  if(!el)return;
+
+  el.textContent=message;
+
+  el.className=
+    "message "+
+    (
+      type==="error"
+      ?"error-message"
+      :"success-message"
+    );
+
+}
+
+
+function clearMessage(id){
+
+  const el=$(id);
+
+  if(!el)return;
+
+  el.textContent="";
+  el.className="message";
+
+}
+
+
+async function getJson(response){
+
+  let data={};
+
+  try{
+    data=await response.json();
+  }catch(e){}
+
+  if(!response.ok){
+
+    throw new Error(
+      data.error ||
+      "Something went wrong"
+    );
+
+  }
+
+  return data;
+
+}
+
+
+/* =========================
    AUTH UI
 ========================= */
 
-function showRegister() {
-  document
-    .getElementById("loginBox")
-    .classList.add("hidden");
+function showRegister(){
 
-  document
-    .getElementById("registerBox")
-    .classList.remove("hidden");
+  $("loginBox").classList.add("hidden");
+  $("registerBox").classList.remove("hidden");
 
   clearMessage("authMessage");
+
 }
 
-function showLogin() {
-  document
-    .getElementById("registerBox")
-    .classList.add("hidden");
 
-  document
-    .getElementById("loginBox")
-    .classList.remove("hidden");
+function showLogin(){
+
+  $("registerBox").classList.add("hidden");
+  $("loginBox").classList.remove("hidden");
 
   clearMessage("authMessage");
+
 }
 
 
 /* =========================
-   MESSAGE
+   REGISTER
 ========================= */
 
-function showMessage(
-  elementId,
-  message,
-  type = "success"
-) {
-  const el =
-    document.getElementById(elementId);
-
-  if (!el) return;
-
-  el.textContent = message;
-
-  el.className =
-    "message " +
-    (
-      type === "error"
-        ? "error-msg"
-        : "success-msg"
-    );
-}
-
-function clearMessage(elementId) {
-  const el =
-    document.getElementById(elementId);
-
-  if (!el) return;
-
-  el.textContent = "";
-  el.className = "message";
-}
-
-
-/* =========================
-   SELLER REGISTER
-========================= */
-
-async function registerSeller() {
+async function registerSeller(){
 
   clearMessage("authMessage");
 
-  const name =
-    document
-      .getElementById("registerName")
-      .value
-      .trim();
+  const name=$("registerName").value.trim();
+  const email=$("registerEmail").value.trim();
+  const phone=$("registerPhone").value.trim();
+  const password=$("registerPassword").value;
 
-  const email =
-    document
-      .getElementById("registerEmail")
-      .value
-      .trim();
+  if(!name){
 
-  const phone =
-    document
-      .getElementById("registerPhone")
-      .value
-      .trim();
-
-  const password =
-    document
-      .getElementById("registerPassword")
-      .value;
-
-  if (!name) {
     return showMessage(
       "authMessage",
-      "Seller name is required",
+      "Seller name is required.",
       "error"
     );
+
   }
 
-  if (!email) {
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+
     return showMessage(
       "authMessage",
-      "Email is required",
+      "Enter a valid email.",
       "error"
     );
+
   }
 
-  if (password.length < 8) {
+  if(phone && !/^[0-9]{10}$/.test(phone)){
+
     return showMessage(
       "authMessage",
-      "Password must be at least 8 characters",
+      "Phone must be 10 digits.",
       "error"
     );
+
   }
 
-  try {
+  if(password.length<8){
 
-    const response =
-      await fetch(
-        "/api/seller/register",
-        {
-          method: "POST",
+    return showMessage(
+      "authMessage",
+      "Password must be at least 8 characters.",
+      "error"
+    );
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+  }
 
-          credentials: "include",
 
-          body: JSON.stringify({
-            name,
-            email,
-            phone,
-            password
-          })
-        }
-      );
+  const button=$("registerButton");
 
-    const data =
-      await response.json();
+  button.disabled=true;
+  button.textContent="Creating account...";
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Registration failed"
-      );
-    }
 
-    currentSeller =
-      data.seller;
+  try{
+
+    const response=await fetch(
+      "/api/seller/register",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        credentials:"include",
+        body:JSON.stringify({
+          name,
+          email,
+          phone,
+          password
+        })
+      }
+    );
+
+
+    const data=await getJson(response);
+
+    currentSeller=data.seller;
 
     showSellerApp();
 
@@ -977,172 +1537,162 @@ async function registerSeller() {
       "Seller account created successfully!"
     );
 
-    await loadDashboard();
-    await loadProducts();
-    await loadOrders();
+    await refreshAll();
 
-  } catch (error) {
+  }catch(error){
 
     showMessage(
       "authMessage",
       error.message,
       "error"
     );
+
+  }finally{
+
+    button.disabled=false;
+    button.textContent="Create Seller Account";
+
   }
+
 }
 
 
 /* =========================
-   SELLER LOGIN
+   LOGIN
 ========================= */
 
-async function sellerLogin() {
+async function sellerLogin(){
 
   clearMessage("authMessage");
 
-  const email =
-    document
-      .getElementById("loginEmail")
-      .value
-      .trim();
+  const email=$("loginEmail").value.trim();
+  const password=$("loginPassword").value;
 
-  const password =
-    document
-      .getElementById("loginPassword")
-      .value;
+  if(!email || !password){
 
-  if (!email || !password) {
     return showMessage(
       "authMessage",
-      "Email and password are required",
+      "Email and password are required.",
       "error"
     );
+
   }
 
-  try {
 
-    const response =
-      await fetch(
-        "/api/seller/login",
-        {
-          method: "POST",
+  const button=$("loginButton");
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+  button.disabled=true;
+  button.textContent="Logging in...";
 
-          credentials: "include",
 
-          body: JSON.stringify({
-            email,
-            password
-          })
-        }
-      );
+  try{
 
-    const data =
-      await response.json();
+    const response=await fetch(
+      "/api/seller/login",
+      {
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json"
+        },
+        credentials:"include",
+        body:JSON.stringify({
+          email,
+          password
+        })
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Login failed"
-      );
-    }
 
-    currentSeller =
-      data.seller;
+    const data=await getJson(response);
+
+    currentSeller=data.seller;
 
     showSellerApp();
 
-    await loadDashboard();
-    await loadProducts();
-    await loadOrders();
+    await refreshAll();
 
-  } catch (error) {
+  }catch(error){
 
     showMessage(
       "authMessage",
       error.message,
       "error"
     );
+
+  }finally{
+
+    button.disabled=false;
+    button.textContent="Login";
+
   }
+
 }
 
 
 /* =========================
-   CHECK SESSION
+   SESSION
 ========================= */
 
-async function checkSellerSession() {
+async function checkSellerSession(){
 
-  try {
+  try{
 
-    const response =
-      await fetch(
-        "/api/seller/me",
-        {
-          credentials: "include"
-        }
-      );
+    const response=await fetch(
+      "/api/seller/me",
+      {
+        credentials:"include"
+      }
+    );
 
-    if (!response.ok) {
-      return;
-    }
 
-    const data =
-      await response.json();
+    if(!response.ok)return;
 
-    if (
-      data.loggedIn &&
-      data.seller
-    ) {
 
-      currentSeller =
-        data.seller;
+    const data=await response.json();
+
+
+    if(data.loggedIn && data.seller){
+
+      currentSeller=data.seller;
 
       showSellerApp();
 
-      await loadDashboard();
-      await loadProducts();
-      await loadOrders();
+      await refreshAll();
+
     }
 
-  } catch (error) {
+  }catch(error){
 
     console.error(
-      "Session check error:",
+      "Seller session:",
       error
     );
+
   }
+
 }
 
 
 /* =========================
-   SHOW SELLER APP
+   SHOW APP
 ========================= */
 
-function showSellerApp() {
+function showSellerApp(){
 
-  document
-    .getElementById("authSection")
-    .classList.add("hidden");
+  $("authSection").classList.add("hidden");
 
-  document
-    .getElementById("sellerSection")
-    .classList.remove("hidden");
+  $("sellerSection").classList.remove("hidden");
 
-  document
-    .getElementById("logoutBtn")
-    .classList.remove("hidden");
+  $("logoutBtn").classList.remove("hidden");
 
-  document
-    .getElementById("sellerNameHeader")
-    .textContent =
-      currentSeller?.name || "";
+  $("sellerNameHeader").textContent=
+    currentSeller?.name || "";
+
+  $("dashboardSellerName").textContent=
+    currentSeller?.name || "Seller";
 
   updateProfile();
+
 }
 
 
@@ -1150,41 +1700,39 @@ function showSellerApp() {
    LOGOUT
 ========================= */
 
-async function logoutSeller() {
+async function logoutSeller(){
 
-  try {
+  try{
 
     await fetch(
       "/api/seller/logout",
       {
-        method: "POST",
-        credentials: "include"
+        method:"POST",
+        credentials:"include"
       }
     );
 
-  } catch (error) {
+  }catch(error){
+
     console.error(error);
+
   }
 
-  currentSeller = null;
 
-  document
-    .getElementById("sellerSection")
-    .classList.add("hidden");
+  currentSeller=null;
+  currentProducts=[];
 
-  document
-    .getElementById("authSection")
-    .classList.remove("hidden");
 
-  document
-    .getElementById("logoutBtn")
-    .classList.add("hidden");
+  $("sellerSection").classList.add("hidden");
 
-  document
-    .getElementById("sellerNameHeader")
-    .textContent = "";
+  $("authSection").classList.remove("hidden");
+
+  $("logoutBtn").classList.add("hidden");
+
+  $("sellerNameHeader").textContent="";
 
   showLogin();
+
 }
 
 
@@ -1192,50 +1740,60 @@ async function logoutSeller() {
    TABS
 ========================= */
 
-function showTab(tab) {
+function showTab(tab){
 
-  const tabs = [
+  const names=[
     "dashboard",
     "products",
     "orders",
     "profile"
   ];
 
-  tabs.forEach(name => {
 
-    const section =
-      document.getElementById(
-        name + "Tab"
-      );
+  names.forEach(name=>{
 
-    const button =
-      document.getElementById(
-        "tab" +
-        name.charAt(0).toUpperCase() +
-        name.slice(1)
-      );
+    const section=$(name+"Tab");
 
-    if (name === tab) {
+    const button=$(
+      "tab"+
+      name.charAt(0).toUpperCase()+
+      name.slice(1)
+    );
 
-      section.classList.remove(
-        "hidden"
-      );
 
-      button.classList.add(
-        "active"
-      );
+    if(name===tab){
 
-    } else {
+      section.classList.remove("hidden");
 
-      section.classList.add(
-        "hidden"
-      );
+      button.classList.add("active");
 
-      button.classList.remove(
-        "active"
-      );
+    }else{
+
+      section.classList.add("hidden");
+
+      button.classList.remove("active");
+
     }
+
   });
+
+}
+
+
+/* =========================
+   REFRESH ALL
+========================= */
+
+async function refreshAll(){
+
+  await Promise.all([
+    loadDashboard(),
+    loadProducts(),
+    loadOrders()
+  ]);
+
+  updateProfile();
+
 }
 
 
@@ -1243,59 +1801,44 @@ function showTab(tab) {
    DASHBOARD
 ========================= */
 
-async function loadDashboard() {
+async function loadDashboard(){
 
-  try {
+  try{
 
-    const response =
-      await fetch(
-        "/api/seller/dashboard",
-        {
-          credentials: "include"
-        }
-      );
+    const response=await fetch(
+      "/api/seller/dashboard",
+      {
+        credentials:"include"
+      }
+    );
 
-    const data =
-      await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Dashboard failed"
-      );
-    }
+    const data=await getJson(response);
 
-    document
-      .getElementById("statProducts")
-      .textContent =
-        data.products || 0;
 
-    document
-      .getElementById("statStock")
-      .textContent =
-        data.stock || 0;
+    $("statProducts").textContent=
+      data.products || 0;
 
-    document
-      .getElementById("statOrders")
-      .textContent =
-        data.orders || 0;
+    $("statStock").textContent=
+      data.stock || 0;
 
-    document
-      .getElementById("statRevenue")
-      .textContent =
-        "₹" +
-        Number(
-          data.revenue || 0
-        ).toFixed(2);
+    $("statOrders").textContent=
+      data.orders || 0;
 
-  } catch (error) {
+    $("statRevenue").textContent=
+      "₹"+money(data.revenue);
+
+
+  }catch(error){
 
     showMessage(
       "mainMessage",
       error.message,
       "error"
     );
+
   }
+
 }
 
 
@@ -1303,288 +1846,378 @@ async function loadDashboard() {
    PRODUCTS
 ========================= */
 
-async function loadProducts() {
+async function loadProducts(){
 
-  try {
+  const grid=$("productsGrid");
 
-    const response =
-      await fetch(
-        "/api/seller/products",
-        {
-          credentials: "include"
-        }
-      );
+  grid.innerHTML=
+    `<div class="loading" style="grid-column:1/-1">
+      Loading products...
+    </div>`;
 
-    const data =
-      await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to load products"
-      );
-    }
+  try{
 
-    currentProducts =
+    const response=await fetch(
+      "/api/seller/products",
+      {
+        credentials:"include"
+      }
+    );
+
+
+    const data=await getJson(response);
+
+    currentProducts=
       Array.isArray(data)
-        ? data
-        : [];
+      ?data
+      :[];
+
 
     renderProducts();
 
-  } catch (error) {
+
+  }catch(error){
+
+    grid.innerHTML="";
 
     showMessage(
       "mainMessage",
       error.message,
       "error"
     );
+
   }
+
 }
 
 
-function renderProducts() {
+/* =========================
+   RENDER PRODUCTS
+========================= */
 
-  const grid =
-    document.getElementById(
-      "productsGrid"
-    );
+function renderProducts(){
 
-  if (!currentProducts.length) {
+  const grid=$("productsGrid");
 
-    grid.innerHTML = `
-      <div class="card empty"
-           style="grid-column:1/-1">
+
+  if(!currentProducts.length){
+
+    grid.innerHTML=`
+
+      <div
+        class="empty"
+        style="grid-column:1/-1"
+      >
+
         <h3>No products yet</h3>
-        <p>Add your first product to start selling.</p>
+
+        <p style="margin:8px 0 18px">
+          Add your first product to start selling.
+        </p>
 
         <button
-          class="primary"
+          class="btn primary"
           onclick="openAddProduct()"
         >
           + Add Product
         </button>
+
       </div>
+
     `;
 
     return;
+
   }
 
-  grid.innerHTML =
-    currentProducts.map(product => {
 
-      const image =
-        product.image ||
-        "https://via.placeholder.com/500x350?text=Shrivi";
+  grid.innerHTML=currentProducts.map(product=>{
 
-      const price =
-        Number(
-          product.price || 0
-        );
+    const image=
+      product.image ||
+      "https://via.placeholder.com/600x400?text=Shrivi";
 
-      const salePrice =
-        Number(
-          product.sale_price ||
-          price
-        );
 
-      const discount =
-        Number(
-          product.discount_percent ||
-          0
-        );
+    const price=
+      Number(product.price || 0);
 
-      return `
 
-        <div class="product">
+    const salePrice=
+      Number(
+        product.sale_price ??
+        (
+          price -
+          price*
+          Number(product.discount_percent || 0)/
+          100
+        )
+      );
 
-          <img
-            class="product-image"
-            src="${escapeHtml(image)}"
-            onerror="this.src='https://via.placeholder.com/500x350?text=Shrivi'"
-          >
 
-          <div class="product-body">
+    const discount=
+      Number(product.discount_percent || 0);
 
-            <h3>
-              ${escapeHtml(
-                product.name || ""
-              )}
-            </h3>
 
-            <div class="price">
-              ₹${salePrice.toFixed(2)}
-            </div>
+    const stock=
+      Number(product.stock || 0);
+
+
+    return `
+
+      <article class="product-card">
+
+        <img
+          class="product-image"
+          src="${escapeHtml(image)}"
+          alt="${escapeHtml(product.name || "Product")}"
+          onerror="
+            this.src='https://via.placeholder.com/600x400?text=Shrivi'
+          "
+        >
+
+
+        <div class="product-content">
+
+          <div class="product-title">
+            ${escapeHtml(product.name || "-")}
+          </div>
+
+
+          <div class="product-category">
+            ${escapeHtml(product.category || "Uncategorized")}
+          </div>
+
+
+          <div class="product-price">
+            ₹${money(salePrice)}
+          </div>
+
+
+          ${
+            discount>0
+            ?`
+              <div class="old-price">
+                ₹${money(price)}
+              </div>
+
+              <div class="discount">
+                ${discount}% OFF
+              </div>
+            `
+            :""
+          }
+
+
+          <div class="stock">
+
+            Stock:
+            <strong>
+              ${stock}
+            </strong>
 
             ${
-              discount > 0
-                ? `
-                  <div class="old-price">
-                    ₹${price.toFixed(2)}
-                  </div>
-
-                  <div class="discount">
-                    ${discount}% OFF
-                  </div>
-                `
-                : ""
+              stock===0
+              ?`
+                <span style="color:#dc2626;font-weight:700">
+                  Out of stock
+                </span>
+              `
+              :""
             }
 
-            <p>
-              Category:
-              ${escapeHtml(
-                product.category || "-"
-              )}
-            </p>
+          </div>
 
-            <p>
-              Stock:
-              <strong>
-                ${Number(
-                  product.stock || 0
-                )}
-              </strong>
-            </p>
 
-            <div class="actions">
+          <div class="product-actions">
 
-              <button
-                class="warning"
-                onclick="editProduct(${product.id})"
-              >
-                Edit
-              </button>
+            <button
+              class="btn warning"
+              onclick="editProduct(${Number(product.id)})"
+            >
+              Edit
+            </button>
 
-              <button
-                class="danger"
-                onclick="deleteProduct(${product.id})"
-              >
-                Delete
-              </button>
-
-            </div>
+            <button
+              class="btn danger"
+              onclick="deleteProduct(${Number(product.id)})"
+            >
+              Delete
+            </button>
 
           </div>
 
         </div>
-      `;
 
-    }).join("");
+      </article>
+
+    `;
+
+  }).join("");
+
 }
 
 
 /* =========================
-   ADD PRODUCT
+   PRODUCT MODAL
 ========================= */
 
-function openAddProduct() {
+function openAddProduct(){
 
-  document
-    .getElementById("productModalTitle")
-    .textContent =
-      "Add Product";
+  $("productModalTitle").textContent=
+    "Add Product";
 
-  document
-    .getElementById("productId")
-    .value = "";
+  $("productId").value="";
+  $("productName").value="";
+  $("productPrice").value="";
+  $("productCategory").value="";
+  $("productImage").value="";
+  $("productDescription").value="";
+  $("productStock").value="0";
+  $("productDiscount").value="0";
 
-  document
-    .getElementById("productName")
-    .value = "";
+  $("productImagePreview").style.display="none";
+  $("productImagePreview").removeAttribute("src");
 
-  document
-    .getElementById("productPrice")
-    .value = "";
+  updateSalePreview();
 
-  document
-    .getElementById("productCategory")
-    .value = "";
+  $("productModal").classList.remove("hidden");
 
-  document
-    .getElementById("productImage")
-    .value = "";
-
-  document
-    .getElementById("productDescription")
-    .value = "";
-
-  document
-    .getElementById("productStock")
-    .value = "0";
-
-  document
-    .getElementById("productDiscount")
-    .value = "0";
-
-  document
-    .getElementById("productModal")
-    .classList.remove("hidden");
 }
 
 
-/* =========================
-   EDIT PRODUCT
-========================= */
+function editProduct(id){
 
-function editProduct(id) {
-
-  const product =
+  const product=
     currentProducts.find(
-      p => Number(p.id) === Number(id)
+      p=>Number(p.id)===Number(id)
     );
 
-  if (!product) {
+
+  if(!product)return;
+
+
+  $("productModalTitle").textContent=
+    "Edit Product";
+
+
+  $("productId").value=
+    product.id;
+
+
+  $("productName").value=
+    product.name || "";
+
+
+  $("productPrice").value=
+    product.price ?? "";
+
+
+  $("productCategory").value=
+    product.category || "";
+
+
+  $("productImage").value=
+    product.image || "";
+
+
+  $("productDescription").value=
+    product.description || "";
+
+
+  $("productStock").value=
+    product.stock ?? 0;
+
+
+  $("productDiscount").value=
+    product.discount_percent ?? 0;
+
+
+  previewProductImage();
+
+  updateSalePreview();
+
+
+  $("productModal").classList.remove("hidden");
+
+}
+
+
+function closeProductModal(){
+
+  $("productModal").classList.add("hidden");
+
+}
+
+
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+function previewProductImage(){
+
+  const url=
+    $("productImage").value.trim();
+
+  const preview=
+    $("productImagePreview");
+
+
+  if(!url){
+
+    preview.style.display="none";
+
+    preview.removeAttribute("src");
+
     return;
+
   }
 
-  document
-    .getElementById("productModalTitle")
-    .textContent =
-      "Edit Product";
 
-  document
-    .getElementById("productId")
-    .value =
-      product.id;
+  preview.src=url;
 
-  document
-    .getElementById("productName")
-    .value =
-      product.name || "";
+  preview.style.display="block";
 
-  document
-    .getElementById("productPrice")
-    .value =
-      product.price || 0;
 
-  document
-    .getElementById("productCategory")
-    .value =
-      product.category || "";
+  preview.onerror=function(){
 
-  document
-    .getElementById("productImage")
-    .value =
-      product.image || "";
+    preview.style.display="none";
 
-  document
-    .getElementById("productDescription")
-    .value =
-      product.description || "";
+  };
 
-  document
-    .getElementById("productStock")
-    .value =
-      product.stock || 0;
+}
 
-  document
-    .getElementById("productDiscount")
-    .value =
-      product.discount_percent || 0;
 
-  document
-    .getElementById("productModal")
-    .classList.remove("hidden");
+/* =========================
+   SALE PRICE PREVIEW
+========================= */
+
+function updateSalePreview(){
+
+  const price=
+    Number($("productPrice").value || 0);
+
+  const discount=
+    Number($("productDiscount").value || 0);
+
+
+  const sale=
+    price -
+    (
+      price*
+      discount/
+      100
+    );
+
+
+  $("salePreview").innerHTML=
+    `
+      Sale price preview:
+      <strong>
+        ₹${money(Math.max(0,sale))}
+      </strong>
+    `;
+
 }
 
 
@@ -1592,131 +2225,170 @@ function editProduct(id) {
    SAVE PRODUCT
 ========================= */
 
-async function saveProduct() {
+async function saveProduct(){
 
-  const id =
-    document
-      .getElementById("productId")
-      .value;
+  const id=
+    $("productId").value.trim();
 
-  const name =
-    document
-      .getElementById("productName")
-      .value
-      .trim();
+  const name=
+    $("productName").value.trim();
 
-  const price =
-    document
-      .getElementById("productPrice")
-      .value;
+  const price=
+    Number($("productPrice").value);
 
-  const category =
-    document
-      .getElementById("productCategory")
-      .value
-      .trim();
+  const category=
+    $("productCategory").value.trim();
 
-  const image =
-    document
-      .getElementById("productImage")
-      .value
-      .trim();
+  const image=
+    $("productImage").value.trim();
 
-  const description =
-    document
-      .getElementById("productDescription")
-      .value
-      .trim();
+  const description=
+    $("productDescription").value.trim();
 
-  const stock =
-    document
-      .getElementById("productStock")
-      .value;
+  const stock=
+    Number($("productStock").value);
 
-  const discount_percent =
-    document
-      .getElementById("productDiscount")
-      .value;
+  const discount=
+    Number($("productDiscount").value || 0);
 
-  if (!name) {
+
+  if(!name){
+
     return alert(
-      "Product name is required"
+      "Product name is required."
     );
+
   }
 
-  if (
-    price === "" ||
-    Number(price) < 0
-  ) {
+
+  if(!Number.isFinite(price) || price<0){
+
     return alert(
-      "Valid price is required"
+      "Enter a valid product price."
     );
+
   }
 
-  try {
 
-    const url =
-      id
-        ? `/api/seller/products/${id}`
-        : "/api/seller/products";
+  if(!category){
 
-    const method =
-      id ? "PUT" : "POST";
+    return alert(
+      "Product category is required."
+    );
 
-    const response =
-      await fetch(
-        url,
-        {
-          method,
+  }
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
 
-          credentials: "include",
+  if(!Number.isInteger(stock) || stock<0){
 
-          body: JSON.stringify({
-            name,
-            price: Number(price),
-            category,
-            image,
-            description,
-            stock: Number(stock),
-            discount_percent:
-              Number(
-                discount_percent
-              )
-          })
-        }
+    return alert(
+      "Stock must be a whole number."
+    );
+
+  }
+
+
+  if(
+    !Number.isFinite(discount) ||
+    discount<0 ||
+    discount>=100
+  ){
+
+    return alert(
+      "Discount must be between 0 and 99.99%."
+    );
+
+  }
+
+
+  if(image){
+
+    try{
+
+      new URL(image);
+
+    }catch(e){
+
+      return alert(
+        "Please enter a valid image URL."
       );
 
-    const data =
-      await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to save product"
-      );
     }
 
+  }
+
+
+  const button=$("saveProductButton");
+
+  button.disabled=true;
+  button.textContent="Saving...";
+
+
+  try{
+
+    const url=
+      id
+      ?"/api/seller/products/"+id
+      :"/api/seller/products";
+
+
+    const method=
+      id
+      ?"PUT"
+      :"POST";
+
+
+    const response=await fetch(
+      url,
+      {
+        method,
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+        credentials:"include",
+        body:JSON.stringify({
+          name,
+          price,
+          category,
+          image,
+          description,
+          stock,
+          discount_percent:discount
+        })
+      }
+    );
+
+
+    await getJson(response);
+
+
     closeProductModal();
+
 
     showMessage(
       "mainMessage",
       id
-        ? "Product updated successfully!"
-        : "Product added successfully!"
+      ?"Product updated successfully!"
+      :"Product added successfully!"
     );
+
 
     await loadProducts();
     await loadDashboard();
 
-  } catch (error) {
+
+  }catch(error){
 
     alert(error.message);
+
+  }finally{
+
+    button.disabled=false;
+    button.textContent="Save Product";
+
   }
+
 }
 
 
@@ -1724,71 +2396,62 @@ async function saveProduct() {
    DELETE PRODUCT
 ========================= */
 
-async function deleteProduct(id) {
+async function deleteProduct(id){
 
-  const product =
+  const product=
     currentProducts.find(
-      p => Number(p.id) === Number(id)
+      p=>Number(p.id)===Number(id)
     );
 
-  const ok =
-    confirm(
-      `Delete "${product?.name || "this product"}"?`
-    );
 
-  if (!ok) {
+  const name=
+    product?.name ||
+    "this product";
+
+
+  if(!confirm(
+    `Delete "${name}"?`
+  )){
+
     return;
+
   }
 
-  try {
 
-    const response =
-      await fetch(
-        `/api/seller/products/${id}`,
-        {
-          method: "DELETE",
-          credentials: "include"
-        }
-      );
+  try{
 
-    const data =
-      await response.json();
+    const response=await fetch(
+      "/api/seller/products/"+id,
+      {
+        method:"DELETE",
+        credentials:"include"
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to delete product"
-      );
-    }
+
+    await getJson(response);
+
 
     showMessage(
       "mainMessage",
       "Product deleted successfully!"
     );
 
+
     await loadProducts();
     await loadDashboard();
 
-  } catch (error) {
+
+  }catch(error){
 
     showMessage(
       "mainMessage",
       error.message,
       "error"
     );
+
   }
-}
 
-
-/* =========================
-   CLOSE MODAL
-========================= */
-
-function closeProductModal() {
-
-  document
-    .getElementById("productModal")
-    .classList.add("hidden");
 }
 
 
@@ -1796,239 +2459,377 @@ function closeProductModal() {
    ORDERS
 ========================= */
 
-async function loadOrders() {
+async function loadOrders(){
 
-  try {
+  const container=$("ordersList");
 
-    const response =
-      await fetch(
-        "/api/seller/orders",
-        {
-          credentials: "include"
-        }
-      );
+  container.innerHTML=
+    `<div class="loading">
+      Loading orders...
+    </div>`;
 
-    const data =
-      await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to load orders"
-      );
-    }
+  try{
+
+    const response=await fetch(
+      "/api/seller/orders",
+      {
+        credentials:"include"
+      }
+    );
+
+
+    const data=await getJson(response);
+
 
     renderOrders(
       Array.isArray(data)
-        ? data
-        : []
+      ?data
+      :[]
     );
 
-  } catch (error) {
+
+  }catch(error){
+
+    container.innerHTML="";
 
     showMessage(
       "mainMessage",
       error.message,
       "error"
     );
-  }
-}
 
-
-function renderOrders(orders) {
-
-  const container =
-    document.getElementById(
-      "ordersList"
-    );
-
-  if (!orders.length) {
-
-    container.innerHTML = `
-      <div class="card empty">
-        <h3>No orders yet</h3>
-        <p>Your customer orders will appear here.</p>
-      </div>
-    `;
-
-    return;
   }
 
-  container.innerHTML =
-    orders.map(order => {
-
-      const items =
-        Array.isArray(order.items)
-          ? order.items
-          : [];
-
-      return `
-
-        <div class="order">
-
-          <h3>
-            Order #${order.id}
-          </h3>
-
-          <p>
-            <strong>Status:</strong>
-            ${escapeHtml(
-              order.status || "pending"
-            )}
-          </p>
-
-          <p>
-            <strong>Customer:</strong>
-            ${escapeHtml(
-              order.customer_name || "-"
-            )}
-          </p>
-
-          <p>
-            <strong>Phone:</strong>
-            ${escapeHtml(
-              order.customer_phone || "-"
-            )}
-          </p>
-
-          <p>
-            <strong>Address:</strong>
-            ${escapeHtml(
-              order.customer_address || "-"
-            )}
-          </p>
-
-          <div class="order-items">
-
-            <strong>Products</strong>
-
-            ${
-              items.length
-                ? items.map(item => `
-                    <div style="
-                      padding:8px 0;
-                      border-bottom:1px solid #eee;
-                    ">
-                      ${escapeHtml(
-                        item.name || ""
-                      )}
-                      ×
-                      ${Number(
-                        item.quantity || 0
-                      )}
-                      —
-                      ₹${Number(
-                        item.item_total || 0
-                      ).toFixed(2)}
-                    </div>
-                  `).join("")
-                : "<p>No items</p>"
-            }
-
-          </div>
-
-          <p>
-            <strong>Your Total:</strong>
-            ₹${Number(
-              order.seller_total || 0
-            ).toFixed(2)}
-          </p>
-
-          <div class="actions">
-
-            <button
-              class="warning"
-              onclick="updateOrderStatus(${order.id}, 'confirmed')"
-            >
-              Confirm
-            </button>
-
-            <button
-              class="primary"
-              onclick="updateOrderStatus(${order.id}, 'shipped')"
-            >
-              Shipped
-            </button>
-
-            <button
-              class="success"
-              onclick="updateOrderStatus(${order.id}, 'delivered')"
-            >
-              Delivered
-            </button>
-
-            <button
-              class="danger"
-              onclick="updateOrderStatus(${order.id}, 'cancelled')"
-            >
-              Cancel
-            </button>
-
-          </div>
-
-        </div>
-      `;
-
-    }).join("");
 }
 
 
 /* =========================
-   UPDATE ORDER
+   RENDER ORDERS
+========================= */
+
+function renderOrders(orders){
+
+  const container=$("ordersList");
+
+
+  if(!orders.length){
+
+    container.innerHTML=`
+
+      <div class="empty">
+
+        <h3>No orders yet</h3>
+
+        <p>
+          Orders containing your products
+          will appear here.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML=
+    orders.map(order=>{
+
+      const items=
+        Array.isArray(order.items)
+        ?order.items
+        :[];
+
+
+      const status=
+        String(
+          order.status || "pending"
+        ).toLowerCase();
+
+
+      return `
+
+        <article class="order-card">
+
+          <div class="order-top">
+
+            <h3>
+              Order #${escapeHtml(order.id)}
+            </h3>
+
+            <span
+              class="status ${escapeHtml(status)}"
+            >
+              ${escapeHtml(
+                status.toUpperCase()
+              )}
+            </span>
+
+          </div>
+
+
+          <div class="order-info">
+
+            <div>
+              <strong>Customer:</strong>
+              ${escapeHtml(
+                order.customer_name || "-"
+              )}
+            </div>
+
+            <div>
+              <strong>Phone:</strong>
+              ${escapeHtml(
+                order.customer_phone || "-"
+              )}
+            </div>
+
+            <div>
+              <strong>Address:</strong>
+              ${escapeHtml(
+                order.customer_address || "-"
+              )}
+            </div>
+
+            <div>
+              <strong>Order Date:</strong>
+              ${escapeHtml(
+                order.created_at
+                ?new Date(order.created_at)
+                  .toLocaleString("en-IN")
+                :""
+              )}
+            </div>
+
+          </div>
+
+
+          <div class="order-items">
+
+            <strong>
+              Your Products
+            </strong>
+
+
+            ${
+              items.length
+              ?items.map(item=>`
+
+                <div class="order-item">
+
+                  <div>
+                    <strong>
+                      ${escapeHtml(
+                        item.name || "-"
+                      )}
+                    </strong>
+                  </div>
+
+                  <div style="color:#6b7280">
+
+                    Qty:
+                    ${Number(
+                      item.quantity || 0
+                    )}
+
+                    &nbsp; • &nbsp;
+
+                    ₹${money(
+                      item.item_total || 0
+                    )}
+
+                  </div>
+
+                </div>
+
+              `).join("")
+              :"<p>No items</p>"
+            }
+
+          </div>
+
+
+          <div class="order-total">
+
+            Your Total:
+            ₹${money(
+              order.seller_total || 0
+            )}
+
+          </div>
+
+
+          <div
+            style="
+              display:flex;
+              gap:8px;
+              flex-wrap:wrap;
+              margin-top:15px;
+            "
+          >
+
+            ${
+              status!=="confirmed" &&
+              status!=="shipped" &&
+              status!=="delivered" &&
+              status!=="cancelled"
+              ?`
+                <button
+                  class="btn warning"
+                  onclick="
+                    updateOrderStatus(
+                      ${Number(order.id)},
+                      'confirmed'
+                    )
+                  "
+                >
+                  Confirm
+                </button>
+              `
+              :""
+            }
+
+
+            ${
+              status==="confirmed"
+              ?`
+                <button
+                  class="btn primary"
+                  onclick="
+                    updateOrderStatus(
+                      ${Number(order.id)},
+                      'shipped'
+                    )
+                  "
+                >
+                  Mark Shipped
+                </button>
+              `
+              :""
+            }
+
+
+            ${
+              status==="shipped"
+              ?`
+                <button
+                  class="btn success"
+                  onclick="
+                    updateOrderStatus(
+                      ${Number(order.id)},
+                      'delivered'
+                    )
+                  "
+                >
+                  Mark Delivered
+                </button>
+              `
+              :""
+            }
+
+
+            ${
+              status!=="delivered" &&
+              status!=="cancelled"
+              ?`
+                <button
+                  class="btn danger"
+                  onclick="
+                    updateOrderStatus(
+                      ${Number(order.id)},
+                      'cancelled'
+                    )
+                  "
+                >
+                  Cancel
+                </button>
+              `
+              :""
+            }
+
+          </div>
+
+        </article>
+
+      `;
+
+    }).join("");
+
+}
+
+
+/* =========================
+   UPDATE ORDER STATUS
 ========================= */
 
 async function updateOrderStatus(
   orderId,
   status
-) {
+){
 
-  try {
+  const labels={
+    confirmed:"confirm this order",
+    shipped:"mark this order as shipped",
+    delivered:"mark this order as delivered",
+    cancelled:"cancel this order"
+  };
 
-    const response =
-      await fetch(
-        `/api/seller/orders/${orderId}/status`,
-        {
-          method: "PUT",
 
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
+  if(!confirm(
+    `Are you sure you want to ${labels[status]}?`
+  )){
 
-          credentials: "include",
+    return;
 
-          body: JSON.stringify({
-            status
-          })
-        }
-      );
+  }
 
-    const data =
-      await response.json();
 
-    if (!response.ok) {
-      throw new Error(
-        data.error ||
-        "Failed to update order"
-      );
-    }
+  try{
+
+    const response=await fetch(
+      "/api/seller/orders/"+
+      orderId+
+      "/status",
+      {
+        method:"PUT",
+        headers:{
+          "Content-Type":
+            "application/json"
+        },
+        credentials:"include",
+        body:JSON.stringify({
+          status
+        })
+      }
+    );
+
+
+    await getJson(response);
+
 
     showMessage(
       "mainMessage",
-      `Order #${orderId} marked as ${status}.`
+      `Order #${orderId} updated to ${status}.`
     );
+
 
     await loadOrders();
     await loadDashboard();
 
-  } catch (error) {
+
+  }catch(error){
 
     showMessage(
       "mainMessage",
       error.message,
       "error"
     );
+
   }
+
 }
 
 
@@ -2036,52 +2837,53 @@ async function updateOrderStatus(
    PROFILE
 ========================= */
 
-function updateProfile() {
+function updateProfile(){
 
-  if (!currentSeller) {
-    return;
-  }
+  if(!currentSeller)return;
 
-  document
-    .getElementById("profileName")
-    .textContent =
-      currentSeller.name || "-";
 
-  document
-    .getElementById("profileEmail")
-    .textContent =
-      currentSeller.email || "-";
+  $("profileName").textContent=
+    currentSeller.name || "-";
 
-  document
-    .getElementById("profilePhone")
-    .textContent =
-      currentSeller.phone || "-";
 
-  document
-    .getElementById("profileStatus")
-    .textContent =
-      currentSeller.status || "-";
+  $("profileEmail").textContent=
+    currentSeller.email || "-";
 
-  document
-    .getElementById("profileId")
-    .textContent =
-      currentSeller.id || "-";
+
+  $("profilePhone").textContent=
+    currentSeller.phone || "-";
+
+
+  $("profileStatus").textContent=
+    currentSeller.status || "-";
+
+
+  $("profileId").textContent=
+    currentSeller.id || "-";
+
+
+  $("dashboardSellerName").textContent=
+    currentSeller.name || "Seller";
+
 }
 
 
 /* =========================
-   HTML ESCAPE
+   ESC KEY
 ========================= */
 
-function escapeHtml(value) {
+document.addEventListener(
+  "keydown",
+  event=>{
 
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+    if(event.key==="Escape"){
+
+      closeProductModal();
+
+    }
+
+  }
+);
 
 
 /* =========================
@@ -2090,7 +2892,7 @@ function escapeHtml(value) {
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
+  ()=>{
     checkSellerSession();
   }
 );
