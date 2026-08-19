@@ -10,10 +10,11 @@ const scripts = [
   ['shrivi-upgrade-suite.js','shrivi-upgrade-suite.js'],
   ['amazon-style-upgrade.js','amazon-style-upgrade.js'],
   ['shrivi-production-upgrade.js','shrivi-production-upgrade.js'],
-  ['shrivi-customer-backend.js','shrivi-customer-backend.js']
+  ['shrivi-customer-backend.js','shrivi-customer-backend.js'],
+  ['shrivi-app-init.js','shrivi-app-init.js']
 ];
 const assets = Object.fromEntries(scripts.map(([url,file])=>['/'+url,fs.readFileSync(path.join(__dirname,file),'utf8')]));
-const tags=scripts.map(([url])=>`<script src="/${url}?v=5"></script>`).join('\n');
+const tags=scripts.map(([url])=>`<script src="/${url}?v=6"></script>`).join('\n');
 
 // Preload the PostgreSQL-backed upgrade routes into the real Express server.
 const child=spawn(process.execPath,['-r',path.join(__dirname,'shrivi-db-upgrades.js'),path.join(__dirname,'server.js')],{env:{...process.env,PORT:String(INTERNAL_PORT)},stdio:'inherit'});
@@ -28,9 +29,10 @@ const server=http.createServer((req,res)=>{
     if(!inject){res.writeHead(proxyRes.statusCode||200,proxyRes.headers);return proxyRes.pipe(res);}
     const chunks=[];proxyRes.on('data',c=>chunks.push(c));proxyRes.on('end',()=>{
       let html=Buffer.concat(chunks).toString('utf8');
-      html=html.replace(/<script[^>]+(?:shrivi-features|shrivi-upgrade-suite|amazon-style-upgrade|shrivi-production-upgrade|shrivi-customer-backend)[^>]*><\/script>/gi,'');
+      html=html.replace(/<script[^>]+(?:shrivi-features|shrivi-upgrade-suite|amazon-style-upgrade|shrivi-production-upgrade|shrivi-customer-backend|shrivi-app-init)[^>]*><\/script>/gi,'');
       html=/<\/body>/i.test(html)?html.replace(/<\/body>/i,`${tags}\n</body>`):`${html}\n${tags}`;
-      const headers={...proxyRes.headers};delete headers['content-length'];delete headers.etag;delete headers['content-encoding'];headers['content-type']='text/html; charset=utf-8';headers['cache-control']='no-store';
+      const headers={...proxyRes.headers};delete headers['content-length'];delete headers.etag;delete headers['content-encoding'];
+      headers['content-type']='text/html; charset=utf-8';headers['cache-control']='no-store';
       res.writeHead(proxyRes.statusCode||200,headers);res.end(html);
     });
   });
