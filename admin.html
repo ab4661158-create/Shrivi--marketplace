@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#111827">
 
 <title>Shrivi Marketplace - Admin</title>
 
@@ -23,12 +24,12 @@ button,input,select,textarea{
     font:inherit;
 }
 
-.hidden{
-    display:none!important;
-}
-
 button{
     cursor:pointer;
+}
+
+.hidden{
+    display:none!important;
 }
 
 .btn{
@@ -109,7 +110,7 @@ button{
     margin-bottom:25px;
 }
 
-/* COMMON FORM */
+/* FORM */
 
 .form-group{
     margin-bottom:16px;
@@ -270,7 +271,7 @@ textarea{
     font-weight:bold;
 }
 
-/* IMAGE UPLOAD */
+/* IMAGE */
 
 .upload-box{
     border:2px dashed #d1d5db;
@@ -399,7 +400,7 @@ textarea{
     border-top:1px solid #e5e7eb;
 }
 
-/* MESSAGES */
+/* MESSAGE */
 
 .message-box{
     padding:12px 15px;
@@ -475,6 +476,7 @@ textarea{
 .address{
     max-width:220px;
     line-height:1.4;
+    white-space:normal;
 }
 
 .order-items{
@@ -603,9 +605,7 @@ textarea{
 
 <body>
 
-<!-- =====================================================
-     LOGIN
-===================================================== -->
+<!-- LOGIN -->
 
 <div id="loginPage">
 
@@ -618,7 +618,6 @@ textarea{
         <form onsubmit="login(event)">
 
             <div class="form-group">
-
                 <label>Username</label>
 
                 <input
@@ -627,11 +626,9 @@ textarea{
                     autocomplete="username"
                     required
                 >
-
             </div>
 
             <div class="form-group">
-
                 <label>Password</label>
 
                 <input
@@ -640,7 +637,6 @@ textarea{
                     autocomplete="current-password"
                     required
                 >
-
             </div>
 
             <button
@@ -651,10 +647,7 @@ textarea{
                 Login
             </button>
 
-            <div
-                id="loginError"
-                class="error-message"
-            ></div>
+            <div id="loginError" class="error-message"></div>
 
         </form>
 
@@ -663,9 +656,7 @@ textarea{
 </div>
 
 
-<!-- =====================================================
-     ADMIN
-===================================================== -->
+<!-- ADMIN -->
 
 <div id="adminPage" class="hidden">
 
@@ -698,77 +689,38 @@ textarea{
 <div class="dashboard-grid">
 
     <div class="dashboard-card">
-
-        <div class="label">
-            Products
-        </div>
-
-        <div
-            class="value"
-            id="productsCount"
-        >
-            0
-        </div>
-
+        <div class="label">Products</div>
+        <div class="value" id="productsCount">0</div>
     </div>
 
     <div class="dashboard-card">
-
-        <div class="label">
-            Orders
-        </div>
-
-        <div
-            class="value"
-            id="ordersCount"
-        >
-            0
-        </div>
-
+        <div class="label">Orders</div>
+        <div class="value" id="ordersCount">0</div>
     </div>
 
     <div class="dashboard-card">
-
-        <div class="label">
-            Sellers
-        </div>
-
-        <div
-            class="value"
-            id="sellersCount"
-        >
-            0
-        </div>
-
+        <div class="label">Sellers</div>
+        <div class="value" id="sellersCount">0</div>
     </div>
 
 </div>
 
 
-<!-- =====================================================
-     ADD PRODUCT
-===================================================== -->
+<!-- ADD PRODUCT -->
 
 <section class="section">
 
 <div class="section-title">
-
     <h2>Add Product</h2>
-
 </div>
 
-<div
-    id="productMessage"
-    class="message-box"
-></div>
-
+<div id="productMessage" class="message-box"></div>
 
 <form onsubmit="addProduct(event)">
 
 <div class="form-grid">
 
     <div class="form-group">
-
         <label>Product Name</label>
 
         <input
@@ -776,18 +728,13 @@ textarea{
             id="productName"
             required
         >
-
     </div>
 
 
     <div class="form-group">
-
         <label>Category</label>
 
-        <select
-            id="productCategory"
-            required
-        >
+        <select id="productCategory" required>
 
             <option value="">
                 Select Category
@@ -807,12 +754,10 @@ textarea{
             <option>Other</option>
 
         </select>
-
     </div>
 
 
     <div class="form-group">
-
         <label>Original Price (₹)</label>
 
         <input
@@ -823,7 +768,6 @@ textarea{
             oninput="updateAddPreview()"
             required
         >
-
     </div>
 
 
@@ -866,8 +810,6 @@ textarea{
 
     </div>
 
-
-    <!-- IMAGE UPLOAD -->
 
     <div class="form-group">
 
@@ -913,13 +855,9 @@ textarea{
     </div>
 
 
-    <!-- IMAGE URL -->
-
     <div class="form-group">
 
-        <label>
-            Or Image URL
-        </label>
+        <label>Or Image URL</label>
 
         <input
             type="url"
@@ -962,9 +900,7 @@ textarea{
 </section>
 
 
-<!-- =====================================================
-     PRODUCTS
-===================================================== -->
+<!-- PRODUCTS -->
 
 <section class="section">
 
@@ -996,9 +932,7 @@ textarea{
 </section>
 
 
-<!-- =====================================================
-     ORDERS
-===================================================== -->
+<!-- ORDERS -->
 
 <section class="section">
 
@@ -1080,21 +1014,32 @@ const editUploadedImages = {};
 
 async function apiFetch(url,options={}){
 
-    const response = await fetch(url,{
+    const config = {
         credentials:"include",
-        ...options,
-        headers:{
-            "Content-Type":"application/json",
-            ...(options.headers||{})
-        }
-    });
+        ...options
+    };
 
-    let data=null;
+    config.headers = {
+        ...(options.headers || {})
+    };
+
+    if(
+        options.body &&
+        typeof options.body === "string"
+    ){
+        config.headers["Content-Type"] =
+            "application/json";
+    }
+
+    const response =
+        await fetch(url,config);
+
+    let data = null;
 
     try{
-        data=await response.json();
+        data = await response.json();
     }catch(e){
-        data=null;
+        data = null;
     }
 
     if(!response.ok){
@@ -1116,7 +1061,7 @@ async function apiFetch(url,options={}){
 
 function escapeHTML(value){
 
-    if(value===null||value===undefined){
+    if(value===null || value===undefined){
         return "";
     }
 
@@ -1141,16 +1086,16 @@ async function login(event){
 
     event.preventDefault();
 
-    const username=
+    const username =
         document.getElementById("username").value.trim();
 
-    const password=
+    const password =
         document.getElementById("password").value;
 
-    const errorBox=
+    const errorBox =
         document.getElementById("loginError");
 
-    const button=
+    const button =
         document.getElementById("loginButton");
 
     errorBox.textContent="";
@@ -1170,14 +1115,16 @@ async function login(event){
 
         showAdmin();
 
-        await loadDashboard();
-        await loadAdminProducts();
-        await loadOrders();
+        await Promise.allSettled([
+            loadDashboard(),
+            loadAdminProducts(),
+            loadOrders()
+        ]);
 
     }catch(error){
 
-        errorBox.textContent=
-            error.message||"Login failed.";
+        errorBox.textContent =
+            error.message || "Login failed.";
 
     }finally{
 
@@ -1211,24 +1158,27 @@ async function checkLogin(){
 
     try{
 
-        const data=
+        const data =
             await apiFetch("/api/me");
 
-        if(
+        const loggedIn =
             data &&
             (
-                data.loggedIn===true ||
-                data.authenticated===true ||
-                data.isAdmin===true ||
+                data.loggedIn === true ||
+                data.authenticated === true ||
+                data.isAdmin === true ||
                 data.user
-            )
-        ){
+            );
+
+        if(loggedIn){
 
             showAdmin();
 
-            await loadDashboard();
-            await loadAdminProducts();
-            await loadOrders();
+            await Promise.allSettled([
+                loadDashboard(),
+                loadAdminProducts(),
+                loadOrders()
+            ]);
 
         }
 
@@ -1246,43 +1196,230 @@ async function checkLogin(){
 
 
 /* =====================================================
-   DASHBOARD
+   DASHBOARD — FIX
 ===================================================== */
+
+async function getArrayFromResponse(data){
+
+    if(Array.isArray(data)){
+        return data;
+    }
+
+    if(Array.isArray(data?.products)){
+        return data.products;
+    }
+
+    if(Array.isArray(data?.orders)){
+        return data.orders;
+    }
+
+    if(Array.isArray(data?.sellers)){
+        return data.sellers;
+    }
+
+    if(Array.isArray(data?.users)){
+        return data.users;
+    }
+
+    return [];
+}
+
+
+async function tryEndpoint(endpoints){
+
+    for(const endpoint of endpoints){
+
+        try{
+
+            const data =
+                await apiFetch(endpoint);
+
+            return {
+                success:true,
+                data
+            };
+
+        }catch(error){
+
+            console.warn(
+                `Endpoint failed: ${endpoint}`,
+                error.message
+            );
+        }
+    }
+
+    return {
+        success:false,
+        data:null
+    };
+}
+
 
 async function loadDashboard(){
 
     try{
 
-        const data=
-            await apiFetch("/api/dashboard");
+        /*
+         * PRODUCTS
+         */
+
+        const productsResult =
+            await tryEndpoint([
+                "/api/admin/products",
+                "/api/products"
+            ]);
+
+        /*
+         * ORDERS
+         */
+
+        const ordersResult =
+            await tryEndpoint([
+                "/api/admin/orders",
+                "/api/orders"
+            ]);
+
+        /*
+         * SELLERS
+         *
+         * Different server versions may expose
+         * different seller endpoints.
+         */
+
+        const sellersResult =
+            await tryEndpoint([
+                "/api/admin/sellers",
+                "/api/sellers",
+                "/api/admin/seller"
+            ]);
+
+
+        /*
+         * COUNT PRODUCTS
+         */
+
+        let products = [];
+
+        if(productsResult.success){
+
+            products =
+                await getArrayFromResponse(
+                    productsResult.data
+                );
+        }
+
+
+        /*
+         * COUNT ORDERS
+         */
+
+        let orders = [];
+
+        if(ordersResult.success){
+
+            orders =
+                await getArrayFromResponse(
+                    ordersResult.data
+                );
+        }
+
+
+        /*
+         * COUNT SELLERS
+         */
+
+        let sellers = [];
+
+        if(sellersResult.success){
+
+            sellers =
+                await getArrayFromResponse(
+                    sellersResult.data
+                );
+        }
+
+
+        /*
+         * FALLBACK:
+         * If dashboard API exists, use its numeric
+         * counts when list endpoints are unavailable.
+         */
+
+        const dashboardResult =
+            await tryEndpoint([
+                "/api/dashboard"
+            ]);
+
+        let dashboard =
+            dashboardResult.success
+            ? dashboardResult.data
+            : null;
+
+
+        const productCount =
+            products.length > 0
+            ? products.length
+            :
+            Number(
+                dashboard?.products ??
+                dashboard?.productCount ??
+                dashboard?.productsCount ??
+                dashboard?.counts?.products ??
+                0
+            );
+
+
+        const orderCount =
+            orders.length > 0
+            ? orders.length
+            :
+            Number(
+                dashboard?.orders ??
+                dashboard?.orderCount ??
+                dashboard?.ordersCount ??
+                dashboard?.counts?.orders ??
+                0
+            );
+
+
+        const sellerCount =
+            sellers.length > 0
+            ? sellers.length
+            :
+            Number(
+                dashboard?.sellers ??
+                dashboard?.sellerCount ??
+                dashboard?.sellersCount ??
+                dashboard?.counts?.sellers ??
+                0
+            );
+
 
         document.getElementById("productsCount")
-            .textContent=
-            data?.products ??
-            data?.productCount ??
-            data?.productsCount ??
-            data?.counts?.products ??
-            0;
+            .textContent = productCount;
 
         document.getElementById("ordersCount")
-            .textContent=
-            data?.orders ??
-            data?.orderCount ??
-            data?.ordersCount ??
-            data?.counts?.orders ??
-            0;
+            .textContent = orderCount;
 
         document.getElementById("sellersCount")
-            .textContent=
-            data?.sellers ??
-            data?.sellerCount ??
-            data?.sellersCount ??
-            data?.counts?.sellers ??
-            0;
+            .textContent = sellerCount;
+
+
+        console.log(
+            "Shrivi Dashboard",
+            {
+                products:productCount,
+                orders:orderCount,
+                sellers:sellerCount
+            }
+        );
 
     }catch(error){
 
-        console.error("Dashboard:",error);
+        console.error(
+            "Dashboard error:",
+            error
+        );
     }
 }
 
@@ -1302,19 +1439,28 @@ function calculateSalePrice(price,discount){
     );
 }
 
+
 function updateAddPreview(){
 
-    const price=
-        document.getElementById("productPrice").value;
+    const price =
+        document.getElementById(
+            "productPrice"
+        ).value;
 
-    const discount=
-        document.getElementById("productDiscount").value;
+    const discount =
+        document.getElementById(
+            "productDiscount"
+        ).value;
 
-    const sale=
-        calculateSalePrice(price,discount);
+    const sale =
+        calculateSalePrice(
+            price,
+            discount
+        );
 
-    document.getElementById("addSalePreview")
-        .textContent=
+    document.getElementById(
+        "addSalePreview"
+    ).textContent =
         `Sale Price: ₹${sale.toFixed(2)}`;
 }
 
@@ -1323,19 +1469,24 @@ function updateAddPreview(){
    MESSAGE
 ===================================================== */
 
-function showProductMessage(message,type="success"){
+function showProductMessage(
+    message,
+    type="success"
+){
 
-    const box=
-        document.getElementById("productMessage");
+    const box =
+        document.getElementById(
+            "productMessage"
+        );
 
     box.textContent=message;
 
-    box.className=
-        "message-box "+
+    box.className =
+        "message-box " +
         (
             type==="error"
-            ?"message-error"
-            :"message-success"
+            ? "message-error"
+            : "message-success"
         );
 
     box.style.display="block";
@@ -1346,19 +1497,24 @@ function showProductMessage(message,type="success"){
 }
 
 
-function showOrderMessage(message,type="success"){
+function showOrderMessage(
+    message,
+    type="success"
+){
 
-    const box=
-        document.getElementById("orderMessage");
+    const box =
+        document.getElementById(
+            "orderMessage"
+        );
 
     box.textContent=message;
 
-    box.className=
-        "message-box "+
+    box.className =
+        "message-box " +
         (
             type==="error"
-            ?"message-error"
-            :"message-success"
+            ? "message-error"
+            : "message-success"
         );
 
     box.style.display="block";
@@ -1382,20 +1538,34 @@ function compressImage(
     return new Promise((resolve,reject)=>{
 
         if(!file){
-            reject(new Error("No image selected."));
+
+            reject(
+                new Error(
+                    "No image selected."
+                )
+            );
+
             return;
         }
 
         if(!file.type.startsWith("image/")){
-            reject(new Error("Please select a valid image."));
+
+            reject(
+                new Error(
+                    "Please select a valid image."
+                )
+            );
+
             return;
         }
 
-        const reader=new FileReader();
+        const reader =
+            new FileReader();
 
         reader.onload=function(event){
 
-            const img=new Image();
+            const img =
+                new Image();
 
             img.onload=function(){
 
@@ -1404,21 +1574,28 @@ function compressImage(
 
                 if(width>maxWidth){
 
-                    height=Math.round(
-                        height*maxWidth/width
-                    );
+                    height =
+                        Math.round(
+                            height *
+                            maxWidth /
+                            width
+                        );
 
                     width=maxWidth;
                 }
 
-                const canvas=
-                    document.createElement("canvas");
+                const canvas =
+                    document.createElement(
+                        "canvas"
+                    );
 
                 canvas.width=width;
                 canvas.height=height;
 
-                const ctx=
-                    canvas.getContext("2d");
+                const ctx =
+                    canvas.getContext(
+                        "2d"
+                    );
 
                 ctx.drawImage(
                     img,
@@ -1428,7 +1605,7 @@ function compressImage(
                     height
                 );
 
-                const result=
+                const result =
                     canvas.toDataURL(
                         "image/jpeg",
                         quality
@@ -1440,17 +1617,22 @@ function compressImage(
             img.onerror=function(){
 
                 reject(
-                    new Error("Unable to read image.")
+                    new Error(
+                        "Unable to read image."
+                    )
                 );
             };
 
-            img.src=event.target.result;
+            img.src =
+                event.target.result;
         };
 
         reader.onerror=function(){
 
             reject(
-                new Error("Unable to read selected file.")
+                new Error(
+                    "Unable to read selected file."
+                )
             );
         };
 
@@ -1460,12 +1642,12 @@ function compressImage(
 
 
 /* =====================================================
-   ADD IMAGE UPLOAD
+   ADD IMAGE
 ===================================================== */
 
 async function handleImageUpload(event){
 
-    const file=
+    const file =
         event.target.files?.[0];
 
     if(!file){
@@ -1478,22 +1660,21 @@ async function handleImageUpload(event){
             "Processing image..."
         );
 
-        uploadedProductImage=
+        uploadedProductImage =
             await compressImage(file);
 
-        const preview=
-            document.getElementById("imagePreview");
-
-        preview.src=
+        document.getElementById(
+            "imagePreview"
+        ).src =
             uploadedProductImage;
 
-        document
-            .getElementById("imageUploadPreview")
-            .style.display="block";
+        document.getElementById(
+            "imageUploadPreview"
+        ).style.display="block";
 
-        document
-            .getElementById("productImage")
-            .value="";
+        document.getElementById(
+            "productImage"
+        ).value="";
 
         showProductMessage(
             "Image ready. Now click Add Product."
@@ -1505,12 +1686,12 @@ async function handleImageUpload(event){
 
         event.target.value="";
 
-        document
-            .getElementById("imageUploadPreview")
-            .style.display="none";
+        document.getElementById(
+            "imageUploadPreview"
+        ).style.display="none";
 
         showProductMessage(
-            error.message||
+            error.message ||
             "Image processing failed.",
             "error"
         );
@@ -1524,10 +1705,10 @@ async function handleImageUpload(event){
 
 function handleImageUrlInput(){
 
-    const url=
-        document
-            .getElementById("productImage")
-            .value.trim();
+    const url =
+        document.getElementById(
+            "productImage"
+        ).value.trim();
 
     if(!url){
         return;
@@ -1535,18 +1716,17 @@ function handleImageUrlInput(){
 
     uploadedProductImage="";
 
-    document
-        .getElementById("productImageFile")
-        .value="";
+    document.getElementById(
+        "productImageFile"
+    ).value="";
 
-    const preview=
-        document.getElementById("imagePreview");
+    document.getElementById(
+        "imagePreview"
+    ).src=url;
 
-    preview.src=url;
-
-    document
-        .getElementById("imageUploadPreview")
-        .style.display="block";
+    document.getElementById(
+        "imageUploadPreview"
+    ).style.display="block";
 }
 
 
@@ -1558,21 +1738,21 @@ function removeUploadedImage(){
 
     uploadedProductImage="";
 
-    document
-        .getElementById("productImageFile")
-        .value="";
+    document.getElementById(
+        "productImageFile"
+    ).value="";
 
-    document
-        .getElementById("productImage")
-        .value="";
+    document.getElementById(
+        "productImage"
+    ).value="";
 
-    document
-        .getElementById("imagePreview")
-        .src="";
+    document.getElementById(
+        "imagePreview"
+    ).src="";
 
-    document
-        .getElementById("imageUploadPreview")
-        .style.display="none";
+    document.getElementById(
+        "imageUploadPreview"
+    ).style.display="none";
 }
 
 
@@ -1584,59 +1764,61 @@ async function addProduct(event){
 
     event.preventDefault();
 
-    const button=
-        document.getElementById("addProductButton");
+    const button =
+        document.getElementById(
+            "addProductButton"
+        );
 
     button.disabled=true;
     button.textContent="Adding...";
 
-    const name=
-        document
-            .getElementById("productName")
-            .value.trim();
+    const name =
+        document.getElementById(
+            "productName"
+        ).value.trim();
 
-    const price=
+    const price =
         Number(
-            document
-                .getElementById("productPrice")
-                .value
+            document.getElementById(
+                "productPrice"
+            ).value
         );
 
-    const discount=
+    const discount =
         Number(
-            document
-                .getElementById("productDiscount")
-                .value
-        )||0;
+            document.getElementById(
+                "productDiscount"
+            ).value
+        ) || 0;
 
-    const stock=
+    const stock =
         Number(
-            document
-                .getElementById("productStock")
-                .value
-        )||0;
+            document.getElementById(
+                "productStock"
+            ).value
+        ) || 0;
 
-    const category=
-        document
-            .getElementById("productCategory")
-            .value;
+    const category =
+        document.getElementById(
+            "productCategory"
+        ).value;
 
-    const imageUrl=
-        document
-            .getElementById("productImage")
-            .value.trim();
+    const imageUrl =
+        document.getElementById(
+            "productImage"
+        ).value.trim();
 
-    const image=
-        uploadedProductImage||
-        imageUrl||
+    const image =
+        uploadedProductImage ||
+        imageUrl ||
         "";
 
-    const description=
-        document
-            .getElementById("productDescription")
-            .value.trim();
+    const description =
+        document.getElementById(
+            "productDescription"
+        ).value.trim();
 
-    const salePrice=
+    const salePrice =
         calculateSalePrice(
             price,
             discount
@@ -1644,49 +1826,53 @@ async function addProduct(event){
 
     try{
 
-        await apiFetch("/api/products",{
-            method:"POST",
-            body:JSON.stringify({
+        await apiFetch(
+            "/api/products",
+            {
+                method:"POST",
 
-                name,
-                price,
-                category,
-                image,
-                description,
-                stock,
-                discount_percent:discount,
-                sale_price:salePrice
+                body:JSON.stringify({
 
-            })
-        });
+                    name,
+                    price,
+                    category,
+                    image,
+                    description,
+                    stock,
+                    discount_percent:discount,
+                    sale_price:salePrice
 
-        document
-            .getElementById("productName")
-            .value="";
+                })
+            }
+        );
 
-        document
-            .getElementById("productPrice")
-            .value="";
+        document.getElementById(
+            "productName"
+        ).value="";
 
-        document
-            .getElementById("productDiscount")
-            .value="0";
+        document.getElementById(
+            "productPrice"
+        ).value="";
 
-        document
-            .getElementById("productStock")
-            .value="0";
+        document.getElementById(
+            "productDiscount"
+        ).value="0";
 
-        document
-            .getElementById("productCategory")
-            .value="";
+        document.getElementById(
+            "productStock"
+        ).value="0";
 
-        document
-            .getElementById("productImage")
-            .value="";
+        document.getElementById(
+            "productCategory"
+        ).value="";
 
-        document
-            .getElementById("productDescription")
-            .value="";
+        document.getElementById(
+            "productImage"
+        ).value="";
+
+        document.getElementById(
+            "productDescription"
+        ).value="";
 
         removeUploadedImage();
 
@@ -1704,7 +1890,7 @@ async function addProduct(event){
         console.error(error);
 
         showProductMessage(
-            error.message||
+            error.message ||
             "Product add failed.",
             "error"
         );
@@ -1718,33 +1904,67 @@ async function addProduct(event){
 
 
 /* =====================================================
-   LOAD PRODUCTS
+   LOAD PRODUCTS — FIXED
 ===================================================== */
 
 async function loadAdminProducts(){
 
-    const loading=
-        document.getElementById("productsLoading");
+    const loading =
+        document.getElementById(
+            "productsLoading"
+        );
 
-    const container=
-        document.getElementById("adminProducts");
+    const container =
+        document.getElementById(
+            "adminProducts"
+        );
 
     loading.style.display="block";
 
     try{
 
-        const data=
-            await apiFetch("/api/products");
+        /*
+         * IMPORTANT:
+         * Admin endpoint first.
+         * Public endpoint is fallback.
+         */
+
+        const result =
+            await tryEndpoint([
+                "/api/admin/products",
+                "/api/products"
+            ]);
+
+        if(!result.success){
+
+            throw new Error(
+                "Unable to load products."
+            );
+        }
+
+        const data=result.data;
 
         if(Array.isArray(data)){
+
             adminProducts=data;
-        }else if(Array.isArray(data?.products)){
+
+        }else if(
+            Array.isArray(data?.products)
+        ){
+
             adminProducts=data.products;
+
         }else{
+
             adminProducts=[];
         }
 
         renderAdminProducts();
+
+        document.getElementById(
+            "productsCount"
+        ).textContent =
+            adminProducts.length;
 
     }catch(error){
 
@@ -1753,6 +1973,8 @@ async function loadAdminProducts(){
         container.innerHTML=`
             <div class="empty-state">
                 Unable to load products.
+                <br>
+                ${escapeHTML(error.message)}
             </div>
         `;
 
@@ -1769,8 +1991,10 @@ async function loadAdminProducts(){
 
 function renderAdminProducts(){
 
-    const container=
-        document.getElementById("adminProducts");
+    const container =
+        document.getElementById(
+            "adminProducts"
+        );
 
     if(!adminProducts.length){
 
@@ -1783,37 +2007,47 @@ function renderAdminProducts(){
         return;
     }
 
-    container.innerHTML=
+    container.innerHTML =
         adminProducts.map(product=>{
 
-            const id=Number(product.id);
+            const id =
+                Number(product.id);
 
-            const name=
+            const name =
                 escapeHTML(product.name);
 
-            const category=
-                escapeHTML(product.category||"");
+            const category =
+                escapeHTML(
+                    product.category || ""
+                );
 
-            const image=
-                product.image||"";
+            const image =
+                product.image || "";
 
-            const description=
-                escapeHTML(product.description||"");
+            const description =
+                escapeHTML(
+                    product.description || ""
+                );
 
-            const price=
-                Number(product.price)||0;
+            const price =
+                Number(product.price) || 0;
 
-            const discount=
-                Number(product.discount_percent)||0;
+            const discount =
+                Number(
+                    product.discount_percent
+                ) || 0;
 
-            const salePrice=
+            const salePrice =
+                Number(
+                    product.sale_price
+                ) ||
                 calculateSalePrice(
                     price,
                     discount
                 );
 
-            const stock=
-                Number(product.stock)||0;
+            const stock =
+                Number(product.stock) || 0;
 
             return `
 
@@ -1851,7 +2085,7 @@ image
 <div class="product-content">
 
 <span class="product-category">
-    ${category||"Uncategorized"}
+    ${category || "Uncategorized"}
 </span>
 
 <h3>${name}</h3>
@@ -1920,8 +2154,6 @@ ${description}
 
 </div>
 
-
-<!-- EDIT -->
 
 <div
     id="edit-${id}"
@@ -2009,8 +2241,6 @@ Sale Price: ₹${salePrice.toFixed(2)}
 </div>
 
 
-<!-- EDIT IMAGE -->
-
 <div class="form-group">
 
 <label>Product Image</label>
@@ -2052,7 +2282,13 @@ Sale Price: ₹${salePrice.toFixed(2)}
     id="edit-image-${id}"
     value="${escapeAttribute(image)}"
     placeholder="Or enter image URL"
-    style="margin-top:8px;width:100%;padding:12px;border:1px solid #d1d5db;border-radius:9px;"
+    style="
+        margin-top:8px;
+        width:100%;
+        padding:12px;
+        border:1px solid #d1d5db;
+        border-radius:9px;
+    "
 >
 
 </div>
@@ -2101,9 +2337,12 @@ Sale Price: ₹${salePrice.toFixed(2)}
    EDIT IMAGE
 ===================================================== */
 
-async function handleEditImageUpload(event,id){
+async function handleEditImageUpload(
+    event,
+    id
+){
 
-    const file=
+    const file =
         event.target.files?.[0];
 
     if(!file){
@@ -2112,18 +2351,18 @@ async function handleEditImageUpload(event,id){
 
     try{
 
-        const compressed=
+        const compressed =
             await compressImage(file);
 
-        editUploadedImages[id]=
+        editUploadedImages[id] =
             compressed;
 
-        const preview=
+        const preview =
             document.getElementById(
                 `edit-preview-img-${id}`
             );
 
-        const previewBox=
+        const previewBox =
             document.getElementById(
                 `edit-image-preview-${id}`
             );
@@ -2134,16 +2373,16 @@ async function handleEditImageUpload(event,id){
 
         previewBox.style.display="block";
 
-        document
-            .getElementById(`edit-image-${id}`)
-            .value="";
+        document.getElementById(
+            `edit-image-${id}`
+        ).value="";
 
     }catch(error){
 
         event.target.value="";
 
         alert(
-            error.message||
+            error.message ||
             "Image upload failed."
         );
     }
@@ -2151,13 +2390,15 @@ async function handleEditImageUpload(event,id){
 
 
 /* =====================================================
-   TOGGLE EDIT
+   EDIT
 ===================================================== */
 
 function toggleEdit(id){
 
-    const box=
-        document.getElementById(`edit-${id}`);
+    const box =
+        document.getElementById(
+            `edit-${id}`
+        );
 
     if(box){
         box.classList.toggle("hidden");
@@ -2165,36 +2406,32 @@ function toggleEdit(id){
 }
 
 
-/* =====================================================
-   EDIT PREVIEW
-===================================================== */
-
 function updateEditPreview(id){
 
-    const price=
+    const price =
         document.getElementById(
             `edit-price-${id}`
-        )?.value||0;
+        )?.value || 0;
 
-    const discount=
+    const discount =
         document.getElementById(
             `edit-discount-${id}`
-        )?.value||0;
+        )?.value || 0;
 
-    const sale=
+    const sale =
         calculateSalePrice(
             price,
             discount
         );
 
-    const preview=
+    const preview =
         document.getElementById(
             `edit-preview-${id}`
         );
 
     if(preview){
 
-        preview.textContent=
+        preview.textContent =
             `Sale Price: ₹${sale.toFixed(2)}`;
     }
 }
@@ -2206,63 +2443,65 @@ function updateEditPreview(id){
 
 async function saveProduct(id){
 
-    const product=
+    const product =
         adminProducts.find(
-            item=>Number(item.id)===Number(id)
+            item =>
+                Number(item.id) ===
+                Number(id)
         );
 
     if(!product){
         return;
     }
 
-    const name=
-        document
-            .getElementById(`edit-name-${id}`)
-            .value.trim();
+    const name =
+        document.getElementById(
+            `edit-name-${id}`
+        ).value.trim();
 
-    const price=
+    const price =
         Number(
-            document
-                .getElementById(`edit-price-${id}`)
-                .value
+            document.getElementById(
+                `edit-price-${id}`
+            ).value
         );
 
-    const discount=
+    const discount =
         Number(
-            document
-                .getElementById(`edit-discount-${id}`)
-                .value
-        )||0;
+            document.getElementById(
+                `edit-discount-${id}`
+            ).value
+        ) || 0;
 
-    const stock=
+    const stock =
         Number(
-            document
-                .getElementById(`edit-stock-${id}`)
-                .value
-        )||0;
+            document.getElementById(
+                `edit-stock-${id}`
+            ).value
+        ) || 0;
 
-    const category=
-        document
-            .getElementById(`edit-category-${id}`)
-            .value.trim();
+    const category =
+        document.getElementById(
+            `edit-category-${id}`
+        ).value.trim();
 
-    const imageUrl=
-        document
-            .getElementById(`edit-image-${id}`)
-            .value.trim();
+    const imageUrl =
+        document.getElementById(
+            `edit-image-${id}`
+        ).value.trim();
 
-    const image=
-        editUploadedImages[id]||
-        imageUrl||
-        product.image||
+    const image =
+        editUploadedImages[id] ||
+        imageUrl ||
+        product.image ||
         "";
 
-    const description=
-        document
-            .getElementById(`edit-description-${id}`)
-            .value.trim();
+    const description =
+        document.getElementById(
+            `edit-description-${id}`
+        ).value.trim();
 
-    const salePrice=
+    const salePrice =
         calculateSalePrice(
             price,
             discount
@@ -2274,6 +2513,7 @@ async function saveProduct(id){
             `/api/products/${id}`,
             {
                 method:"PUT",
+
                 body:JSON.stringify({
 
                     name,
@@ -2303,7 +2543,7 @@ async function saveProduct(id){
         console.error(error);
 
         showProductMessage(
-            error.message||
+            error.message ||
             "Product update failed.",
             "error"
         );
@@ -2312,18 +2552,20 @@ async function saveProduct(id){
 
 
 /* =====================================================
-   DELETE
+   DELETE PRODUCT
 ===================================================== */
 
 async function deleteProduct(id){
 
-    const product=
+    const product =
         adminProducts.find(
-            item=>Number(item.id)===Number(id)
+            item =>
+                Number(item.id) ===
+                Number(id)
         );
 
-    const name=
-        product?.name||
+    const name =
+        product?.name ||
         "this product";
 
     if(
@@ -2353,7 +2595,7 @@ async function deleteProduct(id){
     }catch(error){
 
         showProductMessage(
-            error.message||
+            error.message ||
             "Product delete failed.",
             "error"
         );
@@ -2367,28 +2609,56 @@ async function deleteProduct(id){
 
 async function loadOrders(){
 
-    const loading=
-        document.getElementById("ordersLoading");
+    const loading =
+        document.getElementById(
+            "ordersLoading"
+        );
 
-    const tbody=
-        document.getElementById("ordersTableBody");
+    const tbody =
+        document.getElementById(
+            "ordersTableBody"
+        );
 
     loading.style.display="block";
 
     try{
 
-        const data=
-            await apiFetch("/api/orders");
+        const result =
+            await tryEndpoint([
+                "/api/admin/orders",
+                "/api/orders"
+            ]);
+
+        if(!result.success){
+
+            throw new Error(
+                "Unable to load orders."
+            );
+        }
+
+        const data=result.data;
 
         if(Array.isArray(data)){
+
             adminOrders=data;
-        }else if(Array.isArray(data?.orders)){
+
+        }else if(
+            Array.isArray(data?.orders)
+        ){
+
             adminOrders=data.orders;
+
         }else{
+
             adminOrders=[];
         }
 
         renderOrders();
+
+        document.getElementById(
+            "ordersCount"
+        ).textContent =
+            adminOrders.length;
 
     }catch(error){
 
@@ -2401,6 +2671,8 @@ async function loadOrders(){
                     class="empty-state"
                 >
                     Unable to load orders.
+                    <br>
+                    ${escapeHTML(error.message)}
                 </td>
             </tr>
         `;
@@ -2418,7 +2690,8 @@ async function loadOrders(){
 
 function getOrderItems(order){
 
-    let items=order?.items;
+    let items =
+        order?.items;
 
     if(!items){
         return [];
@@ -2427,8 +2700,12 @@ function getOrderItems(order){
     if(typeof items==="string"){
 
         try{
-            items=JSON.parse(items);
+
+            items =
+                JSON.parse(items);
+
         }catch(e){
+
             return [];
         }
     }
@@ -2448,11 +2725,11 @@ function getOrderItems(order){
 function getItemName(item){
 
     return(
-        item?.name||
-        item?.product_name||
-        item?.title||
-        item?.product?.name||
-        `Product #${item?.product_id||""}`
+        item?.name ||
+        item?.product_name ||
+        item?.title ||
+        item?.product?.name ||
+        `Product #${item?.product_id || ""}`
     );
 }
 
@@ -2460,8 +2737,8 @@ function getItemName(item){
 function getItemQuantity(item){
 
     return Number(
-        item?.quantity??
-        item?.qty??
+        item?.quantity ??
+        item?.qty ??
         1
     );
 }
@@ -2470,21 +2747,22 @@ function getItemQuantity(item){
 function getItemPrice(item){
 
     return Number(
-        item?.price??
-        item?.sale_price??
-        item?.product?.price??
+        item?.price ??
+        item?.sale_price ??
+        item?.product?.sale_price ??
+        item?.product?.price ??
         0
     );
 }
 
 
 /* =====================================================
-   ORDERS RENDER
+   RENDER ORDERS
 ===================================================== */
 
 function renderOrders(){
 
-    const tbody=
+    const tbody =
         document.getElementById(
             "ordersTableBody"
         );
@@ -2505,70 +2783,79 @@ function renderOrders(){
         return;
     }
 
-    tbody.innerHTML=
+    tbody.innerHTML =
         adminOrders.map(order=>{
 
-            const id=order.id;
+            const id =
+                order.id;
 
-            const customer=
+            const customer =
                 escapeHTML(
-                    order.customer_name||
-                    order.customerName||
+                    order.customer_name ||
+                    order.customerName ||
+                    order.customer?.name ||
                     "Customer"
                 );
 
-            const phone=
+            const phone =
                 escapeHTML(
-                    order.customer_phone||
-                    order.customerPhone||
+                    order.customer_phone ||
+                    order.customerPhone ||
+                    order.phone ||
                     "-"
                 );
 
-            const address=
+            const address =
                 escapeHTML(
-                    order.customer_address||
-                    order.customerAddress||
+                    order.customer_address ||
+                    order.customerAddress ||
+                    order.address ||
                     "-"
                 );
 
-            const status=
+            const status =
                 String(
-                    order.status||
+                    order.status ||
                     "pending"
                 ).toLowerCase();
 
-            const total=
-                Number(order.total)||0;
+            const total =
+                Number(
+                    order.total
+                ) || 0;
 
-            const date=
+            const date =
                 formatOrderDate(
-                    order.created_at||
+                    order.created_at ||
                     order.createdAt
                 );
 
-            const items=
+            const items =
                 getOrderItems(order);
 
-            const itemsHTML=
+            const itemsHTML =
                 items.length
                 ?
                 items.map(item=>{
 
-                    const name=
+                    const name =
                         escapeHTML(
                             getItemName(item)
                         );
 
-                    const qty=
+                    const qty =
                         getItemQuantity(item);
 
-                    const price=
+                    const price =
                         getItemPrice(item);
 
                     return`
+
                     <div class="order-item">
 
-                        <strong>${name}</strong>
+                        <strong>
+                            ${name}
+                        </strong>
 
                         <div>
                             Qty: ${qty}
@@ -2579,11 +2866,13 @@ function renderOrders(){
                         </div>
 
                     </div>
+
                     `;
 
                 }).join("")
                 :
                 "No item details";
+
 
             return`
 
@@ -2683,9 +2972,9 @@ Cancelled
 
 <button
     class="btn btn-primary"
-    onclick="updateOrderStatus(${id})"
+    onclick="updateOrderStatus(${Number(id)})"
 >
-Update Status
+    Update Status
 </button>
 
 </div>
@@ -2710,9 +2999,15 @@ function formatOrderDate(value){
         return "-";
     }
 
-    const date=new Date(value);
+    const date =
+        new Date(value);
 
-    if(Number.isNaN(date.getTime())){
+    if(
+        Number.isNaN(
+            date.getTime()
+        )
+    ){
+
         return String(value);
     }
 
@@ -2732,33 +3027,35 @@ function formatOrderDate(value){
 
 function getStatusClass(status){
 
-    switch(String(status).toLowerCase()){
+    switch(
+        String(status).toLowerCase()
+    ){
 
-        case"confirmed":
-            return"status-confirmed";
+        case "confirmed":
+            return "status-confirmed";
 
-        case"shipped":
-            return"status-shipped";
+        case "shipped":
+            return "status-shipped";
 
-        case"delivered":
-            return"status-delivered";
+        case "delivered":
+            return "status-delivered";
 
-        case"cancelled":
-            return"status-cancelled";
+        case "cancelled":
+            return "status-cancelled";
 
         default:
-            return"status-pending";
+            return "status-pending";
     }
 }
 
 
 /* =====================================================
-   UPDATE ORDER
+   UPDATE ORDER STATUS
 ===================================================== */
 
 async function updateOrderStatus(id){
 
-    const select=
+    const select =
         document.getElementById(
             `status-${id}`
         );
@@ -2767,7 +3064,8 @@ async function updateOrderStatus(id){
         return;
     }
 
-    const status=select.value;
+    const status =
+        select.value;
 
     if(
         !confirm(
@@ -2779,10 +3077,15 @@ async function updateOrderStatus(id){
 
     try{
 
+        /*
+         * Primary current endpoint
+         */
+
         await apiFetch(
             `/api/orders/${id}/status`,
             {
                 method:"PUT",
+
                 body:JSON.stringify({
                     status
                 })
@@ -2790,7 +3093,7 @@ async function updateOrderStatus(id){
         );
 
         showOrderMessage(
-            `Order #${id} status updated.`
+            `Order #${id} status updated to ${status}.`
         );
 
         await loadOrders();
@@ -2799,7 +3102,7 @@ async function updateOrderStatus(id){
     }catch(error){
 
         showOrderMessage(
-            error.message||
+            error.message ||
             "Order status update failed.",
             "error"
         );
@@ -2835,17 +3138,17 @@ async function logout(){
         .getElementById("loginPage")
         .classList.remove("hidden");
 
-    document
-        .getElementById("username")
-        .value="";
+    document.getElementById(
+        "username"
+    ).value="";
 
-    document
-        .getElementById("password")
-        .value="";
+    document.getElementById(
+        "password"
+    ).value="";
 
-    document
-        .getElementById("loginError")
-        .textContent="";
+    document.getElementById(
+        "loginError"
+    ).textContent="";
 }
 
 
