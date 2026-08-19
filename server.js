@@ -15,13 +15,9 @@ const PORT = process.env.PORT || 10000;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === "production"
-    ? { rejectUnauthorized: false }
-    : false
-});
-
-pool.on("error", (error) => {
-  console.error("PostgreSQL pool error:", error);
+  ssl: {
+    rejectUnauthorized: false
+  }
 });
 
 // =====================================================
@@ -46,23 +42,19 @@ app.use(express.urlencoded({
   limit: "2mb"
 }));
 
-app.use(
-  session({
-    secret:
-      process.env.SESSION_SECRET ||
-      "shrivi-session-secret-2026",
-
-    resave: false,
-    saveUninitialized: false,
-
-    cookie: {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 24 * 60 * 60 * 1000
-    }
-  })
-);
+app.use(session({
+  secret:
+    process.env.SESSION_SECRET ||
+    "shrivi-session-secret-2026",
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 24 * 60 * 60 * 1000
+  }
+}));
 
 // =====================================================
 // IMAGE UPLOAD
@@ -70,22 +62,21 @@ app.use(
 
 const imageUpload = multer({
   storage: multer.memoryStorage(),
-
   limits: {
     fileSize: 5 * 1024 * 1024
   },
-
   fileFilter: (req, file, cb) => {
     const allowed = [
       "image/jpeg",
       "image/png",
-      "image/webp"
+      "image/webp",
+      "image/gif"
     ];
 
     if (!allowed.includes(file.mimetype)) {
       return cb(
         new Error(
-          "Only JPG, PNG and WEBP images are allowed."
+          "Only JPG, PNG, WEBP and GIF images are allowed."
         )
       );
     }
@@ -141,6 +132,25 @@ function calculateSalePrice(price, discount) {
   ) / 100;
 }
 
+function parseItems(items) {
+  if (Array.isArray(items)) {
+    return items;
+  }
+
+  if (typeof items === "string") {
+    try {
+      const parsed = JSON.parse(items);
+      return Array.isArray(parsed)
+        ? parsed
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  return [];
+}
+
 function normalizeProduct(product) {
   const price = Number(product.price) || 0;
   const discount =
@@ -148,81 +158,26 @@ function normalizeProduct(product) {
 
   return {
     ...product,
-
     price,
-
     original_price: price,
-
     discount_percent: discount,
-
     sale_price: calculateSalePrice(
       price,
       discount
     ),
-
     stock: Number(product.stock) || 0
   };
 }
 
 function normalizeOrder(order) {
-  let items = order.items;
-
-  if (typeof items === "string") {
-    try {
-      items = JSON.parse(items);
-    } catch {
-      items = [];
-    }
-  }
+  const items = parseItems(order.items);
 
   return {
     ...order,
-
     total: Number(order.total) || 0,
-
-    items: Array.isArray(items)
-      ? items
-      : []
+    items
   };
 }
-
-// =====================================================
-// AUTH MIDDLEWARE
-// =====================================================
-
-function requireAdmin(req, res, next) {
-  if (!req.session.admin) {
-    return res.status(401).json({
-      error: "Admin login required"
-    });
-  }
-
-  next();
-}
-
-function requireSeller(req, res, next) {
-  if (!req.session.seller) {
-    return res.status(401).json({
-      error: "Seller login required"
-    });
-  }
-
-  next();
-}
-
-function requireCustomer(req, res, next) {
-  if (!req.session.customer) {
-    return res.status(401).json({
-      error: "Customer login required"
-    });
-  }
-
-  next();
-}
-
-// =====================================================
-// PRODUCT VALIDATION
-// =====================================================
 
 function validateProductInput(body, isEdit = false) {
   const name = clean(body?.name);
@@ -274,19 +229,49 @@ function validateProductInput(body, isEdit = false) {
   return {
     name,
     price,
-
     category:
       clean(body?.category) || null,
-
     image:
       clean(body?.image) || null,
-
     description:
       clean(body?.description) || null,
-
     stock,
     discount
   };
+}
+
+// =====================================================
+// AUTH
+// =====================================================
+
+function requireAdmin(req, res, next) {
+  if (!req.session.admin) {
+    return res.status(401).json({
+      error: "Admin login required"
+    });
+  }
+
+  next();
+}
+
+function requireSeller(req, res, next) {
+  if (!req.session.seller) {
+    return res.status(401).json({
+      error: "Seller login required"
+    });
+  }
+
+  next();
+}
+
+function requireCustomer(req, res, next) {
+  if (!req.session.customer) {
+    return res.status(401).json({
+      error: "Customer login required"
+    });
+  }
+
+  next();
 }
 
 // =====================================================
@@ -337,7 +322,7 @@ app.get("/api/health", async (req, res) => {
       database: "connected"
     });
   } catch (error) {
-    console.error("Health error:", error);
+    console.error("Health:", error);
 
     res.status(500).json({
       ok: false,
@@ -349,7 +334,7 @@ app.get("/api/health", async (req, res) => {
 });
 
 // =====================================================
-// ADMIN AUTH
+// ADMIN LOGIN
 // =====================================================
 
 app.post("/api/login", async (req, res) => {
@@ -394,7 +379,7 @@ app.post("/api/login", async (req, res) => {
       username: adminUser
     };
 
-    req.session.save((error) => {
+    req.session.save(error => {
       if (error) {
         console.error(
           "Admin session:",
@@ -423,7 +408,7 @@ app.post("/api/login", async (req, res) => {
 });
 
 app.post("/api/logout", (req, res) => {
-  req.session.destroy((error) => {
+  req.session.destroy(error => {
     if (error) {
       return res.status(500).json({
         error: "Logout error"
@@ -521,30 +506,16 @@ app.post(
       }
 
       const hash =
-        await bcrypt.hash(
-          password,
-          10
-        );
+        await bcrypt.hash(password, 10);
 
       const result =
         await pool.query(
           `INSERT INTO sellers
-           (
-             name,
-             email,
-             phone,
-             password_hash,
-             status
-           )
+           (name,email,phone,password_hash,status)
            VALUES
            ($1,$2,$3,$4,'active')
            RETURNING
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at`,
+           id,name,email,phone,status,created_at`,
           [
             name,
             email,
@@ -553,19 +524,11 @@ app.post(
           ]
         );
 
-      const seller =
+      req.session.seller =
         result.rows[0];
 
-      req.session.seller =
-        seller;
-
-      req.session.save((error) => {
+      req.session.save(error => {
         if (error) {
-          console.error(
-            "Seller session:",
-            error
-          );
-
           return res.status(500).json({
             error:
               "Session error"
@@ -574,7 +537,8 @@ app.post(
 
         res.status(201).json({
           ok: true,
-          seller
+          seller:
+            result.rows[0]
         });
       });
     } catch (error) {
@@ -611,13 +575,6 @@ app.post(
         return res.status(400).json({
           error:
             "Valid email is required"
-        });
-      }
-
-      if (!password) {
-        return res.status(400).json({
-          error:
-            "Password is required"
         });
       }
 
@@ -662,10 +619,9 @@ app.post(
 
       delete seller.password_hash;
 
-      req.session.seller =
-        seller;
+      req.session.seller = seller;
 
-      req.session.save((error) => {
+      req.session.save(error => {
         if (error) {
           return res.status(500).json({
             error:
@@ -695,14 +651,7 @@ app.post(
 app.post(
   "/api/seller/logout",
   (req, res) => {
-    req.session.destroy((error) => {
-      if (error) {
-        return res.status(500).json({
-          error:
-            "Logout failed"
-        });
-      }
-
+    req.session.destroy(() => {
       res.clearCookie("connect.sid");
 
       res.json({
@@ -720,12 +669,7 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at
+             id,name,email,phone,status,created_at
            FROM sellers
            WHERE id=$1
            LIMIT 1`,
@@ -742,22 +686,6 @@ app.get(
         });
       }
 
-      if (
-        result.rows[0].status !==
-        "active"
-      ) {
-        req.session.seller = null;
-
-        return res.status(403).json({
-          loggedIn: false,
-          error:
-            "Seller account is not active"
-        });
-      }
-
-      req.session.seller =
-        result.rows[0];
-
       res.json({
         loggedIn: true,
         seller:
@@ -765,7 +693,7 @@ app.get(
       });
     } catch (error) {
       console.error(
-        "Seller session:",
+        "Seller me:",
         error
       );
 
@@ -792,7 +720,7 @@ app.get(
              s.name AS seller_name
            FROM products p
            LEFT JOIN sellers s
-           ON s.id=p.seller_id
+             ON s.id=p.seller_id
            ORDER BY p.id DESC`
         );
 
@@ -816,7 +744,7 @@ app.get(
 );
 
 // =====================================================
-// CLOUDINARY IMAGE UPLOAD
+// CLOUDINARY UPLOAD
 // =====================================================
 
 app.post(
@@ -826,7 +754,7 @@ app.post(
     imageUpload.single("image")(
       req,
       res,
-      async (error) => {
+      async error => {
         if (error) {
           return res.status(400).json({
             error:
@@ -963,14 +891,9 @@ app.post(
         await pool.query(
           `INSERT INTO products
            (
-             name,
-             price,
-             category,
-             image,
-             description,
-             stock,
-             discount_percent,
-             seller_id
+             name,price,category,image,
+             description,stock,
+             discount_percent,seller_id
            )
            VALUES
            ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -996,7 +919,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "Seller add product:",
+        "Seller add:",
         error
       );
 
@@ -1017,10 +940,7 @@ app.put(
       const id =
         Number(req.params.id);
 
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
+      if (!Number.isInteger(id)) {
         return res.status(400).json({
           error:
             "Invalid product ID"
@@ -1076,7 +996,7 @@ app.put(
       });
     } catch (error) {
       console.error(
-        "Seller update product:",
+        "Seller update:",
         error
       );
 
@@ -1094,19 +1014,6 @@ app.delete(
   requireSeller,
   async (req, res) => {
     try {
-      const id =
-        Number(req.params.id);
-
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
-
       const result =
         await pool.query(
           `DELETE FROM products
@@ -1114,7 +1021,7 @@ app.delete(
            AND seller_id=$2
            RETURNING id`,
           [
-            id,
+            Number(req.params.id),
             req.session.seller.id
           ]
         );
@@ -1161,10 +1068,7 @@ app.get(
         await pool.query(
           `SELECT
              COUNT(*)::int AS products,
-             COALESCE(
-               SUM(stock),
-               0
-             )::int AS stock
+             COALESCE(SUM(stock),0)::int AS stock
            FROM products
            WHERE seller_id=$1`,
           [sellerId]
@@ -1173,28 +1077,15 @@ app.get(
       const orders =
         await pool.query(
           `SELECT items
-           FROM orders
-           ORDER BY id DESC`
+           FROM orders`
         );
 
       let orderCount = 0;
       let revenue = 0;
 
       for (const order of orders.rows) {
-        let items = order.items;
-
-        if (typeof items === "string") {
-          try {
-            items =
-              JSON.parse(items);
-          } catch {
-            items = [];
-          }
-        }
-
-        if (!Array.isArray(items)) {
-          items = [];
-        }
+        const items =
+          parseItems(order.items);
 
         const sellerItems =
           items.filter(
@@ -1210,11 +1101,9 @@ app.get(
             sellerItems.reduce(
               (sum, item) =>
                 sum +
-                (
-                  Number(
-                    item?.item_total
-                  ) || 0
-                ),
+                (Number(
+                  item?.item_total
+                ) || 0),
               0
             );
         }
@@ -1223,13 +1112,10 @@ app.get(
       res.json({
         products:
           products.rows[0]?.products || 0,
-
         stock:
           products.rows[0]?.stock || 0,
-
         orders:
           orderCount,
-
         revenue:
           Math.round(
             revenue * 100
@@ -1273,20 +1159,8 @@ app.get(
       const sellerOrders = [];
 
       for (const order of result.rows) {
-        let items = order.items;
-
-        if (typeof items === "string") {
-          try {
-            items =
-              JSON.parse(items);
-          } catch {
-            items = [];
-          }
-        }
-
-        if (!Array.isArray(items)) {
-          items = [];
-        }
+        const items =
+          parseItems(order.items);
 
         const sellerItems =
           items.filter(
@@ -1301,34 +1175,25 @@ app.get(
 
         sellerOrders.push({
           id: order.id,
-
           status:
             order.status || "pending",
-
           created_at:
             order.created_at,
-
           customer_name:
             order.customer_name || "-",
-
           customer_phone:
             order.customer_phone || "-",
-
           customer_address:
             order.customer_address || "-",
-
           items: sellerItems,
-
           seller_total:
             Math.round(
               sellerItems.reduce(
                 (sum, item) =>
                   sum +
-                  (
-                    Number(
-                      item?.item_total
-                    ) || 0
-                  ),
+                  (Number(
+                    item?.item_total
+                  ) || 0),
                 0
               ) * 100
             ) / 100
@@ -1376,7 +1241,6 @@ app.put(
 
       if (
         !Number.isInteger(orderId) ||
-        orderId <= 0 ||
         !allowed.includes(status)
       ) {
         return res.status(400).json({
@@ -1400,26 +1264,21 @@ app.put(
         });
       }
 
-      let items =
-        orderResult.rows[0].items;
+      const items =
+        parseItems(
+          orderResult.rows[0].items
+        );
 
-      if (typeof items === "string") {
-        try {
-          items =
-            JSON.parse(items);
-        } catch {
-          items = [];
-        }
-      }
+      const sellerId =
+        Number(
+          req.session.seller.id
+        );
 
       const belongs =
-        Array.isArray(items) &&
         items.some(
           item =>
             Number(item?.seller_id) ===
-            Number(
-              req.session.seller.id
-            )
+            sellerId
         );
 
       if (!belongs) {
@@ -1450,7 +1309,7 @@ app.put(
       });
     } catch (error) {
       console.error(
-        "Seller order status:",
+        "Seller status:",
         error
       );
 
@@ -1540,21 +1399,14 @@ app.post(
         await pool.query(
           `INSERT INTO customers
            (
-             name,
-             email,
-             phone,
-             password_hash,
-             status
+             name,email,phone,
+             password_hash,status
            )
            VALUES
            ($1,$2,$3,$4,'active')
            RETURNING
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at`,
+             id,name,email,phone,
+             status,created_at`,
           [
             name,
             email,
@@ -1569,13 +1421,8 @@ app.post(
       req.session.customer =
         customer;
 
-      req.session.save((error) => {
+      req.session.save(error => {
         if (error) {
-          console.error(
-            "Customer session:",
-            error
-          );
-
           return res.status(500).json({
             error:
               "Session error"
@@ -1589,7 +1436,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "CUSTOMER REGISTER FULL ERROR:",
+        "CUSTOMER REGISTER:",
         error
       );
 
@@ -1678,13 +1525,8 @@ app.post(
       req.session.customer =
         customer;
 
-      req.session.save((error) => {
+      req.session.save(error => {
         if (error) {
-          console.error(
-            "Customer login session:",
-            error
-          );
-
           return res.status(500).json({
             error:
               "Session error"
@@ -1698,7 +1540,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "CUSTOMER LOGIN FULL ERROR:",
+        "CUSTOMER LOGIN:",
         error
       );
 
@@ -1718,13 +1560,8 @@ app.post(
 app.post(
   "/api/customer/logout",
   (req, res) => {
-    req.session.destroy((error) => {
+    req.session.destroy(error => {
       if (error) {
-        console.error(
-          "Customer logout:",
-          error
-        );
-
         return res.status(500).json({
           error:
             "Logout failed"
@@ -1757,12 +1594,8 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at
+             id,name,email,phone,
+             status,created_at
            FROM customers
            WHERE id=$1
            LIMIT 1`,
@@ -1845,7 +1678,6 @@ app.get(
 
       res.status(500).json({
         error:
-          error.message ||
           "Failed to load orders"
       });
     }
@@ -1856,10 +1688,7 @@ app.get(
 // CREATE ORDER
 // =====================================================
 
-async function createCustomerOrder(
-  req,
-  res
-) {
+async function createCustomerOrder(req, res) {
   const client =
     await pool.connect();
 
@@ -1883,7 +1712,7 @@ async function createCustomerOrder(
       });
     }
 
-    const productIds =
+    const ids =
       incomingItems
         .map(
           item =>
@@ -1891,11 +1720,12 @@ async function createCustomerOrder(
         )
         .filter(
           id =>
-            Number.isInteger(id)
+            Number.isInteger(id) &&
+            id > 0
         );
 
     const uniqueIds =
-      [...new Set(productIds)];
+      [...new Set(ids)];
 
     if (!uniqueIds.length) {
       return res.status(400).json({
@@ -1936,18 +1766,13 @@ async function createCustomerOrder(
 
     const orderItems = [];
 
-    for (
-      const incoming
-      of incomingItems
-    ) {
+    for (const incoming of incomingItems) {
       const product =
         productMap.get(
           Number(incoming?.id)
         );
 
-      if (!product) {
-        continue;
-      }
+      if (!product) continue;
 
       const quantity =
         Number(incoming?.quantity);
@@ -1987,38 +1812,23 @@ async function createCustomerOrder(
       const itemTotal =
         Math.round(
           currentPrice *
-          quantity *
-          100
+            quantity *
+            100
         ) / 100;
 
       orderItems.push({
-        id:
-          Number(product.id),
-
+        id: Number(product.id),
         product_id:
           Number(product.id),
-
-        name:
-          product.name,
-
-        image:
-          product.image || "",
-
-        price:
-          currentPrice,
-
-        original_price:
-          price,
-
+        name: product.name,
+        image: product.image || "",
+        price: currentPrice,
+        original_price: price,
         quantity,
-
         seller_id:
           product.seller_id
-            ? Number(
-                product.seller_id
-              )
+            ? Number(product.seller_id)
             : null,
-
         item_total:
           itemTotal
       });
@@ -2044,25 +1854,19 @@ async function createCustomerOrder(
       req.session.customer;
 
     const customerName =
-      clean(
-        req.body?.customer_name
-      ) ||
+      clean(req.body?.customer_name) ||
       clean(req.body?.name) ||
       customer.name ||
       "";
 
     const customerPhone =
-      clean(
-        req.body?.customer_phone
-      ) ||
+      clean(req.body?.customer_phone) ||
       clean(req.body?.phone) ||
       customer.phone ||
       "";
 
     const customerAddress =
-      clean(
-        req.body?.customer_address
-      ) ||
+      clean(req.body?.customer_address) ||
       clean(req.body?.address) ||
       "";
 
@@ -2079,9 +1883,7 @@ async function createCustomerOrder(
            status
          )
          VALUES
-         (
-           $1,$2,$3,$4,$5::jsonb,$6,'pending'
-         )
+         ($1,$2,$3,$4,$5::jsonb,$6,'pending')
          RETURNING *`,
         [
           customer.id,
@@ -2093,15 +1895,11 @@ async function createCustomerOrder(
         ]
       );
 
-    for (
-      const item
-      of orderItems
-    ) {
+    for (const item of orderItems) {
       await client.query(
         `UPDATE products
          SET stock=stock-$1
-         WHERE id=$2
-         AND stock >= $1`,
+         WHERE id=$2`,
         [
           item.quantity,
           item.product_id
@@ -2113,7 +1911,6 @@ async function createCustomerOrder(
 
     res.status(201).json({
       ok: true,
-
       order:
         normalizeOrder(
           orderResult.rows[0]
@@ -2125,7 +1922,7 @@ async function createCustomerOrder(
     } catch {}
 
     console.error(
-      "CREATE ORDER FULL ERROR:",
+      "CREATE ORDER:",
       error
     );
 
@@ -2166,7 +1963,7 @@ app.get(
              s.email AS seller_email
            FROM products p
            LEFT JOIN sellers s
-           ON s.id=p.seller_id
+             ON s.id=p.seller_id
            ORDER BY p.id DESC`
         );
 
@@ -2193,9 +1990,7 @@ app.get(
 // VERIFY SELLER
 // =====================================================
 
-async function verifySellerId(
-  sellerId
-) {
+async function verifySellerId(sellerId) {
   const id =
     Number(sellerId);
 
@@ -2269,14 +2064,9 @@ app.post(
         await pool.query(
           `INSERT INTO products
            (
-             name,
-             price,
-             category,
-             image,
-             description,
-             stock,
-             discount_percent,
-             seller_id
+             name,price,category,image,
+             description,stock,
+             discount_percent,seller_id
            )
            VALUES
            ($1,$2,$3,$4,$5,$6,$7,$8)
@@ -2295,7 +2085,6 @@ app.post(
 
       res.status(201).json({
         ok: true,
-
         product:
           normalizeProduct(
             result.rows[0]
@@ -2303,7 +2092,7 @@ app.post(
       });
     } catch (error) {
       console.error(
-        "Admin add product:",
+        "Admin add:",
         error
       );
 
@@ -2413,7 +2202,6 @@ app.put(
 
       res.json({
         ok: true,
-
         product:
           normalizeProduct(
             result.rows[0]
@@ -2445,16 +2233,6 @@ app.delete(
     try {
       const id =
         Number(req.params.id);
-
-      if (
-        !Number.isInteger(id) ||
-        id <= 0
-      ) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
 
       const result =
         await pool.query(
@@ -2500,12 +2278,8 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at
+             id,name,email,phone,
+             status,created_at
            FROM sellers
            ORDER BY id DESC`
         );
@@ -2537,12 +2311,8 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,
-             name,
-             email,
-             phone,
-             status,
-             created_at
+             id,name,email,phone,
+             status,created_at
            FROM customers
            ORDER BY id DESC`
         );
@@ -2563,7 +2333,7 @@ app.get(
 );
 
 // =====================================================
-// ADMIN ORDERS
+// ADMIN ORDERS — FIXED
 // =====================================================
 
 app.get(
@@ -2573,25 +2343,78 @@ app.get(
     try {
       const result =
         await pool.query(
-          `SELECT *
+          `SELECT
+             id,
+             customer_id,
+             customer_name,
+             customer_phone,
+             customer_address,
+             items,
+             total,
+             status,
+             created_at
            FROM orders
            ORDER BY id DESC`
         );
 
-      res.json(
-        result.rows.map(
-          normalizeOrder
-        )
-      );
+      const orders =
+        result.rows.map(order => {
+          const normalized =
+            normalizeOrder(order);
+
+          const items =
+            normalized.items.map(
+              item => ({
+                ...item,
+                quantity:
+                  Number(item.quantity) || 0,
+                price:
+                  Number(item.price) || 0,
+                item_total:
+                  Number(item.item_total) || 0,
+                seller_id:
+                  item.seller_id === null ||
+                  item.seller_id === undefined
+                    ? null
+                    : Number(item.seller_id)
+              })
+            );
+
+          return {
+            id: order.id,
+            customer_id:
+              order.customer_id,
+            customer_name:
+              order.customer_name || "-",
+            customer_phone:
+              order.customer_phone || "-",
+            customer_address:
+              order.customer_address || "-",
+            items,
+            total:
+              Number(order.total) || 0,
+            status:
+              order.status || "pending",
+            created_at:
+              order.created_at
+          };
+        });
+
+      res.json(orders);
     } catch (error) {
       console.error(
-        "Admin orders:",
+        "ADMIN ORDERS FULL ERROR:",
         error
       );
 
       res.status(500).json({
         error:
-          "Failed to load orders"
+          "Failed to load admin orders",
+        details:
+          process.env.NODE_ENV ===
+          "production"
+            ? undefined
+            : error.message
       });
     }
   }
@@ -2608,10 +2431,7 @@ async function initializeDatabase() {
   try {
     await client.query("BEGIN");
 
-    // =================================================
     // SELLERS
-    // =================================================
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS sellers (
         id SERIAL PRIMARY KEY,
@@ -2624,10 +2444,7 @@ async function initializeDatabase() {
       )
     `);
 
-    // =================================================
     // CUSTOMERS
-    // =================================================
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
@@ -2668,23 +2485,25 @@ async function initializeDatabase() {
       WHERE status IS NULL
     `);
 
-    // =================================================
     // PRODUCTS
-    // =================================================
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
         name TEXT NOT NULL,
-        price NUMERIC(12,2) NOT NULL DEFAULT 0,
+        price NUMERIC(12,2)
+          NOT NULL DEFAULT 0,
         category TEXT,
         image TEXT,
         description TEXT,
-        stock INTEGER NOT NULL DEFAULT 0,
-        discount_percent NUMERIC(5,2) NOT NULL DEFAULT 0,
-        seller_id INTEGER REFERENCES sellers(id)
+        stock INTEGER
+          NOT NULL DEFAULT 0,
+        discount_percent NUMERIC(5,2)
+          NOT NULL DEFAULT 0,
+        seller_id INTEGER
+          REFERENCES sellers(id)
           ON DELETE SET NULL,
-        created_at TIMESTAMPTZ DEFAULT NOW()
+        created_at TIMESTAMPTZ
+          DEFAULT NOW()
       )
     `);
 
@@ -2714,25 +2533,28 @@ async function initializeDatabase() {
     await client.query(`
       ALTER TABLE products
       ADD COLUMN IF NOT EXISTS discount_percent
-      NUMERIC(5,2) NOT NULL DEFAULT 0
+      NUMERIC(5,2)
+      NOT NULL DEFAULT 0
     `);
 
-    // =================================================
     // ORDERS
-    // =================================================
-
     await client.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
-        customer_id INTEGER REFERENCES customers(id)
+        customer_id INTEGER
+          REFERENCES customers(id)
           ON DELETE SET NULL,
         customer_name TEXT,
         customer_phone TEXT,
         customer_address TEXT,
-        items JSONB NOT NULL DEFAULT '[]'::jsonb,
-        total NUMERIC(12,2) NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'pending',
-        created_at TIMESTAMPTZ DEFAULT NOW()
+        items JSONB
+          NOT NULL DEFAULT '[]'::jsonb,
+        total NUMERIC(12,2)
+          NOT NULL DEFAULT 0,
+        status TEXT
+          NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMPTZ
+          DEFAULT NOW()
       )
     `);
 
@@ -2784,6 +2606,7 @@ async function initializeDatabase() {
       DEFAULT NOW()
     `);
 
+    // SAFE ORDER DATA FIX
     await client.query(`
       UPDATE orders
       SET items='[]'::jsonb
@@ -2802,10 +2625,7 @@ async function initializeDatabase() {
       WHERE status IS NULL
     `);
 
-    // =================================================
     // INDEXES
-    // =================================================
-
     await client.query(`
       CREATE INDEX IF NOT EXISTS
       idx_products_seller_id
@@ -2841,23 +2661,21 @@ async function initializeDatabase() {
     console.log(
       "========================================"
     );
-
     console.log(
-      "Shrivi database initialized successfully."
+      "SHRIVI DATABASE INITIALIZED"
     );
-
     console.log(
-      "Customers table checked."
+      "Customers checked"
     );
-
     console.log(
-      "Orders table checked."
+      "Products checked"
     );
-
     console.log(
-      "Existing products/sellers preserved."
+      "Orders checked"
     );
-
+    console.log(
+      "Existing data preserved"
+    );
     console.log(
       "========================================"
     );
@@ -2928,7 +2746,7 @@ app.use(
 );
 
 // =====================================================
-// START SERVER
+// START
 // =====================================================
 
 async function startServer() {
