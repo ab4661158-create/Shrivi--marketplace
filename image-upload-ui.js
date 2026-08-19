@@ -2,8 +2,9 @@
   "use strict";
 
   const MAX_SIZE = 5 * 1024 * 1024;
-  const MAX_DIMENSION = 1600;
-  const COMPRESS_QUALITY = 0.82;
+  const MAX_DIMENSION = 1200;
+  const COMPRESS_QUALITY = 0.70;
+  const TARGET_BYTES = 450 * 1024;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
   const REQUEST_TIMEOUT = 60000;
 
@@ -46,16 +47,10 @@
   async function request(input, init = {}, timeout = REQUEST_TIMEOUT) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeout);
-
     try {
-      return await originalFetch(input, {
-        ...init,
-        signal: controller.signal
-      });
+      return await originalFetch(input, { ...init, signal: controller.signal });
     } catch (error) {
-      if (error?.name === "AbortError") {
-        throw new Error("Request timed out. Please try again.");
-      }
+      if (error?.name === "AbortError") throw new Error("Request timed out. Please try again.");
       throw error;
     } finally {
       clearTimeout(timer);
@@ -64,12 +59,8 @@
 
   function validate(file) {
     if (!file) return;
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      throw new Error("Only JPG, PNG and WEBP images are allowed.");
-    }
-    if (file.size > MAX_SIZE) {
-      throw new Error("Image must be 5MB or smaller.");
-    }
+    if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Only JPG, PNG and WEBP images are allowed.");
+    if (file.size > MAX_SIZE) throw new Error("Image must be 5MB or smaller.");
   }
 
   function setStatus(text) {
@@ -77,24 +68,24 @@
     if (el) el.textContent = text || "";
   }
 
-  // Compress large phone photos in the browser before sending them to Cloudinary.
-  // This makes product creation much faster on mobile networks while preserving quality.
   async function optimizeImage(file) {
     validate(file);
 
-    if (file.size < 900 * 1024) {
-      return file;
-    }
-
     const bitmap = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const longest = Math.max(bitmap.width, bitmap.height);
+    const scale = Math.min(1, MAX_DIMENSION / longest);
     const width = Math.max(1, Math.round(bitmap.width * scale));
     const height = Math.max(1, Math.round(bitmap.height * scale));
+
+    // Skip canvas work only for already-small JPEG/WEBP files.
+    if (file.size <= TARGET_BYTES && longest <= MAX_DIMENSION && /image\/(jpeg|webp)/.test(file.type)) {
+      bitmap.close?.();
+      return file;
+    }
 
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
-
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) {
       bitmap.close?.();
@@ -107,41 +98,62 @@
     const blob = await new Promise((resolve, reject) => {
       canvas.toBlob(
         result => result ? resolve(result) : reject(new Error("Image compression failed")),
-        "image/jpeg",
+        "image/webp",
         COMPRESS_QUALITY
       );
     });
 
-    if (!blob || blob.size >= file.size) {
-      return file;
-    }
+    if (!blob || blob.size >= file.size) return file;
 
     const baseName = (file.name || "product-image").replace(/\.[^.]+$/, "");
-    return new File([blob], `${baseName}.jpg`, {
-      type: "image/jpeg",
+    return new File([blob], `${baseName}.webp`, {
+      type: "image/webp",
       lastModified: Date.now()
+    });
+  }
+
+  function uploadWithProgress(url, file) {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const fd = new FormData();
+      fd.append("image", file);
+
+      xhr.open("POST", url, true);
+      xhr.withCredentials = true;
+      xhr.timeout = REQUEST_TIMEOUT;
+
+      xhr.upload.onprogress = event => {
+        if (event.lengthComputable) {
+          const percent = Math.round((event.loaded / event.total) * 100);
+          setStatus(`Uploading image... ${percent}%`);
+        } else {
+          setStatus("Uploading image...");
+        }
+      };
+
+      xhr.onload = () => {
+        let data = {};
+        try { data = JSON.parse(xhr.responseText || "{}"); } catch (_) {}
+        if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
+        reject(new Error(data.error || data.message || `Upload failed (${xhr.status})`));
+      };
+      xhr.onerror = () => reject(new Error("Network error during image upload."));
+      xhr.ontimeout = () => reject(new Error("Image upload timed out. Please try a smaller image."));
+      xhr.onabort = () => reject(new Error("Image upload was cancelled."));
+      xhr.send(fd);
     });
   }
 
   async function upload(file, productId) {
     const optimized = await optimizeImage(file);
-
-    const fd = new FormData();
-    fd.append("image", optimized);
+    setStatus(
+      optimized.size < file.size
+        ? `Uploading optimized image (${(optimized.size / 1024 / 1024).toFixed(2)} MB)...`
+        : `Uploading image (${(optimized.size / 1024 / 1024).toFixed(2)} MB)...`
+    );
 
     try {
-      setStatus(
-        optimized.size < file.size
-          ? `Uploading optimized image (${(optimized.size / 1024 / 1024).toFixed(2)} MB)...`
-          : "Uploading image..."
-      );
-
-      const r = await request("/api/seller/upload/image", {
-        method: "POST",
-        credentials: "include",
-        body: fd
-      });
-      const d = await json(r);
+      const d = await uploadWithProgress("/api/seller/upload/image", optimized);
       const url = d.url || d.secure_url || d.image || d.product?.image || d.imageUrl || d.data?.url || d.data?.image;
       if (url) return url;
     } catch (firstError) {
@@ -149,14 +161,7 @@
     }
 
     if (productId) {
-      const fd2 = new FormData();
-      fd2.append("image", optimized);
-      const r2 = await request(`/api/seller/products/${encodeURIComponent(productId)}/image`, {
-        method: "POST",
-        credentials: "include",
-        body: fd2
-      });
-      const d2 = await json(r2);
+      const d2 = await uploadWithProgress(`/api/seller/products/${encodeURIComponent(productId)}/image`, optimized);
       const url2 = d2.url || d2.secure_url || d2.image || d2.product?.image || d2.imageUrl || d2.data?.url || d2.data?.image;
       if (url2) return url2;
     }
@@ -190,9 +195,7 @@
     if (!Number.isFinite(price) || price < 0) return alert("Enter a valid product price.");
     if (!category) return alert("Product category is required.");
     if (!Number.isInteger(stock) || stock < 0) return alert("Stock must be a whole number.");
-    if (!Number.isFinite(discount) || discount < 0 || discount > 99.99) {
-      return alert("Discount must be between 0 and 99.99%.");
-    }
+    if (!Number.isFinite(discount) || discount < 0 || discount > 99.99) return alert("Discount must be between 0 and 99.99%.");
 
     try {
       validate(file);
@@ -206,11 +209,7 @@
     button.textContent = file ? "Saving & uploading..." : "Saving...";
 
     try {
-      // Save the database record first. This prevents a slow Cloudinary upload
-      // from blocking product creation or causing a generic "Failed to fetch".
-      const endpoint = id
-        ? `/api/seller/products/${encodeURIComponent(id)}`
-        : "/api/seller/products";
+      const endpoint = id ? `/api/seller/products/${encodeURIComponent(id)}` : "/api/seller/products";
       const method = id ? "PUT" : "POST";
 
       const response = await request(endpoint, {
@@ -230,30 +229,18 @@
 
       const data = await json(response);
       const productId = Number(id || data?.product?.id || data?.id || data?.product_id);
-      if (!productId) {
-        throw new Error("Product was saved but the server did not return its ID.");
-      }
+      if (!productId) throw new Error("Product was saved but the server did not return its ID.");
 
-      // Image upload is now a second, independent step.
       if (file) {
-        setStatus("Preparing image...");
+        setStatus("Preparing smaller image...");
         const imageUrl = await upload(file, productId);
 
         const imageUpdate = await request(`/api/seller/products/${encodeURIComponent(productId)}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({
-            name,
-            price,
-            category,
-            image: imageUrl,
-            description,
-            stock,
-            discount_percent: discount
-          })
+          body: JSON.stringify({ name, price, category, image: imageUrl, description, stock, discount_percent: discount })
         });
-
         await json(imageUpdate);
         $("productImage").value = imageUrl;
         setStatus("Image saved successfully.");
@@ -261,8 +248,6 @@
 
       closeProductModal();
       msg(id ? "Product updated successfully!" : "Product added successfully!", "success");
-
-      // Refresh is best-effort and can never keep the save button stuck.
       await safeRefresh(() => loadProducts());
       await safeRefresh(() => loadDashboard());
     } catch (error) {
