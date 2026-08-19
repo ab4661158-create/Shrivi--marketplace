@@ -1,0 +1,52 @@
+name: Remove Seller UI from Customer App
+
+on:
+  push:
+    paths:
+      - '.github/workflows/remove-customer-sell.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  remove-seller-ui:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Remove seller UI from shop
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('shop.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Remove the navigation seller link.
+          s = re.sub(r'\s*<a href="#seller">Sell on Shrivi</a>\s*', '\n', s, count=1)
+
+          # Remove the complete seller promo section.
+          s = re.sub(r'\n<section id="seller">.*?</section>\n', '\n', s, count=1, flags=re.S)
+
+          # Remove the seller column from the footer.
+          s = re.sub(r'\n\s*<div>\s*<h4>Sell</h4>\s*<a href="/seller">Become a Seller</a>\s*<a href="/seller">Seller Login</a>\s*</div>\s*\n', '\n', s, count=1, flags=re.S)
+
+          # Remove now-unused seller section CSS.
+          s = re.sub(r'\n\.sellsection\{.*?\n\.sellbtn\{.*?\}\n', '\n', s, count=1, flags=re.S)
+
+          # Remove mobile seller CSS if still present.
+          s = re.sub(r'\n\s*\.sellsection\{display:block;padding:35px 25px\}\n\s*\.sellbtn\{margin-top:18px\}', '', s, count=1)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit customer app update
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add shop.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Remove Sell option from customer app'
+          git push
