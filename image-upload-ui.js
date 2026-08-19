@@ -1,12 +1,13 @@
 (() => {
   "use strict";
 
-  const MAX_SIZE = 5 * 1024 * 1024;
+  const MAX_INPUT_BYTES = 5 * 1024 * 1024;
   const MAX_DIMENSION = 1200;
-  const COMPRESS_QUALITY = 0.70;
-  const TARGET_BYTES = 450 * 1024;
+  const TARGET_BYTES = 350 * 1024;
+  const MIN_QUALITY = 0.55;
+  const START_QUALITY = 0.78;
+  const REQUEST_TIMEOUT = 45000;
   const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-  const REQUEST_TIMEOUT = 60000;
 
   const originalFetch = window.fetch.bind(window);
   window.fetch = function (input, init) {
@@ -36,7 +37,12 @@
     }
   }
 
-  async function json(response) {
+  function setStatus(text) {
+    const el = $("imageUploadStatus");
+    if (el) el.textContent = text || "";
+  }
+
+  async function readJson(response) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       throw new Error(data.error || data.message || `Request failed (${response.status})`);
@@ -50,7 +56,9 @@
     try {
       return await originalFetch(input, { ...init, signal: controller.signal });
     } catch (error) {
-      if (error?.name === "AbortError") throw new Error("Request timed out. Please try again.");
+      if (error?.name === "AbortError") {
+        throw new Error("Request timed out. Please try again with a smaller image.");
+      }
       throw error;
     } finally {
       clearTimeout(timer);
@@ -59,27 +67,44 @@
 
   function validate(file) {
     if (!file) return;
-    if (!ALLOWED_TYPES.includes(file.type)) throw new Error("Only JPG, PNG and WEBP images are allowed.");
-    if (file.size > MAX_SIZE) throw new Error("Image must be 5MB or smaller.");
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      throw new Error("Only JPG, PNG and WEBP images are allowed.");
+    }
+    if (file.size > MAX_INPUT_BYTES) {
+      throw new Error("Image must be 5MB or smaller.");
+    }
   }
 
-  function setStatus(text) {
-    const el = $("imageUploadStatus");
-    if (el) el.textContent = text || "";
+  function loadImage(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Could not read the image."));
+      reader.onload = () => {
+        const image = new Image();
+        image.onload = () => resolve(image);
+        image.onerror = () => reject(new Error("Could not open the image."));
+        image.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   async function optimizeImage(file) {
     validate(file);
 
-    const bitmap = await createImageBitmap(file);
-    const longest = Math.max(bitmap.width, bitmap.height);
-    const scale = Math.min(1, MAX_DIMENSION / longest);
-    const width = Math.max(1, Math.round(bitmap.width * scale));
-    const height = Math.max(1, Math.round(bitmap.height * scale));
+    let image;
+    try {
+      image = await loadImage(file);
+    } catch (error) {
+      throw error;
+    }
 
-    // Skip canvas work only for already-small JPEG/WEBP files.
+    const longest = Math.max(image.naturalWidth || image.width, image.naturalHeight || image.height);
+    const scale = Math.min(1, MAX_DIMENSION / Math.max(1, longest));
+    const width = Math.max(1, Math.round((image.naturalWidth || image.width) * scale));
+    const height = Math.max(1, Math.round((image.naturalHeight || image.height) * scale));
+
     if (file.size <= TARGET_BYTES && longest <= MAX_DIMENSION && /image\/(jpeg|webp)/.test(file.type)) {
-      bitmap.close?.();
       return file;
     }
 
@@ -87,21 +112,19 @@
     canvas.width = width;
     canvas.height = height;
     const ctx = canvas.getContext("2d", { alpha: false });
-    if (!ctx) {
-      bitmap.close?.();
-      return file;
+    if (!ctx) return file;
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(image, 0, 0, width, height);
+
+    let quality = START_QUALITY;
+    let blob = await canvasToBlob(canvas, quality);
+
+    while (blob.size > TARGET_BYTES && quality > MIN_QUALITY) {
+      quality = Math.max(MIN_QUALITY, quality - 0.07);
+      blob = await canvasToBlob(canvas, quality);
     }
-
-    ctx.drawImage(bitmap, 0, 0, width, height);
-    bitmap.close?.();
-
-    const blob = await new Promise((resolve, reject) => {
-      canvas.toBlob(
-        result => result ? resolve(result) : reject(new Error("Image compression failed")),
-        "image/webp",
-        COMPRESS_QUALITY
-      );
-    });
 
     if (!blob || blob.size >= file.size) return file;
 
@@ -112,19 +135,29 @@
     });
   }
 
-  function uploadWithProgress(url, file) {
+  function canvasToBlob(canvas, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob(
+        blob => blob ? resolve(blob) : reject(new Error("Image compression failed.")),
+        "image/webp",
+        quality
+      );
+    });
+  }
+
+  function uploadWithProgress(file) {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      const fd = new FormData();
-      fd.append("image", file);
+      const formData = new FormData();
+      formData.append("image", file, file.name);
 
-      xhr.open("POST", url, true);
+      xhr.open("POST", "/api/seller/upload/image", true);
       xhr.withCredentials = true;
       xhr.timeout = REQUEST_TIMEOUT;
 
       xhr.upload.onprogress = event => {
         if (event.lengthComputable) {
-          const percent = Math.round((event.loaded / event.total) * 100);
+          const percent = Math.min(100, Math.round((event.loaded / event.total) * 100));
           setStatus(`Uploading image... ${percent}%`);
         } else {
           setStatus("Uploading image...");
@@ -134,39 +167,49 @@
       xhr.onload = () => {
         let data = {};
         try { data = JSON.parse(xhr.responseText || "{}"); } catch (_) {}
-        if (xhr.status >= 200 && xhr.status < 300) return resolve(data);
-        reject(new Error(data.error || data.message || `Upload failed (${xhr.status})`));
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data);
+        } else {
+          reject(new Error(data.error || data.message || `Image upload failed (${xhr.status})`));
+        }
       };
+
       xhr.onerror = () => reject(new Error("Network error during image upload."));
-      xhr.ontimeout = () => reject(new Error("Image upload timed out. Please try a smaller image."));
+      xhr.ontimeout = () => reject(new Error("Image upload timed out. Please try again."));
       xhr.onabort = () => reject(new Error("Image upload was cancelled."));
-      xhr.send(fd);
+      xhr.send(formData);
     });
   }
 
-  async function upload(file, productId) {
+  async function uploadImage(file) {
+    setStatus("Preparing image...");
     const optimized = await optimizeImage(file);
+
+    const originalMB = (file.size / 1024 / 1024).toFixed(2);
+    const optimizedMB = (optimized.size / 1024 / 1024).toFixed(2);
+
     setStatus(
       optimized.size < file.size
-        ? `Uploading optimized image (${(optimized.size / 1024 / 1024).toFixed(2)} MB)...`
-        : `Uploading image (${(optimized.size / 1024 / 1024).toFixed(2)} MB)...`
+        ? `Uploading optimized image (${optimizedMB} MB from ${originalMB} MB)...`
+        : `Uploading image (${optimizedMB} MB)...`
     );
 
-    try {
-      const d = await uploadWithProgress("/api/seller/upload/image", optimized);
-      const url = d.url || d.secure_url || d.image || d.product?.image || d.imageUrl || d.data?.url || d.data?.image;
-      if (url) return url;
-    } catch (firstError) {
-      console.warn("Primary seller image upload failed:", firstError);
+    const data = await uploadWithProgress(optimized);
+    const url =
+      data.url ||
+      data.secure_url ||
+      data.image ||
+      data.imageUrl ||
+      data.data?.url ||
+      data.data?.image ||
+      data.data?.imageUrl;
+
+    if (!url) {
+      throw new Error("Image uploaded but no image URL was returned.");
     }
 
-    if (productId) {
-      const d2 = await uploadWithProgress(`/api/seller/products/${encodeURIComponent(productId)}/image`, optimized);
-      const url2 = d2.url || d2.secure_url || d2.image || d2.product?.image || d2.imageUrl || d2.data?.url || d2.data?.image;
-      if (url2) return url2;
-    }
-
-    throw new Error("Image upload failed. Please try again.");
+    setStatus("Image uploaded. Saving product...");
+    return url;
   }
 
   async function safeRefresh(fn) {
@@ -195,21 +238,31 @@
     if (!Number.isFinite(price) || price < 0) return alert("Enter a valid product price.");
     if (!category) return alert("Product category is required.");
     if (!Number.isInteger(stock) || stock < 0) return alert("Stock must be a whole number.");
-    if (!Number.isFinite(discount) || discount < 0 || discount > 99.99) return alert("Discount must be between 0 and 99.99%.");
+    if (!Number.isFinite(discount) || discount < 0 || discount > 99.99) {
+      return alert("Discount must be between 0 and 99.99%.");
+    }
 
     try {
       validate(file);
       if (image && !file) new URL(image);
-    } catch (e) {
-      return alert(e.message);
+    } catch (error) {
+      return alert(error.message);
     }
 
     const button = $("saveProductButton");
     button.disabled = true;
-    button.textContent = file ? "Saving & uploading..." : "Saving...";
+    button.textContent = file ? "Uploading & saving..." : "Saving...";
 
     try {
-      const endpoint = id ? `/api/seller/products/${encodeURIComponent(id)}` : "/api/seller/products";
+      // Upload first, then create/update the product with the final URL.
+      // This avoids creating a half-saved product when image upload fails.
+      if (file) {
+        image = await uploadImage(file);
+      }
+
+      const endpoint = id
+        ? `/api/seller/products/${encodeURIComponent(id)}`
+        : "/api/seller/products";
       const method = id ? "PUT" : "POST";
 
       const response = await request(endpoint, {
@@ -220,38 +273,24 @@
           name,
           price,
           category,
-          image: file ? "" : image,
+          image,
           description,
           stock,
           discount_percent: discount
         })
       });
 
-      const data = await json(response);
-      const productId = Number(id || data?.product?.id || data?.id || data?.product_id);
-      if (!productId) throw new Error("Product was saved but the server did not return its ID.");
+      await readJson(response);
 
-      if (file) {
-        setStatus("Preparing smaller image...");
-        const imageUrl = await upload(file, productId);
-
-        const imageUpdate = await request(`/api/seller/products/${encodeURIComponent(productId)}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ name, price, category, image: imageUrl, description, stock, discount_percent: discount })
-        });
-        await json(imageUpdate);
-        $("productImage").value = imageUrl;
-        setStatus("Image saved successfully.");
-      }
-
+      setStatus(file ? "Product and image saved successfully." : "Product saved successfully.");
       closeProductModal();
       msg(id ? "Product updated successfully!" : "Product added successfully!", "success");
+
       await safeRefresh(() => loadProducts());
       await safeRefresh(() => loadDashboard());
     } catch (error) {
       console.error("Shrivi seller save product:", error);
+      setStatus("Save failed.");
       msg(error.message || "Failed to save product.", "error");
     } finally {
       button.disabled = false;
