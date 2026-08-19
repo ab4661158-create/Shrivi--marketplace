@@ -382,9 +382,7 @@ app.get(
   "/api/health",
   async (req, res) => {
     try {
-      await pool.query(
-        "SELECT 1"
-      );
+      await pool.query("SELECT 1");
 
       res.json({
         ok: true,
@@ -404,7 +402,9 @@ app.get(
         service:
           "Shrivi Marketplace",
         database:
-          "error"
+          "error",
+        error:
+          error.message
       });
     }
   }
@@ -450,13 +450,16 @@ app.post(
         });
       }
 
+      const passwordHash =
+        await bcrypt.hash(
+          adminPassword,
+          10
+        );
+
       const passwordOk =
         await bcrypt.compare(
           password,
-          await bcrypt.hash(
-            adminPassword,
-            10
-          )
+          passwordHash
         );
 
       if (!passwordOk) {
@@ -648,6 +651,11 @@ app.post(
       req.session.save(
         error => {
           if (error) {
+            console.error(
+              "Seller session:",
+              error
+            );
+
             return res.status(500).json({
               error:
                 "Session error"
@@ -669,6 +677,7 @@ app.post(
 
       res.status(500).json({
         error:
+          error.message ||
           "Seller registration failed"
       });
     }
@@ -829,6 +838,11 @@ app.get(
           result.rows[0]
       });
     } catch (error) {
+      console.error(
+        "Seller session:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to check seller session"
@@ -1011,6 +1025,11 @@ app.get(
         )
       );
     } catch (error) {
+      console.error(
+        "Seller products:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to load seller products"
@@ -1141,6 +1160,11 @@ app.put(
           )
       });
     } catch (error) {
+      console.error(
+        "Seller update product:",
+        error
+      );
+
       res.status(400).json({
         error:
           error.message ||
@@ -1184,6 +1208,11 @@ app.delete(
         ok: true
       });
     } catch (error) {
+      console.error(
+        "Seller delete:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to delete product"
@@ -1564,6 +1593,11 @@ app.put(
           )
       });
     } catch (error) {
+      console.error(
+        "Seller order status:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to update order status"
@@ -1677,12 +1711,20 @@ app.post(
           ]
         );
 
-      req.session.customer =
+      const customer =
         result.rows[0];
+
+      req.session.customer =
+        customer;
 
       req.session.save(
         error => {
           if (error) {
+            console.error(
+              "Customer session save:",
+              error
+            );
+
             return res.status(500).json({
               error:
                 "Session error"
@@ -1691,20 +1733,19 @@ app.post(
 
           res.status(201).json({
             ok: true,
-
-            customer:
-              result.rows[0]
+            customer
           });
         }
       );
     } catch (error) {
       console.error(
-        "Customer register:",
+        "CUSTOMER REGISTER FULL ERROR:",
         error
       );
 
       res.status(500).json({
         error:
+          error.message ||
           "Registration failed"
       });
     }
@@ -1725,6 +1766,20 @@ app.post(
 
       const password =
         req.body?.password || "";
+
+      if (!validEmail(email)) {
+        return res.status(400).json({
+          error:
+            "Valid email is required"
+        });
+      }
+
+      if (!password) {
+        return res.status(400).json({
+          error:
+            "Password is required"
+        });
+      }
 
       const result =
         await pool.query(
@@ -1780,6 +1835,11 @@ app.post(
       req.session.save(
         error => {
           if (error) {
+            console.error(
+              "Customer login session:",
+              error
+            );
+
             return res.status(500).json({
               error:
                 "Session error"
@@ -1794,23 +1854,44 @@ app.post(
       );
     } catch (error) {
       console.error(
-        "Customer login:",
+        "CUSTOMER LOGIN FULL ERROR:",
         error
       );
 
       res.status(500).json({
         error:
+          error.message ||
           "Login failed"
       });
     }
   }
 );
 
+// =====================================================
+// CUSTOMER LOGOUT
+// =====================================================
+
 app.post(
   "/api/customer/logout",
   (req, res) => {
     req.session.destroy(
-      () => {
+      error => {
+        if (error) {
+          console.error(
+            "Customer logout:",
+            error
+          );
+
+          return res.status(500).json({
+            error:
+              "Logout failed"
+          });
+        }
+
+        res.clearCookie(
+          "connect.sid"
+        );
+
         res.json({
           ok: true
         });
@@ -1819,21 +1900,81 @@ app.post(
   }
 );
 
+// =====================================================
+// CUSTOMER SESSION / ME
+// =====================================================
+
 app.get(
   "/api/customer/me",
-  (req, res) => {
-    if (!req.session.customer) {
-      return res.json({
-        loggedIn: false
+  async (req, res) => {
+    try {
+      if (!req.session.customer) {
+        return res.json({
+          loggedIn: false
+        });
+      }
+
+      const result =
+        await pool.query(
+          `SELECT
+             id,
+             name,
+             email,
+             phone,
+             status,
+             created_at
+           FROM customers
+           WHERE id=$1
+           LIMIT 1`,
+          [
+            req.session
+              .customer.id
+          ]
+        );
+
+      if (
+        !result.rows.length
+      ) {
+        req.session.customer =
+          null;
+
+        return res.json({
+          loggedIn: false
+        });
+      }
+
+      if (
+        result.rows[0].status !==
+        "active"
+      ) {
+        req.session.customer =
+          null;
+
+        return res.json({
+          loggedIn: false
+        });
+      }
+
+      req.session.customer =
+        result.rows[0];
+
+      res.json({
+        loggedIn: true,
+
+        customer:
+          result.rows[0]
+      });
+    } catch (error) {
+      console.error(
+        "Customer me:",
+        error
+      );
+
+      res.status(500).json({
+        error:
+          "Failed to check customer session"
       });
     }
-
-    res.json({
-      loggedIn: true,
-
-      customer:
-        req.session.customer
-    });
   }
 );
 
@@ -1871,6 +2012,7 @@ app.get(
 
       res.status(500).json({
         error:
+          error.message ||
           "Failed to load orders"
       });
     }
@@ -1878,7 +2020,7 @@ app.get(
 );
 
 // =====================================================
-// CREATE ORDER
+// CREATE CUSTOMER ORDER
 // =====================================================
 
 async function createCustomerOrder(
@@ -2151,17 +2293,12 @@ async function createCustomerOrder(
          RETURNING *`,
         [
           customer.id,
-
           customerName,
-
           customerPhone,
-
           customerAddress,
-
           JSON.stringify(
             orderItems
           ),
-
           total
         ]
       );
@@ -2176,7 +2313,6 @@ async function createCustomerOrder(
          WHERE id=$2`,
         [
           item.quantity,
-
           item.product_id
         ]
       );
@@ -2202,7 +2338,7 @@ async function createCustomerOrder(
     } catch {}
 
     console.error(
-      "Create order:",
+      "CREATE ORDER FULL ERROR:",
       error
     );
 
@@ -2216,11 +2352,7 @@ async function createCustomerOrder(
   }
 }
 
-// IMPORTANT:
-// Both endpoints are supported.
-// This fixes older customer.html versions
-// that call /api/orders.
-
+// Both endpoints supported
 app.post(
   "/api/customer/orders",
   createCustomerOrder
@@ -2599,6 +2731,11 @@ app.get(
         result.rows
       );
     } catch (error) {
+      console.error(
+        "Admin sellers:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to load sellers"
@@ -2633,6 +2770,11 @@ app.get(
         result.rows
       );
     } catch (error) {
+      console.error(
+        "Admin customers:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to load customers"
@@ -2663,6 +2805,11 @@ app.get(
         )
       );
     } catch (error) {
+      console.error(
+        "Admin orders:",
+        error
+      );
+
       res.status(500).json({
         error:
           "Failed to load orders"
@@ -2684,7 +2831,10 @@ async function initializeDatabase() {
       "BEGIN"
     );
 
+    // =================================================
     // SELLERS
+    // =================================================
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS sellers (
         id SERIAL PRIMARY KEY,
@@ -2697,7 +2847,10 @@ async function initializeDatabase() {
       )
     `);
 
+    // =================================================
     // CUSTOMERS
+    // =================================================
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
@@ -2710,7 +2863,45 @@ async function initializeDatabase() {
       )
     `);
 
+    // =================================================
+    // CUSTOMER SAFE MIGRATION
+    // IMPORTANT:
+    // Existing customer data is NOT deleted.
+    // =================================================
+
+    await client.query(`
+      ALTER TABLE customers
+      ADD COLUMN IF NOT EXISTS phone TEXT
+    `);
+
+    await client.query(`
+      ALTER TABLE customers
+      ADD COLUMN IF NOT EXISTS password_hash TEXT
+    `);
+
+    await client.query(`
+      ALTER TABLE customers
+      ADD COLUMN IF NOT EXISTS status TEXT
+      DEFAULT 'active'
+    `);
+
+    await client.query(`
+      ALTER TABLE customers
+      ADD COLUMN IF NOT EXISTS created_at
+      TIMESTAMPTZ DEFAULT NOW()
+    `);
+
+    // Fill missing status values safely
+    await client.query(`
+      UPDATE customers
+      SET status='active'
+      WHERE status IS NULL
+    `);
+
+    // =================================================
     // PRODUCTS
+    // =================================================
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -2727,23 +2918,10 @@ async function initializeDatabase() {
       )
     `);
 
-    // ORDERS
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS orders (
-        id SERIAL PRIMARY KEY,
-        customer_id INTEGER REFERENCES customers(id)
-          ON DELETE SET NULL,
-        customer_name TEXT,
-        customer_phone TEXT,
-        customer_address TEXT,
-        items JSONB NOT NULL DEFAULT '[]'::jsonb,
-        total NUMERIC(12,2) NOT NULL DEFAULT 0,
-        status TEXT NOT NULL DEFAULT 'pending',
-        created_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `);
+    // =================================================
+    // PRODUCT SAFE MIGRATION
+    // =================================================
 
-    // EXISTING DATABASE SAFETY
     await client.query(`
       ALTER TABLE products
       ADD COLUMN IF NOT EXISTS seller_id INTEGER
@@ -2773,7 +2951,103 @@ async function initializeDatabase() {
       NUMERIC(5,2) NOT NULL DEFAULT 0
     `);
 
+    // =================================================
+    // ORDERS
+    // =================================================
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        customer_id INTEGER REFERENCES customers(id)
+          ON DELETE SET NULL,
+        customer_name TEXT,
+        customer_phone TEXT,
+        customer_address TEXT,
+        items JSONB NOT NULL DEFAULT '[]'::jsonb,
+        total NUMERIC(12,2) NOT NULL DEFAULT 0,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+
+    // =================================================
+    // ORDER SAFE MIGRATION
+    // =================================================
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS customer_id INTEGER
+      REFERENCES customers(id)
+      ON DELETE SET NULL
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS customer_name TEXT
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS customer_phone TEXT
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS customer_address TEXT
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS items JSONB
+      DEFAULT '[]'::jsonb
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS total
+      NUMERIC(12,2)
+      DEFAULT 0
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS status TEXT
+      DEFAULT 'pending'
+    `);
+
+    await client.query(`
+      ALTER TABLE orders
+      ADD COLUMN IF NOT EXISTS created_at
+      TIMESTAMPTZ
+      DEFAULT NOW()
+    `);
+
+    // =================================================
+    // ORDER DATA SAFETY
+    // =================================================
+
+    await client.query(`
+      UPDATE orders
+      SET items='[]'::jsonb
+      WHERE items IS NULL
+    `);
+
+    await client.query(`
+      UPDATE orders
+      SET total=0
+      WHERE total IS NULL
+    `);
+
+    await client.query(`
+      UPDATE orders
+      SET status='pending'
+      WHERE status IS NULL
+    `);
+
+    // =================================================
     // INDEXES
+    // =================================================
+
     await client.query(`
       CREATE INDEX IF NOT EXISTS
       idx_products_seller_id
@@ -2784,6 +3058,12 @@ async function initializeDatabase() {
       CREATE INDEX IF NOT EXISTS
       idx_products_category
       ON products(category)
+    `);
+
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS
+      idx_customers_email
+      ON customers(email)
     `);
 
     await client.query(`
@@ -2803,7 +3083,27 @@ async function initializeDatabase() {
     );
 
     console.log(
+      "========================================"
+    );
+
+    console.log(
       "Shrivi database initialized successfully."
+    );
+
+    console.log(
+      "Customers table checked."
+    );
+
+    console.log(
+      "Orders table checked."
+    );
+
+    console.log(
+      "Existing products/sellers preserved."
+    );
+
+    console.log(
+      "========================================"
     );
   } catch (error) {
     try {
@@ -2813,7 +3113,7 @@ async function initializeDatabase() {
     } catch {}
 
     console.error(
-      "Database initialization error:",
+      "DATABASE INITIALIZATION FULL ERROR:",
       error
     );
 
@@ -2847,7 +3147,7 @@ app.use(
 app.use(
   (error, req, res, next) => {
     console.error(
-      "Unhandled server error:",
+      "UNHANDLED SERVER ERROR:",
       error
     );
 
@@ -2875,7 +3175,7 @@ app.use(
 );
 
 // =====================================================
-// START
+// START SERVER
 // =====================================================
 
 async function startServer() {
@@ -2892,7 +3192,7 @@ async function startServer() {
     );
   } catch (error) {
     console.error(
-      "Server startup failed:",
+      "SERVER STARTUP FAILED:",
       error
     );
 
