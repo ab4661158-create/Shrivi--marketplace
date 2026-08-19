@@ -1,4 +1,4 @@
-const CACHE_NAME = "shrivi-v3";
+const CACHE_NAME = "shrivi-v4";
 
 const APP_FILES = [
   "/shop",
