@@ -15,9 +15,13 @@ const PORT = process.env.PORT || 10000;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: process.env.NODE_ENV === "production"
+    ? { rejectUnauthorized: false }
+    : false
+});
+
+pool.on("error", (error) => {
+  console.error("PostgreSQL pool error:", error);
 });
 
 // =====================================================
@@ -36,18 +40,11 @@ cloudinary.config({
 
 app.set("trust proxy", 1);
 
-app.use(
-  express.json({
-    limit: "2mb"
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "2mb"
-  })
-);
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({
+  extended: true,
+  limit: "2mb"
+}));
 
 app.use(
   session({
@@ -56,19 +53,13 @@ app.use(
       "shrivi-session-secret-2026",
 
     resave: false,
-
     saveUninitialized: false,
 
     cookie: {
       httpOnly: true,
-
-      secure:
-        process.env.NODE_ENV === "production",
-
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-
-      maxAge:
-        24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000
     }
   })
 );
@@ -145,17 +136,13 @@ function calculateSalePrice(price, discount) {
   const p = Number(price) || 0;
   const d = Number(discount) || 0;
 
-  return (
-    Math.round(
-      (p - (p * d) / 100) * 100
-    ) / 100
-  );
+  return Math.round(
+    (p - (p * d) / 100) * 100
+  ) / 100;
 }
 
 function normalizeProduct(product) {
-  const price =
-    Number(product.price) || 0;
-
+  const price = Number(product.price) || 0;
   const discount =
     Number(product.discount_percent) || 0;
 
@@ -164,20 +151,16 @@ function normalizeProduct(product) {
 
     price,
 
-    original_price:
+    original_price: price,
+
+    discount_percent: discount,
+
+    sale_price: calculateSalePrice(
       price,
+      discount
+    ),
 
-    discount_percent:
-      discount,
-
-    sale_price:
-      calculateSalePrice(
-        price,
-        discount
-      ),
-
-    stock:
-      Number(product.stock) || 0
+    stock: Number(product.stock) || 0
   };
 }
 
@@ -195,13 +178,11 @@ function normalizeOrder(order) {
   return {
     ...order,
 
-    total:
-      Number(order.total) || 0,
+    total: Number(order.total) || 0,
 
-    items:
-      Array.isArray(items)
-        ? items
-        : []
+    items: Array.isArray(items)
+      ? items
+      : []
   };
 }
 
@@ -243,15 +224,9 @@ function requireCustomer(req, res, next) {
 // PRODUCT VALIDATION
 // =====================================================
 
-function validateProductInput(
-  body,
-  isEdit = false
-) {
-  const name =
-    clean(body?.name);
-
-  const price =
-    Number(body?.price);
+function validateProductInput(body, isEdit = false) {
+  const name = clean(body?.name);
+  const price = Number(body?.price);
 
   const stock =
     body?.stock === "" ||
@@ -264,13 +239,10 @@ function validateProductInput(
 
   const discount =
     body?.discount_percent === "" ||
-    body?.discount_percent ===
-      undefined ||
+    body?.discount_percent === undefined ||
     body?.discount_percent === null
       ? 0
-      : Number(
-          body.discount_percent
-        );
+      : Number(body.discount_percent);
 
   if (!name) {
     throw new Error(
@@ -301,23 +273,18 @@ function validateProductInput(
 
   return {
     name,
-
     price,
 
     category:
-      clean(body?.category) ||
-      null,
+      clean(body?.category) || null,
 
     image:
-      clean(body?.image) ||
-      null,
+      clean(body?.image) || null,
 
     description:
-      clean(body?.description) ||
-      null,
+      clean(body?.description) || null,
 
     stock,
-
     discount
   };
 }
@@ -328,222 +295,162 @@ function validateProductInput(
 
 app.get("/", (req, res) => {
   res.sendFile(
-    path.join(
-      __dirname,
-      "admin.html"
-    )
+    path.join(__dirname, "admin.html")
   );
 });
 
 app.get("/shop", (req, res) => {
   res.sendFile(
-    path.join(
-      __dirname,
-      "customer.html"
-    )
+    path.join(__dirname, "customer.html")
   );
 });
 
 app.get("/seller", (req, res) => {
   res.sendFile(
-    path.join(
-      __dirname,
-      "seller.html"
-    )
+    path.join(__dirname, "seller.html")
   );
 });
 
 app.get("/app", (req, res) => {
   res.sendFile(
-    path.join(
-      __dirname,
-      "app-v2.html"
-    )
+    path.join(__dirname, "app-v2.html")
   );
 });
 
-app.get(
-  "/manifest.json",
-  (req, res) => {
-    res.sendFile(
-      path.join(
-        __dirname,
-        "manifest.json"
-      )
-    );
-  }
-);
+app.get("/manifest.json", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "manifest.json")
+  );
+});
 
 // =====================================================
 // HEALTH
 // =====================================================
 
-app.get(
-  "/api/health",
-  async (req, res) => {
-    try {
-      await pool.query("SELECT 1");
+app.get("/api/health", async (req, res) => {
+  try {
+    await pool.query("SELECT 1");
 
-      res.json({
-        ok: true,
-        service:
-          "Shrivi Marketplace",
-        database:
-          "connected"
-      });
-    } catch (error) {
-      console.error(
-        "Health error:",
-        error
-      );
+    res.json({
+      ok: true,
+      service: "Shrivi Marketplace",
+      database: "connected"
+    });
+  } catch (error) {
+    console.error("Health error:", error);
 
-      res.status(500).json({
-        ok: false,
-        service:
-          "Shrivi Marketplace",
-        database:
-          "error",
-        error:
-          error.message
-      });
-    }
+    res.status(500).json({
+      ok: false,
+      service: "Shrivi Marketplace",
+      database: "error",
+      error: error.message
+    });
   }
-);
+});
 
 // =====================================================
 // ADMIN AUTH
 // =====================================================
 
-app.post(
-  "/api/login",
-  async (req, res) => {
-    try {
-      const username =
-        clean(
-          req.body?.username
-        );
+app.post("/api/login", async (req, res) => {
+  try {
+    const username =
+      clean(req.body?.username);
 
-      const password =
-        req.body?.password || "";
+    const password =
+      req.body?.password || "";
 
-      const adminUser =
-        process.env.ADMIN_USER ||
-        "admin";
+    const adminUser =
+      process.env.ADMIN_USER || "admin";
 
-      const adminPassword =
-        process.env.ADMIN_PASSWORD;
+    const adminPassword =
+      process.env.ADMIN_PASSWORD;
 
-      if (!adminPassword) {
-        return res.status(500).json({
-          error:
-            "Admin login is not configured"
-        });
-      }
-
-      if (
-        username !==
-        adminUser
-      ) {
-        return res.status(401).json({
-          error:
-            "Invalid username or password"
-        });
-      }
-
-      const passwordHash =
-        await bcrypt.hash(
-          adminPassword,
-          10
-        );
-
-      const passwordOk =
-        await bcrypt.compare(
-          password,
-          passwordHash
-        );
-
-      if (!passwordOk) {
-        return res.status(401).json({
-          error:
-            "Invalid username or password"
-        });
-      }
-
-      req.session.admin = {
-        username:
-          adminUser
-      };
-
-      req.session.save(
-        error => {
-          if (error) {
-            console.error(
-              "Admin session:",
-              error
-            );
-
-            return res.status(500).json({
-              error:
-                "Session error"
-            });
-          }
-
-          res.json({
-            ok: true
-          });
-        }
-      );
-    } catch (error) {
-      console.error(
-        "Admin login:",
-        error
-      );
-
-      res.status(500).json({
+    if (!adminPassword) {
+      return res.status(500).json({
         error:
-          "Login error"
+          "Admin login is not configured"
       });
     }
-  }
-);
 
-app.post(
-  "/api/logout",
-  (req, res) => {
-    req.session.destroy(
-      error => {
-        if (error) {
-          return res.status(500).json({
-            error:
-              "Logout error"
-          });
-        }
+    if (username !== adminUser) {
+      return res.status(401).json({
+        error:
+          "Invalid username or password"
+      });
+    }
 
-        res.json({
-          ok: true
+    const passwordOk =
+      password === adminPassword;
+
+    if (!passwordOk) {
+      return res.status(401).json({
+        error:
+          "Invalid username or password"
+      });
+    }
+
+    req.session.admin = {
+      username: adminUser
+    };
+
+    req.session.save((error) => {
+      if (error) {
+        console.error(
+          "Admin session:",
+          error
+        );
+
+        return res.status(500).json({
+          error: "Session error"
         });
       }
-    );
-  }
-);
 
-app.get(
-  "/api/me",
-  (req, res) => {
-    if (!req.session.admin) {
-      return res.status(401).json({
-        loggedIn: false
+      res.json({
+        ok: true
       });
-    }
+    });
+  } catch (error) {
+    console.error(
+      "Admin login:",
+      error
+    );
 
-    res.json({
-      loggedIn: true,
-
-      username:
-        req.session.admin.username
+    res.status(500).json({
+      error: "Login error"
     });
   }
-);
+});
+
+app.post("/api/logout", (req, res) => {
+  req.session.destroy((error) => {
+    if (error) {
+      return res.status(500).json({
+        error: "Logout error"
+      });
+    }
+
+    res.clearCookie("connect.sid");
+
+    res.json({
+      ok: true
+    });
+  });
+});
+
+app.get("/api/me", (req, res) => {
+  if (!req.session.admin) {
+    return res.status(401).json({
+      loggedIn: false
+    });
+  }
+
+  res.json({
+    loggedIn: true,
+    username:
+      req.session.admin.username
+  });
+});
 
 // =====================================================
 // SELLER REGISTER
@@ -582,9 +489,7 @@ app.post(
 
       if (
         phone &&
-        !/^[0-9]{10}$/.test(
-          phone
-        )
+        !/^[0-9]{10}$/.test(phone)
       ) {
         return res.status(400).json({
           error:
@@ -608,9 +513,7 @@ app.post(
           [email]
         );
 
-      if (
-        existing.rows.length
-      ) {
+      if (existing.rows.length) {
         return res.status(409).json({
           error:
             "Seller email already exists"
@@ -636,7 +539,12 @@ app.post(
            VALUES
            ($1,$2,$3,$4,'active')
            RETURNING
-           id,name,email,phone,status,created_at`,
+             id,
+             name,
+             email,
+             phone,
+             status,
+             created_at`,
           [
             name,
             email,
@@ -645,30 +553,30 @@ app.post(
           ]
         );
 
-      req.session.seller =
+      const seller =
         result.rows[0];
 
-      req.session.save(
-        error => {
-          if (error) {
-            console.error(
-              "Seller session:",
-              error
-            );
+      req.session.seller =
+        seller;
 
-            return res.status(500).json({
-              error:
-                "Session error"
-            });
-          }
+      req.session.save((error) => {
+        if (error) {
+          console.error(
+            "Seller session:",
+            error
+          );
 
-          res.status(201).json({
-            ok: true,
-            seller:
-              result.rows[0]
+          return res.status(500).json({
+            error:
+              "Session error"
           });
         }
-      );
+
+        res.status(201).json({
+          ok: true,
+          seller
+        });
+      });
     } catch (error) {
       console.error(
         "Seller register:",
@@ -706,6 +614,13 @@ app.post(
         });
       }
 
+      if (!password) {
+        return res.status(400).json({
+          error:
+            "Password is required"
+        });
+      }
+
       const result =
         await pool.query(
           `SELECT *
@@ -715,9 +630,7 @@ app.post(
           [email]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -730,8 +643,7 @@ app.post(
       const passwordOk =
         await bcrypt.compare(
           password,
-          seller.password_hash ||
-            ""
+          seller.password_hash || ""
         );
 
       if (!passwordOk) {
@@ -741,10 +653,7 @@ app.post(
         });
       }
 
-      if (
-        seller.status !==
-        "active"
-      ) {
+      if (seller.status !== "active") {
         return res.status(403).json({
           error:
             "Seller account is not active"
@@ -756,21 +665,19 @@ app.post(
       req.session.seller =
         seller;
 
-      req.session.save(
-        error => {
-          if (error) {
-            return res.status(500).json({
-              error:
-                "Session error"
-            });
-          }
-
-          res.json({
-            ok: true,
-            seller
+      req.session.save((error) => {
+        if (error) {
+          return res.status(500).json({
+            error:
+              "Session error"
           });
         }
-      );
+
+        res.json({
+          ok: true,
+          seller
+        });
+      });
     } catch (error) {
       console.error(
         "Seller login:",
@@ -788,13 +695,20 @@ app.post(
 app.post(
   "/api/seller/logout",
   (req, res) => {
-    req.session.destroy(
-      () => {
-        res.json({
-          ok: true
+    req.session.destroy((error) => {
+      if (error) {
+        return res.status(500).json({
+          error:
+            "Logout failed"
         });
       }
-    );
+
+      res.clearCookie("connect.sid");
+
+      res.json({
+        ok: true
+      });
+    });
   }
 );
 
@@ -816,21 +730,33 @@ app.get(
            WHERE id=$1
            LIMIT 1`,
           [
-            req.session
-              .seller.id
+            req.session.seller.id
           ]
         );
 
-      if (
-        !result.rows.length
-      ) {
-        req.session.seller =
-          null;
+      if (!result.rows.length) {
+        req.session.seller = null;
 
         return res.status(401).json({
           loggedIn: false
         });
       }
+
+      if (
+        result.rows[0].status !==
+        "active"
+      ) {
+        req.session.seller = null;
+
+        return res.status(403).json({
+          loggedIn: false,
+          error:
+            "Seller account is not active"
+        });
+      }
+
+      req.session.seller =
+        result.rows[0];
 
       res.json({
         loggedIn: true,
@@ -897,12 +823,10 @@ app.post(
   "/api/seller/upload/image",
   requireSeller,
   (req, res) => {
-    imageUpload.single(
-      "image"
-    )(
+    imageUpload.single("image")(
       req,
       res,
-      async error => {
+      async (error) => {
         if (error) {
           return res.status(400).json({
             error:
@@ -920,12 +844,9 @@ app.post(
           }
 
           if (
-            !process.env
-              .CLOUDINARY_CLOUD_NAME ||
-            !process.env
-              .CLOUDINARY_API_KEY ||
-            !process.env
-              .CLOUDINARY_API_SECRET
+            !process.env.CLOUDINARY_CLOUD_NAME ||
+            !process.env.CLOUDINARY_API_KEY ||
+            !process.env.CLOUDINARY_API_SECRET
           ) {
             return res.status(500).json({
               error:
@@ -935,37 +856,30 @@ app.post(
 
           const result =
             await new Promise(
-              (
-                resolve,
-                reject
-              ) => {
+              (resolve, reject) => {
                 const stream =
-                  cloudinary
-                    .uploader
-                    .upload_stream(
-                      {
-                        folder:
-                          "shrivi/products",
-                        resource_type:
-                          "image"
-                      },
-                      (
-                        uploadError,
-                        uploadResult
-                      ) => {
-                        if (
+                  cloudinary.uploader.upload_stream(
+                    {
+                      folder:
+                        "shrivi/products",
+                      resource_type:
+                        "image"
+                    },
+                    (
+                      uploadError,
+                      uploadResult
+                    ) => {
+                      if (uploadError) {
+                        reject(
                           uploadError
-                        ) {
-                          reject(
-                            uploadError
-                          );
-                        } else {
-                          resolve(
-                            uploadResult
-                          );
-                        }
+                        );
+                      } else {
+                        resolve(
+                          uploadResult
+                        );
                       }
-                    );
+                    }
+                  );
 
                 stream.end(
                   req.file.buffer
@@ -975,10 +889,8 @@ app.post(
 
           res.json({
             ok: true,
-
             image:
               result.secure_url,
-
             url:
               result.secure_url
           });
@@ -1014,8 +926,7 @@ app.get(
            WHERE seller_id=$1
            ORDER BY id DESC`,
           [
-            req.session
-              .seller.id
+            req.session.seller.id
           ]
         );
 
@@ -1072,14 +983,12 @@ app.post(
             data.description,
             data.stock,
             data.discount,
-            req.session
-              .seller.id
+            req.session.seller.id
           ]
         );
 
       res.status(201).json({
         ok: true,
-
         product:
           normalizeProduct(
             result.rows[0]
@@ -1107,6 +1016,16 @@ app.put(
     try {
       const id =
         Number(req.params.id);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+        return res.status(400).json({
+          error:
+            "Invalid product ID"
+        });
+      }
 
       const data =
         validateProductInput(
@@ -1137,14 +1056,11 @@ app.put(
             data.stock,
             data.discount,
             id,
-            req.session
-              .seller.id
+            req.session.seller.id
           ]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -1153,7 +1069,6 @@ app.put(
 
       res.json({
         ok: true,
-
         product:
           normalizeProduct(
             result.rows[0]
@@ -1179,6 +1094,19 @@ app.delete(
   requireSeller,
   async (req, res) => {
     try {
+      const id =
+        Number(req.params.id);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+        return res.status(400).json({
+          error:
+            "Invalid product ID"
+        });
+      }
+
       const result =
         await pool.query(
           `DELETE FROM products
@@ -1186,18 +1114,12 @@ app.delete(
            AND seller_id=$2
            RETURNING id`,
           [
-            Number(
-              req.params.id
-            ),
-
-            req.session
-              .seller.id
+            id,
+            req.session.seller.id
           ]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -1232,8 +1154,7 @@ app.get(
     try {
       const sellerId =
         Number(
-          req.session
-            .seller.id
+          req.session.seller.id
         );
 
       const products =
@@ -1259,58 +1180,41 @@ app.get(
       let orderCount = 0;
       let revenue = 0;
 
-      for (
-        const order
-        of orders.rows
-      ) {
-        let items =
-          order.items;
+      for (const order of orders.rows) {
+        let items = order.items;
 
-        if (
-          typeof items ===
-          "string"
-        ) {
+        if (typeof items === "string") {
           try {
             items =
-              JSON.parse(
-                items
-              );
+              JSON.parse(items);
           } catch {
             items = [];
           }
         }
 
-        if (
-          !Array.isArray(
-            items
-          )
-        ) {
+        if (!Array.isArray(items)) {
           items = [];
         }
 
         const sellerItems =
           items.filter(
             item =>
-              Number(
-                item?.seller_id
-              ) === sellerId
+              Number(item?.seller_id) ===
+              sellerId
           );
 
-        if (
-          sellerItems.length
-        ) {
+        if (sellerItems.length) {
           orderCount++;
 
           revenue +=
             sellerItems.reduce(
-              (
-                sum,
-                item
-              ) =>
+              (sum, item) =>
                 sum +
-                (Number(
-                  item?.item_total
-                ) || 0),
+                (
+                  Number(
+                    item?.item_total
+                  ) || 0
+                ),
               0
             );
         }
@@ -1318,12 +1222,10 @@ app.get(
 
       res.json({
         products:
-          products.rows[0]
-            ?.products || 0,
+          products.rows[0]?.products || 0,
 
         stock:
-          products.rows[0]
-            ?.stock || 0,
+          products.rows[0]?.stock || 0,
 
         orders:
           orderCount,
@@ -1358,8 +1260,7 @@ app.get(
     try {
       const sellerId =
         Number(
-          req.session
-            .seller.id
+          req.session.seller.id
         );
 
       const result =
@@ -1369,98 +1270,72 @@ app.get(
            ORDER BY id DESC`
         );
 
-      const sellerOrders =
-        [];
+      const sellerOrders = [];
 
-      for (
-        const order
-        of result.rows
-      ) {
-        let items =
-          order.items;
+      for (const order of result.rows) {
+        let items = order.items;
 
-        if (
-          typeof items ===
-          "string"
-        ) {
+        if (typeof items === "string") {
           try {
             items =
-              JSON.parse(
-                items
-              );
+              JSON.parse(items);
           } catch {
             items = [];
           }
         }
 
-        if (
-          !Array.isArray(
-            items
-          )
-        ) {
+        if (!Array.isArray(items)) {
           items = [];
         }
 
         const sellerItems =
           items.filter(
             item =>
-              Number(
-                item?.seller_id
-              ) === sellerId
+              Number(item?.seller_id) ===
+              sellerId
           );
 
-        if (
-          !sellerItems.length
-        ) {
+        if (!sellerItems.length) {
           continue;
         }
 
         sellerOrders.push({
-          id:
-            order.id,
+          id: order.id,
 
           status:
-            order.status ||
-            "pending",
+            order.status || "pending",
 
           created_at:
             order.created_at,
 
           customer_name:
-            order.customer_name ||
-            "-",
+            order.customer_name || "-",
 
           customer_phone:
-            order.customer_phone ||
-            "-",
+            order.customer_phone || "-",
 
           customer_address:
-            order.customer_address ||
-            "-",
+            order.customer_address || "-",
 
-          items:
-            sellerItems,
+          items: sellerItems,
 
           seller_total:
             Math.round(
               sellerItems.reduce(
-                (
-                  sum,
-                  item
-                ) =>
+                (sum, item) =>
                   sum +
-                  (Number(
-                    item?.item_total
-                  ) || 0),
+                  (
+                    Number(
+                      item?.item_total
+                    ) || 0
+                  ),
                 0
               ) * 100
             ) / 100
         });
       }
 
-      res.json(
-        sellerOrders
-      );
+      res.json(sellerOrders);
     } catch (error) {
       console.error(
         "Seller orders:",
@@ -1485,9 +1360,7 @@ app.put(
   async (req, res) => {
     try {
       const orderId =
-        Number(
-          req.params.id
-        );
+        Number(req.params.id);
 
       const status =
         clean(
@@ -1502,12 +1375,9 @@ app.put(
       ];
 
       if (
-        !Number.isInteger(
-          orderId
-        ) ||
-        !allowed.includes(
-          status
-        )
+        !Number.isInteger(orderId) ||
+        orderId <= 0 ||
+        !allowed.includes(status)
       ) {
         return res.status(400).json({
           error:
@@ -1523,9 +1393,7 @@ app.put(
           [orderId]
         );
 
-      if (
-        !orderResult.rows.length
-      ) {
+      if (!orderResult.rows.length) {
         return res.status(404).json({
           error:
             "Order not found"
@@ -1533,35 +1401,24 @@ app.put(
       }
 
       let items =
-        orderResult.rows[0]
-          .items;
+        orderResult.rows[0].items;
 
-      if (
-        typeof items ===
-        "string"
-      ) {
+      if (typeof items === "string") {
         try {
           items =
-            JSON.parse(
-              items
-            );
+            JSON.parse(items);
         } catch {
           items = [];
         }
       }
 
       const belongs =
-        Array.isArray(
-          items
-        ) &&
+        Array.isArray(items) &&
         items.some(
           item =>
+            Number(item?.seller_id) ===
             Number(
-              item?.seller_id
-            ) ===
-            Number(
-              req.session
-                .seller.id
+              req.session.seller.id
             )
         );
 
@@ -1586,7 +1443,6 @@ app.put(
 
       res.json({
         ok: true,
-
         order:
           normalizeOrder(
             result.rows[0]
@@ -1643,9 +1499,7 @@ app.post(
 
       if (
         phone &&
-        !/^[0-9]{10}$/.test(
-          phone
-        )
+        !/^[0-9]{10}$/.test(phone)
       ) {
         return res.status(400).json({
           error:
@@ -1669,9 +1523,7 @@ app.post(
           [email]
         );
 
-      if (
-        existing.rows.length
-      ) {
+      if (existing.rows.length) {
         return res.status(409).json({
           error:
             "Email already registered"
@@ -1717,26 +1569,24 @@ app.post(
       req.session.customer =
         customer;
 
-      req.session.save(
-        error => {
-          if (error) {
-            console.error(
-              "Customer session save:",
-              error
-            );
+      req.session.save((error) => {
+        if (error) {
+          console.error(
+            "Customer session:",
+            error
+          );
 
-            return res.status(500).json({
-              error:
-                "Session error"
-            });
-          }
-
-          res.status(201).json({
-            ok: true,
-            customer
+          return res.status(500).json({
+            error:
+              "Session error"
           });
         }
-      );
+
+        res.status(201).json({
+          ok: true,
+          customer
+        });
+      });
     } catch (error) {
       console.error(
         "CUSTOMER REGISTER FULL ERROR:",
@@ -1790,9 +1640,7 @@ app.post(
           [email]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -1805,8 +1653,7 @@ app.post(
       const passwordOk =
         await bcrypt.compare(
           password,
-          customer.password_hash ||
-            ""
+          customer.password_hash || ""
         );
 
       if (!passwordOk) {
@@ -1818,8 +1665,7 @@ app.post(
 
       if (
         customer.status &&
-        customer.status !==
-          "active"
+        customer.status !== "active"
       ) {
         return res.status(403).json({
           error:
@@ -1832,26 +1678,24 @@ app.post(
       req.session.customer =
         customer;
 
-      req.session.save(
-        error => {
-          if (error) {
-            console.error(
-              "Customer login session:",
-              error
-            );
+      req.session.save((error) => {
+        if (error) {
+          console.error(
+            "Customer login session:",
+            error
+          );
 
-            return res.status(500).json({
-              error:
-                "Session error"
-            });
-          }
-
-          res.json({
-            ok: true,
-            customer
+          return res.status(500).json({
+            error:
+              "Session error"
           });
         }
-      );
+
+        res.json({
+          ok: true,
+          customer
+        });
+      });
     } catch (error) {
       console.error(
         "CUSTOMER LOGIN FULL ERROR:",
@@ -1874,34 +1718,30 @@ app.post(
 app.post(
   "/api/customer/logout",
   (req, res) => {
-    req.session.destroy(
-      error => {
-        if (error) {
-          console.error(
-            "Customer logout:",
-            error
-          );
-
-          return res.status(500).json({
-            error:
-              "Logout failed"
-          });
-        }
-
-        res.clearCookie(
-          "connect.sid"
+    req.session.destroy((error) => {
+      if (error) {
+        console.error(
+          "Customer logout:",
+          error
         );
 
-        res.json({
-          ok: true
+        return res.status(500).json({
+          error:
+            "Logout failed"
         });
       }
-    );
+
+      res.clearCookie("connect.sid");
+
+      res.json({
+        ok: true
+      });
+    });
   }
 );
 
 // =====================================================
-// CUSTOMER SESSION / ME
+// CUSTOMER ME
 // =====================================================
 
 app.get(
@@ -1927,16 +1767,12 @@ app.get(
            WHERE id=$1
            LIMIT 1`,
           [
-            req.session
-              .customer.id
+            req.session.customer.id
           ]
         );
 
-      if (
-        !result.rows.length
-      ) {
-        req.session.customer =
-          null;
+      if (!result.rows.length) {
+        req.session.customer = null;
 
         return res.json({
           loggedIn: false
@@ -1947,8 +1783,7 @@ app.get(
         result.rows[0].status !==
         "active"
       ) {
-        req.session.customer =
-          null;
+        req.session.customer = null;
 
         return res.json({
           loggedIn: false
@@ -1960,7 +1795,6 @@ app.get(
 
       res.json({
         loggedIn: true,
-
         customer:
           result.rows[0]
       });
@@ -1994,8 +1828,7 @@ app.get(
            WHERE customer_id=$1
            ORDER BY id DESC`,
           [
-            req.session
-              .customer.id
+            req.session.customer.id
           ]
         );
 
@@ -2020,7 +1853,7 @@ app.get(
 );
 
 // =====================================================
-// CREATE CUSTOMER ORDER
+// CREATE ORDER
 // =====================================================
 
 async function createCustomerOrder(
@@ -2039,15 +1872,11 @@ async function createCustomerOrder(
     }
 
     const incomingItems =
-      Array.isArray(
-        req.body?.items
-      )
+      Array.isArray(req.body?.items)
         ? req.body.items
         : [];
 
-    if (
-      !incomingItems.length
-    ) {
+    if (!incomingItems.length) {
       return res.status(400).json({
         error:
           "Order items are required"
@@ -2066,11 +1895,7 @@ async function createCustomerOrder(
         );
 
     const uniqueIds =
-      [
-        ...new Set(
-          productIds
-        )
-      ];
+      [...new Set(productIds)];
 
     if (!uniqueIds.length) {
       return res.status(400).json({
@@ -2079,9 +1904,7 @@ async function createCustomerOrder(
       });
     }
 
-    await client.query(
-      "BEGIN"
-    );
+    await client.query("BEGIN");
 
     const productsResult =
       await client.query(
@@ -2105,16 +1928,13 @@ async function createCustomerOrder(
       new Map(
         productsResult.rows.map(
           product => [
-            Number(
-              product.id
-            ),
+            Number(product.id),
             product
           ]
         )
       );
 
-    const orderItems =
-      [];
+    const orderItems = [];
 
     for (
       const incoming
@@ -2122,9 +1942,7 @@ async function createCustomerOrder(
     ) {
       const product =
         productMap.get(
-          Number(
-            incoming?.id
-          )
+          Number(incoming?.id)
         );
 
       if (!product) {
@@ -2132,14 +1950,10 @@ async function createCustomerOrder(
       }
 
       const quantity =
-        Number(
-          incoming?.quantity
-        );
+        Number(incoming?.quantity);
 
       if (
-        !Number.isInteger(
-          quantity
-        ) ||
+        !Number.isInteger(quantity) ||
         quantity <= 0
       ) {
         throw new Error(
@@ -2148,22 +1962,16 @@ async function createCustomerOrder(
       }
 
       const stock =
-        Number(
-          product.stock
-        ) || 0;
+        Number(product.stock) || 0;
 
-      if (
-        quantity > stock
-      ) {
+      if (quantity > stock) {
         throw new Error(
           `${product.name} has only ${stock} item(s) in stock`
         );
       }
 
       const price =
-        Number(
-          product.price
-        ) || 0;
+        Number(product.price) || 0;
 
       const discount =
         Number(
@@ -2179,27 +1987,22 @@ async function createCustomerOrder(
       const itemTotal =
         Math.round(
           currentPrice *
-            quantity *
-            100
+          quantity *
+          100
         ) / 100;
 
       orderItems.push({
         id:
-          Number(
-            product.id
-          ),
+          Number(product.id),
 
         product_id:
-          Number(
-            product.id
-          ),
+          Number(product.id),
 
         name:
           product.name,
 
         image:
-          product.image ||
-          "",
+          product.image || "",
 
         price:
           currentPrice,
@@ -2230,14 +2033,9 @@ async function createCustomerOrder(
     const total =
       Math.round(
         orderItems.reduce(
-          (
-            sum,
-            item
-          ) =>
+          (sum, item) =>
             sum +
-            Number(
-              item.item_total
-            ),
+            Number(item.item_total),
           0
         ) * 100
       ) / 100;
@@ -2249,9 +2047,7 @@ async function createCustomerOrder(
       clean(
         req.body?.customer_name
       ) ||
-      clean(
-        req.body?.name
-      ) ||
+      clean(req.body?.name) ||
       customer.name ||
       "";
 
@@ -2259,9 +2055,7 @@ async function createCustomerOrder(
       clean(
         req.body?.customer_phone
       ) ||
-      clean(
-        req.body?.phone
-      ) ||
+      clean(req.body?.phone) ||
       customer.phone ||
       "";
 
@@ -2269,9 +2063,7 @@ async function createCustomerOrder(
       clean(
         req.body?.customer_address
       ) ||
-      clean(
-        req.body?.address
-      ) ||
+      clean(req.body?.address) ||
       "";
 
     const orderResult =
@@ -2296,9 +2088,7 @@ async function createCustomerOrder(
           customerName,
           customerPhone,
           customerAddress,
-          JSON.stringify(
-            orderItems
-          ),
+          JSON.stringify(orderItems),
           total
         ]
       );
@@ -2310,7 +2100,8 @@ async function createCustomerOrder(
       await client.query(
         `UPDATE products
          SET stock=stock-$1
-         WHERE id=$2`,
+         WHERE id=$2
+         AND stock >= $1`,
         [
           item.quantity,
           item.product_id
@@ -2318,9 +2109,7 @@ async function createCustomerOrder(
       );
     }
 
-    await client.query(
-      "COMMIT"
-    );
+    await client.query("COMMIT");
 
     res.status(201).json({
       ok: true,
@@ -2332,9 +2121,7 @@ async function createCustomerOrder(
     });
   } catch (error) {
     try {
-      await client.query(
-        "ROLLBACK"
-      );
+      await client.query("ROLLBACK");
     } catch {}
 
     console.error(
@@ -2352,7 +2139,6 @@ async function createCustomerOrder(
   }
 }
 
-// Both endpoints supported
 app.post(
   "/api/customer/orders",
   createCustomerOrder
@@ -2431,9 +2217,7 @@ async function verifySellerId(
       [id]
     );
 
-  if (
-    !result.rows.length
-  ) {
+  if (!result.rows.length) {
     throw new Error(
       "Seller not found"
     );
@@ -2542,9 +2326,7 @@ app.put(
   async (req, res) => {
     try {
       const id =
-        Number(
-          req.params.id
-        );
+        Number(req.params.id);
 
       if (
         !Number.isInteger(id) ||
@@ -2584,9 +2366,7 @@ app.put(
             [id]
           );
 
-        if (
-          !old.rows.length
-        ) {
+        if (!old.rows.length) {
           return res.status(404).json({
             error:
               "Product not found"
@@ -2594,8 +2374,7 @@ app.put(
         }
 
         sellerId =
-          old.rows[0]
-            .seller_id;
+          old.rows[0].seller_id;
       }
 
       const result =
@@ -2625,9 +2404,7 @@ app.put(
           ]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -2667,9 +2444,17 @@ app.delete(
   async (req, res) => {
     try {
       const id =
-        Number(
-          req.params.id
-        );
+        Number(req.params.id);
+
+      if (
+        !Number.isInteger(id) ||
+        id <= 0
+      ) {
+        return res.status(400).json({
+          error:
+            "Invalid product ID"
+        });
+      }
 
       const result =
         await pool.query(
@@ -2679,9 +2464,7 @@ app.delete(
           [id]
         );
 
-      if (
-        !result.rows.length
-      ) {
+      if (!result.rows.length) {
         return res.status(404).json({
           error:
             "Product not found"
@@ -2727,9 +2510,7 @@ app.get(
            ORDER BY id DESC`
         );
 
-      res.json(
-        result.rows
-      );
+      res.json(result.rows);
     } catch (error) {
       console.error(
         "Admin sellers:",
@@ -2766,9 +2547,7 @@ app.get(
            ORDER BY id DESC`
         );
 
-      res.json(
-        result.rows
-      );
+      res.json(result.rows);
     } catch (error) {
       console.error(
         "Admin customers:",
@@ -2827,9 +2606,7 @@ async function initializeDatabase() {
     await pool.connect();
 
   try {
-    await client.query(
-      "BEGIN"
-    );
+    await client.query("BEGIN");
 
     // =================================================
     // SELLERS
@@ -2863,12 +2640,6 @@ async function initializeDatabase() {
       )
     `);
 
-    // =================================================
-    // CUSTOMER SAFE MIGRATION
-    // IMPORTANT:
-    // Existing customer data is NOT deleted.
-    // =================================================
-
     await client.query(`
       ALTER TABLE customers
       ADD COLUMN IF NOT EXISTS phone TEXT
@@ -2891,7 +2662,6 @@ async function initializeDatabase() {
       TIMESTAMPTZ DEFAULT NOW()
     `);
 
-    // Fill missing status values safely
     await client.query(`
       UPDATE customers
       SET status='active'
@@ -2917,10 +2687,6 @@ async function initializeDatabase() {
         created_at TIMESTAMPTZ DEFAULT NOW()
       )
     `);
-
-    // =================================================
-    // PRODUCT SAFE MIGRATION
-    // =================================================
 
     await client.query(`
       ALTER TABLE products
@@ -2970,10 +2736,6 @@ async function initializeDatabase() {
       )
     `);
 
-    // =================================================
-    // ORDER SAFE MIGRATION
-    // =================================================
-
     await client.query(`
       ALTER TABLE orders
       ADD COLUMN IF NOT EXISTS customer_id INTEGER
@@ -3021,10 +2783,6 @@ async function initializeDatabase() {
       TIMESTAMPTZ
       DEFAULT NOW()
     `);
-
-    // =================================================
-    // ORDER DATA SAFETY
-    // =================================================
 
     await client.query(`
       UPDATE orders
@@ -3078,9 +2836,7 @@ async function initializeDatabase() {
       ON orders(created_at DESC)
     `);
 
-    await client.query(
-      "COMMIT"
-    );
+    await client.query("COMMIT");
 
     console.log(
       "========================================"
@@ -3107,13 +2863,11 @@ async function initializeDatabase() {
     );
   } catch (error) {
     try {
-      await client.query(
-        "ROLLBACK"
-      );
+      await client.query("ROLLBACK");
     } catch {}
 
     console.error(
-      "DATABASE INITIALIZATION FULL ERROR:",
+      "DATABASE INITIALIZATION ERROR:",
       error
     );
 
@@ -3133,7 +2887,6 @@ app.use(
     res.status(404).json({
       error:
         "API endpoint not found",
-
       path:
         req.originalUrl
     });
@@ -3141,7 +2894,7 @@ app.use(
 );
 
 // =====================================================
-// ERROR HANDLER
+// GLOBAL ERROR HANDLER
 // =====================================================
 
 app.use(
