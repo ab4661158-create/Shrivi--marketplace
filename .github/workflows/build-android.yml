@@ -27,8 +27,8 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor
-        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android
+      - name: Install Capacitor and TypeScript
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android typescript
 
       - name: Generate Android project
         run: npx cap add android
