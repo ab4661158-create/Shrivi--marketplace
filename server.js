@@ -9,16 +9,11 @@ const { v2: cloudinary } = require("cloudinary");
 const Razorpay = require("razorpay");
 
 const app = express();
-
 const PORT = Number(process.env.PORT) || 10000;
 
 // =====================================================
 // DATABASE
 // =====================================================
-
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL is missing.");
-}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -30,8 +25,8 @@ const pool = new Pool({
   connectionTimeoutMillis: 10000
 });
 
-pool.on("error", error => {
-  console.error("POSTGRES POOL ERROR:", error);
+pool.on("error", err => {
+  console.error("POSTGRES ERROR:", err);
 });
 
 // =====================================================
@@ -61,9 +56,7 @@ if (
 
   console.log("Razorpay configured.");
 } else {
-  console.warn(
-    "WARNING: Razorpay environment variables are not configured."
-  );
+  console.warn("Razorpay is not configured.");
 }
 
 // =====================================================
@@ -73,46 +66,30 @@ if (
 app.set("trust proxy", 1);
 app.disable("x-powered-by");
 
-app.use(
-  express.json({
-    limit: "5mb"
-  })
-);
-
-app.use(
-  express.urlencoded({
-    extended: true,
-    limit: "5mb"
-  })
-);
+app.use(express.json({ limit: "5mb" }));
+app.use(express.urlencoded({
+  extended: true,
+  limit: "5mb"
+}));
 
 // =====================================================
 // SESSION
 // =====================================================
 
-const sessionSecret =
-  process.env.SESSION_SECRET;
-
 app.use(
   session({
     secret:
-      sessionSecret ||
+      process.env.SESSION_SECRET ||
       "CHANGE_THIS_SESSION_SECRET",
 
     resave: false,
-
     saveUninitialized: false,
 
     cookie: {
       httpOnly: true,
-
-      secure:
-        process.env.NODE_ENV === "production",
-
+      secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-
-      maxAge:
-        24 * 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000
     }
   })
 );
@@ -171,28 +148,17 @@ function validPassword(password) {
 }
 
 function validPhone(phone) {
-  return (
-    !phone ||
-    /^[0-9]{10}$/.test(phone)
-  );
+  return !phone || /^[0-9]{10}$/.test(phone);
 }
 
 function positiveInteger(value) {
   const n = Number(value);
-
-  return (
-    Number.isInteger(n) &&
-    n > 0
-  );
+  return Number.isInteger(n) && n > 0;
 }
 
 function validStock(value) {
   const n = Number(value);
-
-  return (
-    Number.isInteger(n) &&
-    n >= 0
-  );
+  return Number.isInteger(n) && n >= 0;
 }
 
 function validDiscount(value) {
@@ -205,10 +171,7 @@ function validDiscount(value) {
   );
 }
 
-function calculateSalePrice(
-  price,
-  discount
-) {
+function calculateSalePrice(price, discount) {
   const p = Number(price) || 0;
   const d = Number(discount) || 0;
 
@@ -218,9 +181,7 @@ function calculateSalePrice(
 }
 
 function normalizeProduct(product) {
-  const price =
-    Number(product.price) || 0;
-
+  const price = Number(product.price) || 0;
   const discount =
     Number(product.discount_percent) || 0;
 
@@ -293,7 +254,7 @@ function safeError(error) {
 }
 
 // =====================================================
-// AUTH MIDDLEWARE
+// AUTH
 // =====================================================
 
 function requireAdmin(req, res, next) {
@@ -332,7 +293,6 @@ function requireCustomer(req, res, next) {
 
 function validateProductInput(body) {
   const name = clean(body?.name);
-
   const price = Number(body?.price);
 
   const stock =
@@ -350,15 +310,11 @@ function validateProductInput(body) {
       : Number(body.discount_percent);
 
   if (!name) {
-    throw new Error(
-      "Product name is required"
-    );
+    throw new Error("Product name is required");
   }
 
   if (name.length > 250) {
-    throw new Error(
-      "Product name is too long"
-    );
+    throw new Error("Product name is too long");
   }
 
   if (
@@ -366,9 +322,7 @@ function validateProductInput(body) {
     price < 0 ||
     price > 100000000
   ) {
-    throw new Error(
-      "Valid product price is required"
-    );
+    throw new Error("Valid product price is required");
   }
 
   if (!validStock(stock)) {
@@ -397,7 +351,6 @@ function validateProductInput(body) {
       clean(body?.description) || null,
 
     stock,
-
     discount
   };
 }
@@ -449,18 +402,14 @@ app.get("/api/health", async (req, res) => {
       service: "Shrivi Marketplace",
       database: "connected",
       razorpay:
-        razorpay ? "configured" : "not_configured",
+        razorpay
+          ? "configured"
+          : "not_configured",
       time: new Date().toISOString()
     });
   } catch (error) {
-    console.error(
-      "HEALTH ERROR:",
-      error
-    );
-
     res.status(500).json({
       ok: false,
-      service: "Shrivi Marketplace",
       database: "error"
     });
   }
@@ -492,7 +441,7 @@ app.post("/api/login", async (req, res) => {
     if (!adminPassword && !adminHash) {
       return res.status(500).json({
         error:
-          "Admin login is not configured in Render Environment Variables"
+          "Admin login is not configured"
       });
     }
 
@@ -529,11 +478,6 @@ app.post("/api/login", async (req, res) => {
 
     req.session.save(error => {
       if (error) {
-        console.error(
-          "ADMIN SESSION ERROR:",
-          error
-        );
-
         return res.status(500).json({
           error: "Session error"
         });
@@ -545,11 +489,6 @@ app.post("/api/login", async (req, res) => {
       });
     });
   } catch (error) {
-    console.error(
-      "ADMIN LOGIN ERROR:",
-      error
-    );
-
     res.status(500).json({
       error: safeError(error)
     });
@@ -645,8 +584,7 @@ app.post(
 
       const existing =
         await pool.query(
-          `SELECT id
-           FROM sellers
+          `SELECT id FROM sellers
            WHERE LOWER(email)=LOWER($1)
            LIMIT 1`,
           [email]
@@ -669,8 +607,7 @@ app.post(
         await pool.query(
           `INSERT INTO sellers
            (name,email,phone,password_hash,status)
-           VALUES
-           ($1,$2,$3,$4,'active')
+           VALUES ($1,$2,$3,$4,'active')
            RETURNING
            id,name,email,phone,status,created_at`,
           [
@@ -681,11 +618,8 @@ app.post(
           ]
         );
 
-      const seller =
-        result.rows[0];
-
       req.session.seller =
-        seller;
+        result.rows[0];
 
       req.session.save(error => {
         if (error) {
@@ -696,15 +630,11 @@ app.post(
 
         res.status(201).json({
           ok: true,
-          seller
+          seller:
+            result.rows[0]
         });
       });
     } catch (error) {
-      console.error(
-        "SELLER REGISTER ERROR:",
-        error
-      );
-
       res.status(500).json({
         error: safeError(error)
       });
@@ -753,13 +683,13 @@ app.post(
       const seller =
         result.rows[0];
 
-      const passwordOk =
+      const ok =
         await bcrypt.compare(
           password,
           seller.password_hash || ""
         );
 
-      if (!passwordOk) {
+      if (!ok) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -781,7 +711,8 @@ app.post(
       req.session.save(error => {
         if (error) {
           return res.status(500).json({
-            error: "Session error"
+            error:
+              "Session error"
           });
         }
 
@@ -791,11 +722,6 @@ app.post(
         });
       });
     } catch (error) {
-      console.error(
-        "SELLER LOGIN ERROR:",
-        error
-      );
-
       res.status(500).json({
         error: safeError(error)
       });
@@ -844,8 +770,7 @@ app.get(
           `SELECT
            id,name,email,phone,status,created_at
            FROM sellers
-           WHERE id=$1
-           LIMIT 1`,
+           WHERE id=$1`,
           [id]
         );
 
@@ -854,19 +779,6 @@ app.get(
 
         return res.status(401).json({
           loggedIn: false
-        });
-      }
-
-      if (
-        result.rows[0].status !==
-        "active"
-      ) {
-        req.session.seller = null;
-
-        return res.status(403).json({
-          loggedIn: false,
-          error:
-            "Seller account is not active"
         });
       }
 
@@ -879,11 +791,6 @@ app.get(
           result.rows[0]
       });
     } catch (error) {
-      console.error(
-        "SELLER ME ERROR:",
-        error
-      );
-
       res.status(500).json({
         error: safeError(error)
       });
@@ -916,11 +823,6 @@ app.get(
         )
       );
     } catch (error) {
-      console.error(
-        "PRODUCTS ERROR:",
-        error
-      );
-
       res.status(500).json({
         error:
           "Failed to load products"
@@ -930,7 +832,7 @@ app.get(
 );
 
 // =====================================================
-// CLOUDINARY IMAGE UPLOAD
+// CLOUDINARY UPLOAD
 // =====================================================
 
 app.post(
@@ -1009,11 +911,6 @@ app.post(
               result.secure_url
           });
         } catch (error) {
-          console.error(
-            "CLOUDINARY ERROR:",
-            error
-          );
-
           res.status(500).json({
             error:
               "Image upload failed"
@@ -1033,18 +930,17 @@ app.get(
   requireSeller,
   async (req, res) => {
     try {
-      const sellerId =
-        Number(
-          req.session.seller.id
-        );
-
       const result =
         await pool.query(
           `SELECT *
            FROM products
            WHERE seller_id=$1
            ORDER BY id DESC`,
-          [sellerId]
+          [
+            Number(
+              req.session.seller.id
+            )
+          ]
         );
 
       res.json(
@@ -1075,27 +971,14 @@ app.post(
           req.body
         );
 
-      const sellerId =
-        Number(
-          req.session.seller.id
-        );
-
       const result =
         await pool.query(
           `INSERT INTO products
-          (
-            name,
-            price,
-            category,
-            image,
-            description,
-            stock,
-            discount_percent,
-            seller_id
-          )
-          VALUES
-          ($1,$2,$3,$4,$5,$6,$7,$8)
-          RETURNING *`,
+           (name,price,category,image,description,
+            stock,discount_percent,seller_id)
+           VALUES
+           ($1,$2,$3,$4,$5,$6,$7,$8)
+           RETURNING *`,
           [
             data.name,
             data.price,
@@ -1104,7 +987,9 @@ app.post(
             data.description,
             data.stock,
             data.discount,
-            sellerId
+            Number(
+              req.session.seller.id
+            )
           ]
         );
 
@@ -1116,11 +1001,6 @@ app.post(
           )
       });
     } catch (error) {
-      console.error(
-        "SELLER ADD PRODUCT ERROR:",
-        error
-      );
-
       res.status(400).json({
         error:
           safeError(error)
@@ -1153,22 +1033,16 @@ app.put(
           req.body
         );
 
-      const sellerId =
-        Number(
-          req.session.seller.id
-        );
-
       const result =
         await pool.query(
           `UPDATE products
-           SET
-             name=$1,
-             price=$2,
-             category=$3,
-             image=$4,
-             description=$5,
-             stock=$6,
-             discount_percent=$7
+           SET name=$1,
+               price=$2,
+               category=$3,
+               image=$4,
+               description=$5,
+               stock=$6,
+               discount_percent=$7
            WHERE id=$8
            AND seller_id=$9
            RETURNING *`,
@@ -1181,7 +1055,9 @@ app.put(
             data.stock,
             data.discount,
             id,
-            sellerId
+            Number(
+              req.session.seller.id
+            )
           ]
         );
 
@@ -1220,11 +1096,6 @@ app.delete(
       const id =
         Number(req.params.id);
 
-      const sellerId =
-        Number(
-          req.session.seller.id
-        );
-
       if (!positiveInteger(id)) {
         return res.status(400).json({
           error:
@@ -1240,7 +1111,9 @@ app.delete(
            RETURNING id`,
           [
             id,
-            sellerId
+            Number(
+              req.session.seller.id
+            )
           ]
         );
 
@@ -1337,17 +1210,11 @@ app.post(
       const result =
         await pool.query(
           `INSERT INTO customers
-          (
-            name,
-            email,
-            phone,
-            password_hash,
-            status
-          )
-          VALUES
-          ($1,$2,$3,$4,'active')
-          RETURNING
-          id,name,email,phone,status,created_at`,
+           (name,email,phone,password_hash,status)
+           VALUES
+           ($1,$2,$3,$4,'active')
+           RETURNING
+           id,name,email,phone,status,created_at`,
           [
             name,
             email,
@@ -1356,11 +1223,8 @@ app.post(
           ]
         );
 
-      const customer =
-        result.rows[0];
-
       req.session.customer =
-        customer;
+        result.rows[0];
 
       req.session.save(error => {
         if (error) {
@@ -1372,15 +1236,11 @@ app.post(
 
         res.status(201).json({
           ok: true,
-          customer
+          customer:
+            result.rows[0]
         });
       });
     } catch (error) {
-      console.error(
-        "CUSTOMER REGISTER ERROR:",
-        error
-      );
-
       res.status(500).json({
         error:
           safeError(error)
@@ -1430,13 +1290,13 @@ app.post(
       const customer =
         result.rows[0];
 
-      const passwordOk =
+      const ok =
         await bcrypt.compare(
           password,
           customer.password_hash || ""
         );
 
-      if (!passwordOk) {
+      if (!ok) {
         return res.status(401).json({
           error:
             "Invalid email or password"
@@ -1538,17 +1398,6 @@ app.get(
         });
       }
 
-      if (
-        result.rows[0].status !==
-        "active"
-      ) {
-        req.session.customer = null;
-
-        return res.json({
-          loggedIn: false
-        });
-      }
-
       req.session.customer =
         result.rows[0];
 
@@ -1567,7 +1416,7 @@ app.get(
 );
 
 // =====================================================
-// CREATE RAZORPAY ORDER
+// PAYMENT CREATE ORDER
 // =====================================================
 
 app.post(
@@ -1602,7 +1451,7 @@ app.post(
         });
       }
 
-      const razorpayOrder =
+      const order =
         await razorpay.orders.create({
           amount:
             Math.round(amount * 100),
@@ -1619,8 +1468,7 @@ app.post(
         key:
           process.env.RAZORPAY_KEY_ID,
 
-        order:
-          razorpayOrder
+        order
       });
     } catch (error) {
       console.error(
@@ -1637,7 +1485,7 @@ app.post(
 );
 
 // =====================================================
-// RAZORPAY VERIFY
+// PAYMENT VERIFY
 // =====================================================
 
 app.post(
@@ -1658,41 +1506,43 @@ app.post(
       ) {
         return res.status(400).json({
           error:
-            "Incomplete payment verification data"
+            "Incomplete payment data"
         });
       }
 
-      if (
-        !process.env.RAZORPAY_KEY_SECRET
-      ) {
+      const secret =
+        process.env.RAZORPAY_KEY_SECRET;
+
+      if (!secret) {
         return res.status(500).json({
           error:
             "Razorpay secret is not configured"
         });
       }
 
-      const generatedSignature =
+      const generated =
         crypto
           .createHmac(
             "sha256",
-            process.env.RAZORPAY_KEY_SECRET
+            secret
           )
           .update(
             `${razorpay_order_id}|${razorpay_payment_id}`
           )
           .digest("hex");
 
-      const valid =
-        crypto.timingSafeEqual(
-          Buffer.from(
-            generatedSignature
-          ),
-          Buffer.from(
-            razorpay_signature
-          )
+      const a =
+        Buffer.from(generated);
+
+      const b =
+        Buffer.from(
+          razorpay_signature
         );
 
-      if (!valid) {
+      if (
+        a.length !== b.length ||
+        !crypto.timingSafeEqual(a, b)
+      ) {
         return res.status(400).json({
           error:
             "Invalid payment signature"
@@ -1708,11 +1558,6 @@ app.post(
           razorpay_order_id
       });
     } catch (error) {
-      console.error(
-        "PAYMENT VERIFY ERROR:",
-        error
-      );
-
       res.status(400).json({
         error:
           "Payment verification failed"
@@ -1722,47 +1567,10 @@ app.post(
 );
 
 // =====================================================
-// CUSTOMER ORDERS
+// CREATE ORDER
 // =====================================================
 
-app.get(
-  "/api/customer/orders",
-  requireCustomer,
-  async (req, res) => {
-    try {
-      const result =
-        await pool.query(
-          `SELECT *
-           FROM orders
-           WHERE customer_id=$1
-           ORDER BY id DESC`,
-          [
-            req.session.customer.id
-          ]
-        );
-
-      res.json(
-        result.rows.map(
-          normalizeOrder
-        )
-      );
-    } catch (error) {
-      res.status(500).json({
-        error:
-          "Failed to load orders"
-      });
-    }
-  }
-);
-
-// =====================================================
-// CREATE CUSTOMER ORDER
-// =====================================================
-
-async function createCustomerOrder(
-  req,
-  res
-) {
+async function createCustomerOrder(req, res) {
   if (!req.session?.customer) {
     return res.status(401).json({
       error:
@@ -1881,16 +1689,8 @@ async function createCustomerOrder(
           discount
         );
 
-      const itemTotal =
-        Math.round(
-          salePrice *
-            quantity *
-            100
-        ) / 100;
-
       orderItems.push({
         id,
-
         product_id: id,
 
         name:
@@ -1913,7 +1713,11 @@ async function createCustomerOrder(
             : Number(product.seller_id),
 
         item_total:
-          itemTotal
+          Math.round(
+            salePrice *
+            quantity *
+            100
+          ) / 100
       });
     }
 
@@ -1927,30 +1731,48 @@ async function createCustomerOrder(
         ) * 100
       ) / 100;
 
+    const paymentMethod =
+      clean(
+        req.body?.payment_method
+      ).toLowerCase() || "cod";
+
+    if (
+      !["cod", "razorpay"]
+        .includes(paymentMethod)
+    ) {
+      throw new Error(
+        "Invalid payment method"
+      );
+    }
+
+    if (
+      paymentMethod === "razorpay"
+    ) {
+      if (
+        !req.body?.payment_id ||
+        !req.body?.razorpay_order_id
+      ) {
+        throw new Error(
+          "Verified payment is required"
+        );
+      }
+    }
+
     const customer =
       req.session.customer;
 
     const customerName =
-      clean(
-        req.body?.customer_name
-      ) ||
-      clean(req.body?.name) ||
+      clean(req.body?.customer_name) ||
       customer.name ||
       "";
 
     const customerPhone =
-      clean(
-        req.body?.customer_phone
-      ) ||
-      clean(req.body?.phone) ||
+      clean(req.body?.customer_phone) ||
       customer.phone ||
       "";
 
     const customerAddress =
-      clean(
-        req.body?.customer_address
-      ) ||
-      clean(req.body?.address) ||
+      clean(req.body?.customer_address) ||
       "";
 
     if (!customerAddress) {
@@ -1959,41 +1781,12 @@ async function createCustomerOrder(
       );
     }
 
-    const paymentMethod =
-      clean(
-        req.body?.payment_method
-      ).toLowerCase() || "cod";
-
-    const allowedPaymentMethods = [
-      "cod",
-      "razorpay"
-    ];
-
-    if (
-      !allowedPaymentMethods.includes(
-        paymentMethod
-      )
-    ) {
-      throw new Error(
-        "Invalid payment method"
-      );
-    }
-
-    if (
-      paymentMethod === "razorpay" &&
-      !req.body?.payment_id
-    ) {
-      throw new Error(
-        "Payment is required"
-      );
-    }
-
     const paymentStatus =
       paymentMethod === "razorpay"
         ? "paid"
         : "pending";
 
-    const orderResult =
+    const result =
       await client.query(
         `INSERT INTO orders
         (
@@ -2010,10 +1803,8 @@ async function createCustomerOrder(
           razorpay_order_id
         )
         VALUES
-        (
-          $1,$2,$3,$4,$5::jsonb,$6,
-          'pending',$7,$8,$9,$10
-        )
+        ($1,$2,$3,$4,$5::jsonb,$6,
+         'pending',$7,$8,$9,$10)
         RETURNING *`,
         [
           customer.id,
@@ -2030,7 +1821,7 @@ async function createCustomerOrder(
       );
 
     for (const item of orderItems) {
-      const update =
+      const stockUpdate =
         await client.query(
           `UPDATE products
            SET stock=stock-$1
@@ -2043,7 +1834,7 @@ async function createCustomerOrder(
           ]
         );
 
-      if (!update.rows.length) {
+      if (!stockUpdate.rows.length) {
         throw new Error(
           `${item.name} is out of stock`
         );
@@ -2054,21 +1845,15 @@ async function createCustomerOrder(
 
     res.status(201).json({
       ok: true,
-
       order:
         normalizeOrder(
-          orderResult.rows[0]
+          result.rows[0]
         )
     });
   } catch (error) {
     try {
       await client.query("ROLLBACK");
     } catch {}
-
-    console.error(
-      "CREATE ORDER ERROR:",
-      error
-    );
 
     res.status(400).json({
       error:
@@ -2100,10 +1885,9 @@ app.get(
     try {
       const result =
         await pool.query(
-          `SELECT
-             p.*,
-             s.name AS seller_name,
-             s.email AS seller_email
+          `SELECT p.*,
+                  s.name AS seller_name,
+                  s.email AS seller_email
            FROM products p
            LEFT JOIN sellers s
            ON s.id=p.seller_id
@@ -2125,12 +1909,10 @@ app.get(
 );
 
 // =====================================================
-// VERIFY SELLER
+// ADMIN ADD / UPDATE / DELETE PRODUCTS
 // =====================================================
 
-async function verifySellerId(
-  sellerId
-) {
+async function verifySellerId(sellerId) {
   const id =
     Number(sellerId);
 
@@ -2144,8 +1926,7 @@ async function verifySellerId(
     await pool.query(
       `SELECT id,status
        FROM sellers
-       WHERE id=$1
-       LIMIT 1`,
+       WHERE id=$1`,
       [id]
     );
 
@@ -2155,10 +1936,7 @@ async function verifySellerId(
     );
   }
 
-  if (
-    result.rows[0].status !==
-    "active"
-  ) {
+  if (result.rows[0].status !== "active") {
     throw new Error(
       "Seller is not active"
     );
@@ -2166,10 +1944,6 @@ async function verifySellerId(
 
   return id;
 }
-
-// =====================================================
-// ADMIN ADD PRODUCT
-// =====================================================
 
 app.post(
   "/api/products",
@@ -2200,19 +1974,11 @@ app.post(
       const result =
         await pool.query(
           `INSERT INTO products
-          (
-            name,
-            price,
-            category,
-            image,
-            description,
-            stock,
-            discount_percent,
-            seller_id
-          )
-          VALUES
-          ($1,$2,$3,$4,$5,$6,$7,$8)
-          RETURNING *`,
+           (name,price,category,image,description,
+            stock,discount_percent,seller_id)
+           VALUES
+           ($1,$2,$3,$4,$5,$6,$7,$8)
+           RETURNING *`,
           [
             data.name,
             data.price,
@@ -2241,10 +2007,6 @@ app.post(
   }
 );
 
-// =====================================================
-// ADMIN UPDATE PRODUCT
-// =====================================================
-
 app.put(
   "/api/products/:id",
   requireAdmin,
@@ -2252,13 +2014,6 @@ app.put(
     try {
       const id =
         Number(req.params.id);
-
-      if (!positiveInteger(id)) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
 
       const data =
         validateProductInput(
@@ -2300,15 +2055,14 @@ app.put(
       const result =
         await pool.query(
           `UPDATE products
-           SET
-             name=$1,
-             price=$2,
-             category=$3,
-             image=$4,
-             description=$5,
-             stock=$6,
-             discount_percent=$7,
-             seller_id=$8
+           SET name=$1,
+               price=$2,
+               category=$3,
+               image=$4,
+               description=$5,
+               stock=$6,
+               discount_percent=$7,
+               seller_id=$8
            WHERE id=$9
            RETURNING *`,
           [
@@ -2347,10 +2101,6 @@ app.put(
   }
 );
 
-// =====================================================
-// ADMIN DELETE PRODUCT
-// =====================================================
-
 app.delete(
   "/api/products/:id",
   requireAdmin,
@@ -2358,13 +2108,6 @@ app.delete(
     try {
       const id =
         Number(req.params.id);
-
-      if (!positiveInteger(id)) {
-        return res.status(400).json({
-          error:
-            "Invalid product ID"
-        });
-      }
 
       const result =
         await pool.query(
@@ -2405,14 +2148,12 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,name,email,phone,status,created_at
+           id,name,email,phone,status,created_at
            FROM sellers
            ORDER BY id DESC`
         );
 
-      res.json(
-        result.rows
-      );
+      res.json(result.rows);
     } catch (error) {
       res.status(500).json({
         error:
@@ -2434,18 +2175,50 @@ app.get(
       const result =
         await pool.query(
           `SELECT
-             id,name,email,phone,status,created_at
+           id,name,email,phone,status,created_at
            FROM customers
            ORDER BY id DESC`
         );
 
-      res.json(
-        result.rows
-      );
+      res.json(result.rows);
     } catch (error) {
       res.status(500).json({
         error:
           "Failed to load customers"
+      });
+    }
+  }
+);
+
+// =====================================================
+// CUSTOMER ORDERS
+// =====================================================
+
+app.get(
+  "/api/customer/orders",
+  requireCustomer,
+  async (req, res) => {
+    try {
+      const result =
+        await pool.query(
+          `SELECT *
+           FROM orders
+           WHERE customer_id=$1
+           ORDER BY id DESC`,
+          [
+            req.session.customer.id
+          ]
+        );
+
+      res.json(
+        result.rows.map(
+          normalizeOrder
+        )
+      );
+    } catch (error) {
+      res.status(500).json({
+        error:
+          "Failed to load orders"
       });
     }
   }
@@ -2609,8 +2382,8 @@ app.get(
       const products =
         await pool.query(
           `SELECT
-             COUNT(*)::int AS products,
-             COALESCE(SUM(stock),0)::int AS stock
+           COUNT(*)::int AS products,
+           COALESCE(SUM(stock),0)::int AS stock
            FROM products
            WHERE seller_id=$1`,
           [sellerId]
@@ -2702,10 +2475,7 @@ app.get(
            WHERE EXISTS (
              SELECT 1
              FROM jsonb_array_elements(
-               COALESCE(
-                 items,
-                 '[]'::jsonb
-               )
+               COALESCE(items,'[]'::jsonb)
              ) item
              WHERE
              (item->>'seller_id')::integer=$1
@@ -2714,7 +2484,7 @@ app.get(
           [sellerId]
         );
 
-      const sellerOrders =
+      res.json(
         result.rows.map(order => {
           const normalized =
             normalizeOrder(order);
@@ -2743,17 +2513,11 @@ app.get(
 
           return {
             ...normalized,
-
-            items:
-              sellerItems,
-
+            items: sellerItems,
             seller_total:
               sellerTotal
           };
-        });
-
-      res.json(
-        sellerOrders
+        })
       );
     } catch (error) {
       res.status(500).json({
@@ -2806,8 +2570,7 @@ app.put(
         await pool.query(
           `SELECT *
            FROM orders
-           WHERE id=$1
-           LIMIT 1`,
+           WHERE id=$1`,
           [orderId]
         );
 
@@ -2872,7 +2635,7 @@ app.put(
 );
 
 // =====================================================
-// DATABASE INITIALIZATION
+// DATABASE
 // =====================================================
 
 async function initializeDatabase() {
@@ -2882,7 +2645,6 @@ async function initializeDatabase() {
   try {
     await client.query("BEGIN");
 
-    // SELLERS
     await client.query(`
       CREATE TABLE IF NOT EXISTS sellers (
         id SERIAL PRIMARY KEY,
@@ -2912,7 +2674,6 @@ async function initializeDatabase() {
       TIMESTAMPTZ DEFAULT NOW()
     `);
 
-    // CUSTOMERS
     await client.query(`
       CREATE TABLE IF NOT EXISTS customers (
         id SERIAL PRIMARY KEY,
@@ -2947,7 +2708,6 @@ async function initializeDatabase() {
       TIMESTAMPTZ DEFAULT NOW()
     `);
 
-    // PRODUCTS
     await client.query(`
       CREATE TABLE IF NOT EXISTS products (
         id SERIAL PRIMARY KEY,
@@ -2994,7 +2754,6 @@ async function initializeDatabase() {
       ADD COLUMN IF NOT EXISTS seller_id INTEGER
     `);
 
-    // ORDERS
     await client.query(`
       CREATE TABLE IF NOT EXISTS orders (
         id SERIAL PRIMARY KEY,
@@ -3015,76 +2774,27 @@ async function initializeDatabase() {
       )
     `);
 
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_id INTEGER
-    `);
+    const orderColumns = [
+      `ADD COLUMN IF NOT EXISTS customer_id INTEGER`,
+      `ADD COLUMN IF NOT EXISTS customer_name TEXT`,
+      `ADD COLUMN IF NOT EXISTS customer_phone TEXT`,
+      `ADD COLUMN IF NOT EXISTS customer_address TEXT`,
+      `ADD COLUMN IF NOT EXISTS items JSONB DEFAULT '[]'::jsonb`,
+      `ADD COLUMN IF NOT EXISTS total NUMERIC(12,2) DEFAULT 0`,
+      `ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending'`,
+      `ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW()`,
+      `ADD COLUMN IF NOT EXISTS payment_method TEXT DEFAULT 'cod'`,
+      `ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending'`,
+      `ADD COLUMN IF NOT EXISTS payment_id TEXT`,
+      `ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT`
+    ];
 
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_name TEXT
-    `);
+    for (const column of orderColumns) {
+      await client.query(
+        `ALTER TABLE orders ${column}`
+      );
+    }
 
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_phone TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS customer_address TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS items JSONB
-      DEFAULT '[]'::jsonb
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS total
-      NUMERIC(12,2)
-      DEFAULT 0
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS status TEXT
-      DEFAULT 'pending'
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS created_at
-      TIMESTAMPTZ
-      DEFAULT NOW()
-    `);
-
-    // PAYMENT COLUMNS
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS payment_method TEXT
-      DEFAULT 'cod'
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS payment_status TEXT
-      DEFAULT 'pending'
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS payment_id TEXT
-    `);
-
-    await client.query(`
-      ALTER TABLE orders
-      ADD COLUMN IF NOT EXISTS razorpay_order_id TEXT
-    `);
-
-    // SAFETY
     await client.query(`
       UPDATE sellers
       SET status='active'
@@ -3139,7 +2849,6 @@ async function initializeDatabase() {
       WHERE payment_status IS NULL
     `);
 
-    // INDEXES
     await client.query(`
       CREATE INDEX IF NOT EXISTS
       idx_products_seller_id
@@ -3190,25 +2899,9 @@ async function initializeDatabase() {
 
     await client.query("COMMIT");
 
-    console.log(
-      "========================================"
-    );
-
-    console.log(
-      "SHRIVI DATABASE READY"
-    );
-
-    console.log(
-      "Existing data preserved."
-    );
-
-    console.log(
-      "Payment columns ready."
-    );
-
-    console.log(
-      "========================================"
-    );
+    console.log("SHRIVI DATABASE READY");
+    console.log("Existing data preserved.");
+    console.log("Payment columns ready.");
   } catch (error) {
     try {
       await client.query("ROLLBACK");
@@ -3248,23 +2941,18 @@ app.use(
 app.use(
   (error, req, res, next) => {
     console.error(
-      "UNHANDLED SERVER ERROR:",
+      "UNHANDLED ERROR:",
       error
     );
 
     if (
-      error instanceof
-      multer.MulterError
+      error instanceof multer.MulterError &&
+      error.code === "LIMIT_FILE_SIZE"
     ) {
-      if (
-        error.code ===
-        "LIMIT_FILE_SIZE"
-      ) {
-        return res.status(400).json({
-          error:
-            "Image must be 5MB or smaller."
-        });
-      }
+      return res.status(400).json({
+        error:
+          "Image must be 5MB or smaller."
+      });
     }
 
     res.status(500).json({
