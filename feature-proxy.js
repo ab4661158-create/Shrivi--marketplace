@@ -12,20 +12,22 @@ const scripts = [
   ['shrivi-production-upgrade.js','shrivi-production-upgrade.js']
 ];
 const assets = Object.fromEntries(scripts.map(([url,file])=>['/'+url,fs.readFileSync(path.join(__dirname,file),'utf8')]));
+const tags=scripts.map(([url])=>`<script src="/${url}?v=4"></script>`).join('\n');
 
-const child = spawn(process.execPath,[path.join(__dirname,'server.js')],{env:{...process.env,PORT:String(INTERNAL_PORT)},stdio:'inherit'});
+const child=spawn(process.execPath,[path.join(__dirname,'server.js')],{env:{...process.env,PORT:String(INTERNAL_PORT)},stdio:'inherit'});
 child.on('exit',code=>process.exit(code ?? 1));
 
 const server=http.createServer((req,res)=>{
-  if(assets[req.url]){res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-store'});return res.end(assets[req.url]);}
+  const pathname=(req.url||'/').split('?')[0];
+  if(assets[pathname]){res.writeHead(200,{'content-type':'application/javascript; charset=utf-8','cache-control':'no-store'});return res.end(assets[pathname]);}
   const proxyReq=http.request({hostname:'127.0.0.1',port:INTERNAL_PORT,method:req.method,path:req.url,headers:{...req.headers,host:`127.0.0.1:${INTERNAL_PORT}`,'accept-encoding':'identity'}},proxyRes=>{
     const type=String(proxyRes.headers['content-type']||'').toLowerCase();
-    const inject=req.method==='GET'&&/text\/html/.test(type)&&['/shop','/shop/','/seller','/seller/','/','/admin','/admin/'].includes(req.url);
+    const inject=req.method==='GET'&&/text\/html/.test(type)&&['/shop','/shop/','/seller','/seller/','/','/admin','/admin/'].includes(pathname);
     if(!inject){res.writeHead(proxyRes.statusCode||200,proxyRes.headers);return proxyRes.pipe(res);}
     const chunks=[];proxyRes.on('data',c=>chunks.push(c));proxyRes.on('end',()=>{
       let html=Buffer.concat(chunks).toString('utf8');
-      const tags=scripts.map(([url])=>`<script src="/${url}"></script>`).join('\n')+'\n';
-      if(!html.includes('/shrivi-production-upgrade.js'))html=html.replace(/<\/body>/i,`${tags}</body>`);
+      html=html.replace(/<script[^>]+(?:shrivi-features|shrivi-upgrade-suite|amazon-style-upgrade|shrivi-production-upgrade)[^>]*><\/script>/gi,'');
+      html=/<\/body>/i.test(html)?html.replace(/<\/body>/i,`${tags}\n</body>`):`${html}\n${tags}`;
       const headers={...proxyRes.headers};delete headers['content-length'];delete headers.etag;delete headers['content-encoding'];headers['content-type']='text/html; charset=utf-8';headers['cache-control']='no-store';
       res.writeHead(proxyRes.statusCode||200,headers);res.end(html);
     });
