@@ -1,21 +1,21 @@
 {
   "name": "shrivi-marketplace",
-  "version": "2.0.3",
-  "description": "Shrivi Fashion Marketplace",
+  "version": "2.0.0",
+  "description": "Shrivi Marketplace - Multi-vendor fashion marketplace",
   "main": "server.js",
   "scripts": {
-    "start": "node ui-fix-402.js"
+    "start": "node server.js",
+    "dev": "node server.js"
   },
   "engines": {
     "node": ">=18"
   },
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
-    "express": "^4.21.2",
-    "express-session": "^1.18.1",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
     "multer": "^2.0.2",
-    "pg": "^8.13.1",
-    "razorpay": "^2.9.6"
+    "pg": "^8.16.3"
   }
 }
