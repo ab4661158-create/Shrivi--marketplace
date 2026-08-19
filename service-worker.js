@@ -1,4 +1,4 @@
-const CACHE_NAME = "shrivi-v2";
+const CACHE_NAME = "shrivi-v3";
 
 const APP_FILES = [
   "/shop",
@@ -34,19 +34,44 @@ self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
 
   // Never cache API responses: product/order/account data must stay fresh.
-  if (url.pathname.startsWith("/api/")) {
-    return;
-  }
+  if (url.pathname.startsWith("/api/")) return;
 
   event.respondWith(
     fetch(event.request)
-      .then(response => {
-        if (response && response.ok && url.origin === self.location.origin) {
+      .then(async response => {
+        if (!response || !response.ok) return response;
+
+        // Customer app: remove the Seller entry from the customer UI.
+        if (url.origin === self.location.origin && url.pathname === "/shop") {
+          const contentType = response.headers.get("content-type") || "";
+          if (contentType.includes("text/html")) {
+            let html = await response.text();
+
+            html = html.replace(
+              /<button[^>]*onclick=["']location\.href=['"]\/seller['"][^>]*>[\s\S]*?<\/button>/i,
+              ""
+            );
+
+            html = html.replace(
+              /<button[^>]*onclick=["'][^"']*\/seller[^"']*["'][^>]*>[\s\S]*?<\/button>/i,
+              ""
+            );
+
+            return new Response(html, {
+              status: response.status,
+              statusText: response.statusText,
+              headers: response.headers
+            });
+          }
+        }
+
+        if (url.origin === self.location.origin) {
           const copy = response.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, copy).catch(() => {});
           });
         }
+
         return response;
       })
       .catch(() => caches.match(event.request))
