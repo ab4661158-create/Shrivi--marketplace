@@ -3,6 +3,7 @@ name: Remove Seller UI from Customer App
 on:
   push:
     paths:
+      - 'customer.html'
       - '.github/workflows/remove-customer-sell.yml'
 
 permissions:
@@ -24,7 +25,6 @@ jobs:
           p = Path('customer.html')
           s = p.read_text(encoding='utf-8')
 
-          # Remove any customer navigation button/link that points to /seller.
           s = re.sub(
               r'\s*<button\b(?=[^>]*onclick=["\'][^"\']*\/seller[^"\']*["\'])[^>]*>[\s\S]*?<\/button>\s*',
               '\n', s, flags=re.I
@@ -34,14 +34,9 @@ jobs:
               '\n', s, flags=re.I
           )
 
-          # Remove any obvious seller promo section/link blocks if present.
           s = re.sub(
               r'\n\s*<section[^>]*id=["\']seller["\'][^>]*>[\s\S]*?<\/section>\s*\n',
               '\n', s, flags=re.I
-          )
-          s = re.sub(
-              r'\n\s*<div[^>]*>\s*<h[1-6][^>]*>\s*Sell\s*</h[1-6]>[\s\S]*?\/seller[\s\S]*?<\/div>\s*\n',
-              '\n', s, count=1, flags=re.I
           )
 
           p.write_text(s, encoding='utf-8')
