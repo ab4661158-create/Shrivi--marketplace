@@ -1,0 +1,50 @@
+name: Build SHRIVI Seller Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'capacitor.seller.config.ts'
+      - '.github/workflows/build-seller-android.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-seller-android:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Capacitor and TypeScript
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android typescript
+
+      - name: Select Seller app config
+        run: cp capacitor.seller.config.ts capacitor.config.ts
+
+      - name: Generate Android project
+        run: npx cap add android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Build Seller debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Upload Seller APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHRIVI-seller-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
