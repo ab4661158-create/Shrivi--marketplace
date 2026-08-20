@@ -1,0 +1,83 @@
+name: Apply Seller Premium Theme
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  theme:
+    if: ${{ !contains(github.event.head_commit.message, '[seller-theme]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Apply premium seller theme
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('seller.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '/* SHRIVI SELLER PREMIUM THEME */'
+          if marker not in s:
+              css = r'''
+/* SHRIVI SELLER PREMIUM THEME */
+:root{
+  --seller-purple:#6d28d9;
+  --seller-violet:#7c3aed;
+  --seller-pink:#ec4899;
+  --seller-bg:#f7f5ff;
+  --seller-ink:#24123f;
+}
+body{background:var(--seller-bg);color:var(--seller-ink)}
+header{background:linear-gradient(135deg,#24104f 0%,#6d28d9 55%,#ec4899 100%);box-shadow:0 8px 28px rgba(76,29,149,.20)}
+.brand-icon{background:linear-gradient(135deg,#ec4899,#8b5cf6);box-shadow:0 6px 18px rgba(236,72,153,.35)}
+.brand-title{letter-spacing:.2px}
+.container{padding-top:24px}
+.card,.stat-card,.product-card,.order-card{border:1px solid #ebe4ff;box-shadow:0 8px 28px rgba(76,29,149,.08)}
+.auth-card{border-top:4px solid var(--seller-pink)}
+input,textarea,select{border-color:#ddd3f7;background:#fff}
+input:focus,textarea:focus,select:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+.primary{background:linear-gradient(135deg,#6d28d9,#ec4899);box-shadow:0 6px 16px rgba(109,40,217,.22)}
+.success{background:linear-gradient(135deg,#7c3aed,#a855f7)}
+.warning{background:#f59e0b}
+.dark{background:#2e1065}
+.secondary{background:#ede9fe;color:#4c1d95}
+.logout{background:#fff;color:#6d28d9;font-weight:800}
+.tabs{padding:6px;background:#eee9ff;border-radius:14px}
+.tab{background:transparent;color:#5b21b6}
+.tab.active{background:linear-gradient(135deg,#6d28d9,#ec4899);box-shadow:0 5px 14px rgba(109,40,217,.20)}
+.stat-card{position:relative;overflow:hidden}
+.stat-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(#7c3aed,#ec4899)}
+.stat-label{color:#7c6a99}
+.stat-value{color:#3b176d}
+.product-card,.order-card{transition:transform .18s ease,box-shadow .18s ease}
+.product-card:hover,.order-card:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(76,29,149,.12)}
+.product-image{background:#f1ecff}
+.image-upload-box{border-color:#c4b5fd;background:#faf8ff}
+.image-upload-box:hover{border-color:#7c3aed;background:#f3efff}
+.image-upload-label{background:linear-gradient(135deg,#6d28d9,#ec4899)}
+.modal{background:rgba(28,12,52,.72)}
+.modal-box{border:1px solid #e9ddff;box-shadow:0 24px 70px rgba(37,10,74,.28)}
+.close-btn{background:#ede9fe;color:#4c1d95}
+.profile-item{background:#faf8ff;border:1px solid #eee7ff}
+'''
+              s = s.replace('</style>', css + '\n</style>', 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit theme
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add seller.html
+          if git diff --cached --quiet; then
+            echo "No theme changes needed"
+            exit 0
+          fi
+          git commit -m "Apply premium seller theme [seller-theme]"
+          git push
