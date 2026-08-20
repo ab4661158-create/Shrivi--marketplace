@@ -13,11 +13,10 @@ const scripts = [
   ['shrivi-customer-backend.js','shrivi-customer-backend.js'],
   ['shrivi-app-init.js','shrivi-app-init.js'],
   ['seller-multi-images.js','seller-multi-images.js'],
-  ['seller-pro-listing-ui.js','seller-pro-listing-ui.js'],
-  ['seller-gallery-force.js','seller-gallery-force.js']
+  ['seller-pro-listing-ui.js','seller-pro-listing-ui.js']
 ];
 const assets = Object.fromEntries(scripts.map(([url,file])=>['/'+url,fs.readFileSync(path.join(__dirname,file),'utf8')]));
-const tags=scripts.map(([url])=>`<script src="/${url}?v=9"></script>`).join('\n');
+const tags=scripts.map(([url])=>`<script src="/${url}?v=10"></script>`).join('\n');
 
 const child=spawn(process.execPath,['-r',path.join(__dirname,'shrivi-db-upgrades.js'),'-r',path.join(__dirname,'seller-images-upgrade.js'),'-r',path.join(__dirname,'seller-images-router-fix.js'),'-r',path.join(__dirname,'seller-pro-listing-upgrade.js'),path.join(__dirname,'server.js')],{env:{...process.env,PORT:String(INTERNAL_PORT)},stdio:'inherit'});
 child.on('exit',code=>process.exit(code ?? 1));
@@ -31,7 +30,7 @@ const server=http.createServer((req,res)=>{
     if(!inject){res.writeHead(proxyRes.statusCode||200,proxyRes.headers);return proxyRes.pipe(res);}
     const chunks=[];proxyRes.on('data',c=>chunks.push(c));proxyRes.on('end',()=>{
       let html=Buffer.concat(chunks).toString('utf8');
-      html=html.replace(/<script[^>]+(?:shrivi-features|shrivi-upgrade-suite|amazon-style-upgrade|shrivi-production-upgrade|shrivi-customer-backend|shrivi-app-init|seller-multi-images|seller-pro-listing-ui|seller-gallery-force)[^>]*><\/script>/gi,'');
+      html=html.replace(/<script[^>]+(?:shrivi-features|shrivi-upgrade-suite|amazon-style-upgrade|shrivi-production-upgrade|shrivi-customer-backend|shrivi-app-init|seller-multi-images|seller-pro-listing-ui)[^>]*><\/script>/gi,'');
       html=/<\/body>/i.test(html)?html.replace(/<\/body>/i,`${tags}\n</body>`):`${html}\n${tags}`;
       const headers={...proxyRes.headers};delete headers['content-length'];delete headers.etag;delete headers['content-encoding'];
       headers['content-type']='text/html; charset=utf-8';headers['cache-control']='no-store';
