@@ -1,7 +1,7 @@
 (() => {
   "use strict";
   const MAX_SIZE = 5 * 1024 * 1024;
-  const TYPES = ["image/jpeg", "image/png", "image/webp"];
+  const TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   const $ = id => document.getElementById(id);
 
   function message(text, type = "success") {
@@ -20,7 +20,9 @@
     } catch (error) {
       if (error?.name === "AbortError") throw new Error("Request timed out. Please try again.");
       throw new Error(error.message || "Network request failed");
-    } finally { clearTimeout(timer); }
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   async function readJson(response) {
@@ -31,18 +33,20 @@
 
   function validate(file) {
     if (!file) return;
-    if (!TYPES.includes(file.type)) throw new Error("Only JPG, PNG and WEBP images are allowed.");
+    if (!TYPES.includes(file.type)) throw new Error("Only JPG, PNG, WEBP and GIF images are allowed.");
     if (file.size > MAX_SIZE) throw new Error("Image must be 5MB or smaller.");
   }
 
   async function uploadImage(file) {
     validate(file);
+    if ($("imageUploadStatus")) $("imageUploadStatus").textContent = "Uploading image...";
     const form = new FormData();
     form.append("image", file);
     const response = await request("/api/seller/upload/image", { method: "POST", body: form }, 25000);
     const data = await readJson(response);
     const url = data.url || data.secure_url || data.image || data.imageUrl;
     if (!url) throw new Error("Image upload completed but no image URL was returned.");
+    if ($("imageUploadStatus")) $("imageUploadStatus").textContent = "Image uploaded successfully.";
     return url;
   }
 
@@ -66,36 +70,44 @@
     if (!category) return alert("Product category is required.");
     if (!Number.isInteger(stock) || stock < 0) return alert("Stock must be a whole number.");
     if (!Number.isFinite(discount) || discount < 0 || discount >= 100) return alert("Discount must be between 0 and 99.99%.");
-    try { validate(file); if (image && !file) new URL(image); } catch (e) { return alert(e.message); }
+
+    try {
+      validate(file);
+      if (image && !file) new URL(image);
+      if (!file && !image && !id) throw new Error("Please select a product image or enter an image URL.");
+    } catch (e) {
+      return alert(e.message);
+    }
 
     button.disabled = true;
     button.textContent = "Saving...";
 
     try {
-      // Save listing first so the product is never lost because image hosting is slow.
+      // IMPORTANT: the current seller backend requires an image when creating a product.
+      // Upload the selected file FIRST, then send its Cloudinary URL with the product request.
+      if (file) {
+        image = await uploadImage(file);
+        imageInput.value = image;
+      }
+
       const endpoint = id ? `/api/seller/products/${encodeURIComponent(id)}` : "/api/seller/products";
       const response = await request(endpoint, {
         method: id ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, price, category, image: file ? "" : image, description, stock, discount_percent: discount })
-      }, 15000);
-      const data = await readJson(response);
-      const productId = Number(id || data?.product?.id || data?.id);
-      if (!productId) throw new Error("Product saved, but no product ID was returned.");
+        body: JSON.stringify({
+          name,
+          price,
+          category,
+          image,
+          description,
+          stock,
+          discount_percent: discount
+        })
+      }, 20000);
 
-      if (file) {
-        if ($("imageUploadStatus")) $("imageUploadStatus").textContent = "Uploading image...";
-        image = await uploadImage(file);
-        const update = await request(`/api/seller/products/${productId}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name, price, category, image, description, stock, discount_percent: discount })
-        }, 15000);
-        await readJson(update);
-        imageInput.value = image;
-        if ($("imageUploadStatus")) $("imageUploadStatus").textContent = "Image saved successfully.";
-      }
+      await readJson(response);
 
+      if ($("imageUploadStatus") && image) $("imageUploadStatus").textContent = "Image saved successfully.";
       closeProductModal();
       message(id ? "Product updated successfully!" : "Product added successfully!", "success");
       Promise.resolve().then(() => loadProducts()).catch(console.warn);
