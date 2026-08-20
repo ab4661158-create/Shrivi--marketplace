@@ -20,8 +20,8 @@ const scripts=[
   ['customer-gallery-v2.js','customer-gallery-v2.js']
 ];
 
-const assets=Object.fromEntries(scripts.map(([url,file])=>['/'+url,fs.readFileSync(path.join(__dirname,file),'utf8')));
-const tags=scripts.map(([url])=>`<script src="/${url}?v=29"></script>`).join('\n');
+const assets=Object.fromEntries(scripts.map(([url,file])=>['/'+url,fs.readFileSync(path.join(__dirname,file),'utf8')]));
+const tags=scripts.map(([url])=>`<script src="/${url}?v=30"></script>`).join('\n');
 
 const child=spawn(process.execPath,[
   '-r',path.join(__dirname,'shrivi-db-upgrades.js'),
