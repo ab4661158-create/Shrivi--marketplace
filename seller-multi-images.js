@@ -7,7 +7,6 @@ let gallery=[];
 const originalOpenAdd=window.openAddProduct;
 const originalEdit=window.editProduct;
 const originalRender=window.renderProducts;
-const originalSave=window.saveProduct;
 function msg(text,type='success'){if(typeof window.showMessage==='function')window.showMessage('mainMessage',text,type);else alert(text)}
 function parseGallery(product){
   if(Array.isArray(product?.image_gallery))return product.image_gallery.filter(Boolean).slice(0,MAX_IMAGES);
@@ -25,7 +24,16 @@ function ensureUI(){
   input.onchange=handleSelect;
   const box=input.closest('.image-upload-box');if(!box)return;
   if(!$('multiImageNote')){
-    const n=document.createElement('div');n.id='multiImageNote';n.innerHTML='📸 <b>Up to 8 photos</b> • Select multiple photos together or add more one-by-one. First photo is the main image.';n.style.cssText='font-size:12px;color:#59636e;margin-top:9px;text-align:left';box.appendChild(n);
+    const n=document.createElement('div');n.id='multiImageNote';n.innerHTML='📸 <b>Up to 8 photos</b> • You can select multiple photos together, or use <b>Add More Photos</b> one-by-one.';n.style.cssText='font-size:12px;color:#59636e;margin-top:9px;text-align:left';box.appendChild(n);
+  }
+  if(!$('addMoreImagesBtn')){
+    const b=document.createElement('button');b.id='addMoreImagesBtn';b.type='button';b.textContent='＋ Add More Photos';b.className='btn secondary';b.style.cssText='margin-top:10px;width:100%;border-color:#ff9900;color:#111;background:#fffaf0';
+    b.onclick=()=>{
+      if(gallery.length>=MAX_IMAGES){msg(`Maximum ${MAX_IMAGES} photos allowed per product.`,'error');return;}
+      input.multiple=true;
+      input.click();
+    };
+    box.appendChild(b);
   }
   if(!$('multiImageGallery')){
     const g=document.createElement('div');g.id='multiImageGallery';g.style.cssText='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:12px;text-align:left';
@@ -44,7 +52,7 @@ function renderGallery(){
     d.style.cssText='position:relative;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#f7f8f8;aspect-ratio:1;cursor:zoom-in';
     d.innerHTML=`<img src="${esc(url)}" alt="Product photo ${index+1}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.opacity='.25'"><button type="button" data-remove="1" style="position:absolute;top:4px;right:4px;width:28px;height:28px;border-radius:50%;background:#d13212;color:#fff;font-weight:900;font-size:18px;line-height:28px">×</button><div style="position:absolute;left:4px;bottom:4px;background:#111820dd;color:#fff;font-size:10px;padding:3px 6px;border-radius:4px">${index===0?'MAIN':'PHOTO '+(index+1)}</div>`;
     d.addEventListener('click',e=>{if(e.target.closest('[data-remove]'))return;openImageViewer(index)});
-    d.querySelector('[data-remove]').addEventListener('click',e=>{e.stopPropagation();const removed=gallery.splice(index,1)[0];revokeBlob(removed);renderGallery();updateFileLabel()});
+    d.querySelector('[data-remove]').addEventListener('click',e=>{e.stopPropagation();const removed=gallery.splice(index,1)[0];revokeBlob(removed);renderGallery()});
     wrap.appendChild(d);
   });
   updateFileLabel();
@@ -59,14 +67,14 @@ function updateFileLabel(){
 }
 function handleSelect(e){
   const files=[...(e.target.files||[])];
+  e.target.value='';
   if(!files.length)return;
-  if(gallery.length+files.length>MAX_IMAGES){msg(`Maximum ${MAX_IMAGES} photos allowed per product.`,'error');e.target.value='';return;}
+  if(gallery.length+files.length>MAX_IMAGES){msg(`Maximum ${MAX_IMAGES} photos allowed per product.`,'error');return;}
   for(const file of files){
-    if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)){msg('Only JPG, PNG, WEBP or GIF images are allowed.','error');e.target.value='';return}
-    if(file.size>MAX_SIZE){msg('Each image must be 5MB or smaller.','error');e.target.value='';return}
+    if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)){msg('Only JPG, PNG, WEBP or GIF images are allowed.','error');return}
+    if(file.size>MAX_SIZE){msg('Each image must be 5MB or smaller.','error');return}
   }
   files.forEach(file=>gallery.push({file,preview:URL.createObjectURL(file),url:''}));
-  e.target.value='';
   renderGallery();
 }
 function resetGallery(images=[]){
@@ -160,20 +168,12 @@ function enhanceProductCards(){
   document.querySelectorAll('.product-card').forEach(card=>{
     const img=card.querySelector('.product-image');if(!img||img.dataset.viewerBound)return;
     img.dataset.viewerBound='1';img.style.cursor='zoom-in';
-    img.addEventListener('click',()=>{
-      const product=findProductForCard(card);const images=parseGallery(product);
-      openImageViewer(0,images.length?images:[img.currentSrc||img.src]);
-    });
+    img.addEventListener('click',()=>{const product=findProductForCard(card);const images=parseGallery(product);openImageViewer(0,images.length?images:[img.currentSrc||img.src])});
   });
 }
 function hook(){
   window.openAddProduct=function(){originalOpenAdd?.apply(this,arguments);ensureUI();resetGallery([])};
-  window.editProduct=function(id){
-    originalEdit?.apply(this,arguments);ensureUI();
-    setTimeout(async()=>{
-      try{const response=await fetch('/api/seller/products',{credentials:'include',cache:'no-store'});const data=await response.json();const product=(Array.isArray(data)?data:[]).find(p=>Number(p.id)===Number(id));resetGallery(parseGallery(product));}catch(_){resetGallery([])}
-    },120);
-  };
+  window.editProduct=function(id){originalEdit?.apply(this,arguments);ensureUI();setTimeout(async()=>{try{const response=await fetch('/api/seller/products',{credentials:'include',cache:'no-store'});const data=await response.json();const product=(Array.isArray(data)?data:[]).find(p=>Number(p.id)===Number(id));resetGallery(parseGallery(product))}catch(_){resetGallery([])}},120)};
   window.saveProduct=saveProduct;
   if(typeof originalRender==='function')window.renderProducts=function(){originalRender.apply(this,arguments);setTimeout(enhanceProductCards,30)};
   setTimeout(enhanceProductCards,300);
