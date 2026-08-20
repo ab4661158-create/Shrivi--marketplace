@@ -9,7 +9,8 @@ const optional = [
   'shrivi-db-upgrades.js',
   'image-upload-bootstrap.js',
   'seller-images-upgrade.js',
-  'seller-save-repair.js'
+  'seller-save-repair.js',
+  'seller-center-api-fix.js'
 ];
 
 for (const file of optional) {
