@@ -4,7 +4,7 @@
   "description": "Shrivi multi-vendor marketplace with customer, seller, admin and Razorpay payments",
   "main": "server.js",
   "scripts": {
-    "start": "node feature-proxy.js"
+    "start": "node shrivi-production-start.js"
   },
   "engines": {
     "node": ">=18"
