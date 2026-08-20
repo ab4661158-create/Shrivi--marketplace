@@ -75,12 +75,20 @@
     renderGallery();
     const imageUrl=$('productImage'); if(imageUrl) imageUrl.value='';
   };
-  window.editProduct=function(id){
+  window.editProduct=async function(id){
     originalEdit(id);
     ensureUI();
-    const product=(window.currentProducts||[]).find(p=>Number(p.id)===Number(id));
-    resetGallery(parseGallery(product));
-    const imageUrl=$('productImage'); if(imageUrl) imageUrl.value=gallery[0]||'';
+    try{
+      const r=await fetch('/api/seller/products',{credentials:'include',cache:'no-store'});
+      const data=await r.json();
+      const list=Array.isArray(data)?data:[];
+      const product=list.find(p=>Number(p.id)===Number(id));
+      resetGallery(parseGallery(product));
+      const imageUrl=$('productImage'); if(imageUrl) imageUrl.value=gallery[0]||'';
+    }catch(e){
+      const product={image:$('productImage')?.value||''};
+      resetGallery(parseGallery(product));
+    }
   };
   window.saveProduct=async function(){
     const id=$('productId')?.value.trim();
