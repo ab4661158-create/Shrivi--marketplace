@@ -1,0 +1,11 @@
+/* Shrivi Seller Premium Theme */
+:root{--seller-primary:#6d28d9;--seller-accent:#ec4899;--seller-bg:#f7f5ff;--seller-line:#e9e3f5}
+body{background:var(--seller-bg)!important;color:#17112b!important}
+header,.header,.top,.seller-header{background:linear-gradient(135deg,#4c1d95,#7c3aed 55%,#db2777)!important;color:#fff!important}
+button.btn.primary,.primary,.btn.primary{background:linear-gradient(135deg,var(--seller-primary),var(--seller-accent))!important;color:#fff!important;border:0!important;box-shadow:0 7px 18px #6d28d933}
+button.btn.secondary,.secondary{border-color:#d8c9f4!important;color:var(--seller-primary)!important;background:#fff!important}
+.card,.panel,.stat,.product-card,.order-card,.profile-card{background:#fff!important;border:1px solid var(--seller-line)!important;border-radius:18px!important;box-shadow:0 8px 28px #4c1d9510!important}
+input,textarea,select{border-color:#ddd3ef!important;background:#fff!important}
+input:focus,textarea:focus,select:focus{border-color:var(--seller-primary)!important;box-shadow:0 0 0 3px #7c3aed18!important}
+.tab.active,.nav.active{color:var(--seller-primary)!important;border-color:var(--seller-primary)!important}
+.badge,.pill{background:#f3e8ff!important;color:#6d28d9!important}
