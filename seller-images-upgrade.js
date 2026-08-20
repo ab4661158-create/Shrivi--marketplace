@@ -96,12 +96,10 @@ function payload(body) {
   const price = num(body?.price);
   const stock = Number(body?.stock);
   const discount = num(body?.discount_percent);
-
   if (!name) throw Error('Product name is required');
   if (price < 0 || price > 100000000) throw Error('Valid product price is required');
   if (!Number.isInteger(stock) || stock < 0) throw Error('Stock must be a whole number 0 or greater');
   if (discount < 0 || discount > 99.99) throw Error('Discount must be between 0 and 99.99');
-
   return { name, category: category || null, description: description || null, price, stock, discount_percent: discount };
 }
 
@@ -111,13 +109,35 @@ function getImages(body) {
   return images;
 }
 
+function moveGalleryRoutesFirst(app) {
+  const router = app.router || app._router;
+  if (!router?.stack) return;
+  const wanted = new Set([
+    '/api/seller/upload/image',
+    '/api/seller/upload/images',
+    '/api/seller/products',
+    '/api/seller/products/:id'
+  ]);
+  const picked = [];
+  for (let i = router.stack.length - 1; i >= 0; i--) {
+    const layer = router.stack[i];
+    if (wanted.has(layer?.route?.path)) picked.unshift(router.stack.splice(i, 1)[0]);
+  }
+  if (!picked.length) return;
+  const legacyIndex = router.stack.findIndex(layer => {
+    const text = String(layer?.handle || '') + String(layer?.handle?.toString?.() || '');
+    return text.includes('API endpoint not found');
+  });
+  const at = legacyIndex < 0 ? 0 : legacyIndex;
+  router.stack.splice(at, 0, ...picked);
+}
+
 async function install(app) {
   if (app.__shriviSellerImages) return;
   app.__shriviSellerImages = true;
 
-  // IMPORTANT: register routes immediately. The old version waited for the
-  // database CREATE TABLE before registering them, creating a startup race
-  // where the legacy product route could handle the request instead.
+  // Register immediately, then move these routes ahead of the legacy routes.
+  // This removes the startup/order race that caused Save Product to hang.
   app.post('/api/seller/upload/image', seller, (req, res) => {
     upload.single('image')(req, res, async error => {
       try {
@@ -157,16 +177,7 @@ async function install(app) {
       const out = [];
       for (const product of result.rows) {
         const images = await gallery(pool, product.id, product.image);
-        out.push({
-          ...product,
-          price: num(product.price),
-          original_price: num(product.price),
-          discount_percent: num(product.discount_percent),
-          sale_price: salePrice(product.price, product.discount_percent),
-          stock: Math.max(0, Number(product.stock) || 0),
-          images,
-          image_gallery: images
-        });
+        out.push({ ...product, price: num(product.price), original_price: num(product.price), discount_percent: num(product.discount_percent), sale_price: salePrice(product.price, product.discount_percent), stock: Math.max(0, Number(product.stock) || 0), images, image_gallery: images });
       }
       res.json(out);
     } catch (e) {
@@ -182,32 +193,22 @@ async function install(app) {
       const product = payload(req.body || {});
       const images = getImages(req.body || {});
       if (!images.length) return res.status(400).json({ error: 'Add at least one product image.' });
-
       await client.query('BEGIN');
       const result = await client.query(
-        `INSERT INTO products(name,price,category,image,description,stock,discount_percent,seller_id)
-         VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+        `INSERT INTO products(name,price,category,image,description,stock,discount_percent,seller_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
         [product.name, product.price, product.category, images[0], product.description, product.stock, product.discount_percent, Number(req.session.seller.id)]
       );
       const productId = result.rows[0].id;
       for (let i = 0; i < images.length; i++) {
-        await client.query(
-          'INSERT INTO product_images(product_id,image_url,sort_order,is_primary) VALUES($1,$2,$3,$4)',
-          [productId, images[i], i, i === 0]
-        );
+        await client.query('INSERT INTO product_images(product_id,image_url,sort_order,is_primary) VALUES($1,$2,$3,$4)', [productId, images[i], i, i === 0]);
       }
       await client.query('COMMIT');
-      res.status(201).json({
-        ok: true,
-        product: { ...result.rows[0], images, image_gallery: images, sale_price: salePrice(product.price, product.discount_percent) }
-      });
+      res.status(201).json({ ok: true, product: { ...result.rows[0], images, image_gallery: images, sale_price: salePrice(product.price, product.discount_percent) } });
     } catch (e) {
       try { await client.query('ROLLBACK'); } catch {}
       console.error('Seller product create:', e);
       res.status(400).json({ error: e.message || 'Unable to create product' });
-    } finally {
-      client.release();
-    }
+    } finally { client.release(); }
   });
 
   app.put('/api/seller/products/:id', seller, async (req, res) => {
@@ -215,46 +216,31 @@ async function install(app) {
     try {
       await ensureTables();
       const id = Number(req.params.id);
-      const owner = await client.query(
-        'SELECT id,image FROM products WHERE id=$1 AND seller_id=$2',
-        [id, Number(req.session.seller.id)]
-      );
+      const owner = await client.query('SELECT id,image FROM products WHERE id=$1 AND seller_id=$2', [id, Number(req.session.seller.id)]);
       if (!owner.rows.length) return res.status(404).json({ error: 'Product not found' });
-
       const product = payload(req.body || {});
       let images = getImages(req.body || {});
       if (!images.length) images = await gallery(client, id, owner.rows[0].image);
       if (!images.length) return res.status(400).json({ error: 'Add at least one product image.' });
-
       await client.query('BEGIN');
       const result = await client.query(
-        `UPDATE products SET name=$1,price=$2,category=$3,image=$4,description=$5,stock=$6,discount_percent=$7
-         WHERE id=$8 AND seller_id=$9 RETURNING *`,
+        `UPDATE products SET name=$1,price=$2,category=$3,image=$4,description=$5,stock=$6,discount_percent=$7 WHERE id=$8 AND seller_id=$9 RETURNING *`,
         [product.name, product.price, product.category, images[0], product.description, product.stock, product.discount_percent, id, Number(req.session.seller.id)]
       );
       await client.query('DELETE FROM product_images WHERE product_id=$1', [id]);
       for (let i = 0; i < images.length; i++) {
-        await client.query(
-          'INSERT INTO product_images(product_id,image_url,sort_order,is_primary) VALUES($1,$2,$3,$4)',
-          [id, images[i], i, i === 0]
-        );
+        await client.query('INSERT INTO product_images(product_id,image_url,sort_order,is_primary) VALUES($1,$2,$3,$4)', [id, images[i], i, i === 0]);
       }
       await client.query('COMMIT');
-      res.json({
-        ok: true,
-        product: { ...result.rows[0], images, image_gallery: images, sale_price: salePrice(product.price, product.discount_percent) }
-      });
+      res.json({ ok: true, product: { ...result.rows[0], images, image_gallery: images, sale_price: salePrice(product.price, product.discount_percent) } });
     } catch (e) {
       try { await client.query('ROLLBACK'); } catch {}
       console.error('Seller product update:', e);
       res.status(400).json({ error: e.message || 'Unable to update product' });
-    } finally {
-      client.release();
-    }
+    } finally { client.release(); }
   });
 
-  // Create the gallery table in the background as soon as the server boots,
-  // but never delay route registration.
+  moveGalleryRoutesFirst(app);
   ensureTables().catch(error => console.error('SHRIVI gallery table:', error));
 }
 
