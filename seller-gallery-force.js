@@ -1,0 +1,23 @@
+(()=>{
+'use strict';
+const MAX=8;
+const $=id=>document.getElementById(id);
+let imgs=[];
+const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
+function ensure(){
+ const input=$('productImageFile'); if(!input)return;
+ input.multiple=true; input.accept='image/jpeg,image/png,image/webp,image/gif';
+ input.removeAttribute('onchange'); input.onchange=select;
+ const box=input.closest('.image-upload-box'); if(!box)return;
+ let note=$('forceGalleryNote'); if(!note){note=document.createElement('div');note.id='forceGalleryNote';note.style.cssText='margin-top:10px;padding:10px;border-radius:7px;background:#fffaf0;border:1px solid #f3d18a;color:#59636e;font-size:13px;text-align:left';note.innerHTML='<b>📸 Multiple Product Photos</b><br>Up to 8 photos. Select multiple at once. First photo is the main image. Tap a thumbnail to view it.';box.appendChild(note)}
+ let g=$('forceGallery'); if(!g){g=document.createElement('div');g.id='forceGallery';g.style.cssText='display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px';box.appendChild(g)}
+ render();
+}
+function select(e){const files=[...(e.target.files||[])];if(!files.length)return;if(imgs.length+files.length>MAX)return alert('Maximum 8 photos allowed.');for(const f of files){if(!['image/jpeg','image/png','image/webp','image/gif'].includes(f.type))return alert('Only JPG, PNG, WEBP or GIF images are allowed.');if(f.size>5*1024*1024)return alert('Each image must be 5MB or smaller.');imgs.push({file:f,url:URL.createObjectURL(f)});}e.target.value='';render()}
+function render(){const g=$('forceGallery');if(!g)return;g.innerHTML=imgs.map((x,i)=>`<div data-i="${i}" style="position:relative;aspect-ratio:1;border:2px solid ${i===0?'#ff9900':'#ddd'};border-radius:8px;overflow:hidden;background:#f7f8f8"><img src="${esc(x.url)}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in"><button type="button" data-x="1" style="position:absolute;right:3px;top:3px;width:26px;height:26px;border-radius:50%;background:#d13212;color:white;font-size:17px">×</button><span style="position:absolute;left:3px;bottom:3px;background:#131921dd;color:white;padding:3px 5px;border-radius:4px;font-size:10px">${i===0?'MAIN':'PHOTO '+(i+1)}</span></div>`).join('');g.querySelectorAll('[data-i]').forEach((el,i)=>{el.querySelector('img').onclick=()=>viewer(i);el.querySelector('[data-x]').onclick=e=>{e.stopPropagation();imgs.splice(i,1);render()}});const label=$('selectedFileName');if(label)label.textContent=imgs.length?`${imgs.length} photo(s) ready`:'No image selected'}
+function reset(){imgs.forEach(x=>{if(x.url.startsWith('blob:'))URL.revokeObjectURL(x.url)});imgs=[];const f=$('productImageFile');if(f)f.value='';render()}
+function viewer(i){if(!imgs[i])return;let m=$('forceViewer');if(!m){m=document.createElement('div');m.id='forceViewer';m.style.cssText='position:fixed;inset:0;background:#000e;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';m.innerHTML='<button id="fvClose" style="position:absolute;right:15px;top:15px;width:44px;height:44px;border-radius:50%;background:#fff;font-size:25px">×</button><button id="fvPrev" style="position:absolute;left:12px;top:50%;width:46px;height:46px;border-radius:50%;background:#fff;font-size:28px">‹</button><img id="fvImg" style="max-width:90vw;max-height:85vh;object-fit:contain;border-radius:10px"><button id="fvNext" style="position:absolute;right:12px;top:50%;width:46px;height:46px;border-radius:50%;background:#fff;font-size:28px">›</button><div id="fvCount" style="position:absolute;bottom:15px;background:#111;color:#fff;padding:6px 12px;border-radius:20px"></div>';document.body.appendChild(m);$('fvClose').onclick=()=>m.remove();m.onclick=e=>{if(e.target===m)m.remove()}}
+let n=i;const draw=()=>{$('fvImg').src=imgs[n].url;$('fvCount').textContent=`${n+1} / ${imgs.length}`};$('fvPrev').onclick=()=>{n=(n-1+imgs.length)%imgs.length;draw()};$('fvNext').onclick=()=>{n=(n+1)%imgs.length;draw()};draw()}
+function hook(){const oldAdd=window.openAddProduct,oldEdit=window.editProduct,oldSave=window.saveProduct;window.openAddProduct=function(){oldAdd?.apply(this,arguments);setTimeout(reset,20);setTimeout(ensure,30)};window.editProduct=function(id){oldEdit?.apply(this,arguments);setTimeout(ensure,30)};window.__shriviGallery=()=>imgs.map(x=>x.url);ensure()}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(hook,100));else setTimeout(hook,100);setInterval(ensure,1000);
+})();
