@@ -1,0 +1,159 @@
+name: Fix Seller Image Upload
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    if: ${{ !contains(github.event.head_commit.message, '[seller-image-fix]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Patch seller image upload
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('seller.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '/* SHRIVI SELLER IMAGE UPLOAD FIX V3 */'
+          if marker not in s:
+              js = r'''
+<script>
+/* SHRIVI SELLER IMAGE UPLOAD FIX V3 */
+(function(){
+  const MAX_SIDE = 1800;
+  const QUALITY = 0.82;
+  const MAX_BYTES = 1200 * 1024;
+
+  function setUploadStatus(text, error){
+    const el = document.getElementById('imageUploadStatus');
+    if(!el) return;
+    el.textContent = text;
+    el.style.color = error ? '#c40000' : '#067d62';
+  }
+
+  function compressImage(file){
+    return new Promise((resolve,reject)=>{
+      if(!file || !file.type || !file.type.startsWith('image/')){
+        reject(new Error('Only image files are allowed.'));
+        return;
+      }
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = ()=>{
+        try{
+          let w = img.naturalWidth || img.width;
+          let h = img.naturalHeight || img.height;
+          const scale = Math.min(1, MAX_SIDE / Math.max(w,h));
+          w = Math.max(1, Math.round(w * scale));
+          h = Math.max(1, Math.round(h * scale));
+          const canvas = document.createElement('canvas');
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext('2d', {alpha:false});
+          if(!ctx) throw new Error('Browser image processor unavailable.');
+          ctx.drawImage(img,0,0,w,h);
+          canvas.toBlob(blob=>{
+            URL.revokeObjectURL(url);
+            if(!blob){reject(new Error('Image compression failed.'));return;}
+            const name = (file.name || 'product-image').replace(/\.[^.]+$/,'') + '.jpg';
+            resolve(new File([blob], name, {type:'image/jpeg',lastModified:Date.now()}));
+          },'image/jpeg',QUALITY);
+        }catch(e){
+          URL.revokeObjectURL(url);
+          reject(e);
+        }
+      };
+      img.onerror = ()=>{URL.revokeObjectURL(url);reject(new Error('Could not read selected image.'));};
+      img.src = url;
+    });
+  }
+
+  async function prepareSelectedImages(){
+    if(!Array.isArray(window.selectedProductImages) || !window.selectedProductImages.length) return;
+    const files = window.selectedProductImages.slice(0,8);
+    const out = [];
+    for(let i=0;i<files.length;i++){
+      const f = files[i];
+      if(f.size <= MAX_BYTES && f.type === 'image/jpeg'){
+        out.push(f);
+        continue;
+      }
+      setUploadStatus('Compressing photo ' + (i+1) + ' of ' + files.length + '...');
+      const compressed = await compressImage(f);
+      out.push(compressed);
+    }
+    window.selectedProductImages = out;
+    const total = out.reduce((n,f)=>n+f.size,0);
+    setUploadStatus('Photos ready • compressed upload size ' + Math.max(1,Math.round(total/1024)) + ' KB');
+  }
+
+  const input = document.getElementById('productImageFiles');
+  if(input){
+    input.addEventListener('change', async function(){
+      try{
+        await new Promise(r=>setTimeout(r,0));
+        await prepareSelectedImages();
+      }catch(e){
+        console.error(e);
+        setUploadStatus(e.message || 'Image preparation failed.', true);
+      }
+    }, true);
+  }
+
+  const originalFetch = window.fetch;
+  window.fetch = async function(input, init){
+    const url = typeof input === 'string' ? input : (input && input.url) || '';
+    if(String(url).includes('/api/seller/upload/images')){
+      try{
+        await prepareSelectedImages();
+        setUploadStatus('Uploading compressed photos...');
+      }catch(e){
+        setUploadStatus(e.message || 'Image preparation failed.', true);
+        throw e;
+      }
+      try{
+        const response = await originalFetch.apply(this, arguments);
+        if(!response.ok){
+          let detail = '';
+          try{
+            const clone = response.clone();
+            const data = await clone.json();
+            detail = data.error || data.message || '';
+          }catch(_e){}
+          throw new Error(detail || ('Image upload failed (' + response.status + ').'));
+        }
+        setUploadStatus('Photos uploaded successfully.');
+        return response;
+      }catch(e){
+        setUploadStatus(e.message || 'Image upload failed. Please try again.', true);
+        throw e;
+      }
+    }
+    return originalFetch.apply(this, arguments);
+  };
+})();
+</script>
+'''
+              s = s.replace('</body>', js + '\n</body>', 1)
+              p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit seller image fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add seller.html
+          if git diff --cached --quiet; then
+            echo "No seller image changes needed"
+            exit 0
+          fi
+          git commit -m "Fix seller image compression and upload diagnostics [seller-image-fix]"
+          git push
