@@ -8,7 +8,8 @@ const path = require('path');
 const optional = [
   'shrivi-db-upgrades.js',
   'image-upload-bootstrap.js',
-  'seller-images-upgrade.js'
+  'seller-images-upgrade.js',
+  'seller-save-repair.js'
 ];
 
 for (const file of optional) {
