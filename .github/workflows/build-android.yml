@@ -28,8 +28,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor, Assets and TypeScript
-        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets typescript
+      - name: Install Capacitor, icon tooling and TypeScript
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets typescript sharp
+
+      - name: Create final SHRIVI 1024x1024 app icon
+        run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
 
       - name: Generate SHRIVI Android icon assets
         run: npx capacitor-assets generate --android
