@@ -45,12 +45,34 @@ jobs:
         run: |
           npm install --no-save @capacitor/cli @capacitor/core @capacitor/android @capacitor/splash-screen @capacitor/assets sharp typescript
 
+      - name: Prepare canonical SHRIVI PNG assets
+        run: |
+          node - <<'NODE'
+          const sharp = require('sharp');
+          Promise.all([
+            sharp('resources/icon-source.svg').resize(1024, 1024).png().toFile('resources/icon.png'),
+            sharp('resources/splash-source.svg').resize(1024, 1024).png().toFile('resources/splash.png')
+          ]).then(() => console.log('Canonical 1024x1024 SHRIVI icon and splash PNGs generated.'))
+            .catch(err => { console.error(err); process.exit(1); });
+          NODE
+
       - name: Verify SHRIVI source assets
         run: |
           test -s resources/icon-source.svg
           test -s resources/icon.png
           test -s resources/splash-source.svg
-          echo "SHRIVI icon and splash source assets found."
+          test -s resources/splash.png
+          node - <<'NODE'
+          const sharp = require('sharp');
+          Promise.all([
+            sharp('resources/icon.png').metadata(),
+            sharp('resources/splash.png').metadata()
+          ]).then(([icon, splash]) => {
+            if (icon.width !== 1024 || icon.height !== 1024) throw new Error(`Invalid icon dimensions: ${icon.width}x${icon.height}`);
+            if (splash.width !== 1024 || splash.height !== 1024) throw new Error(`Invalid splash dimensions: ${splash.width}x${splash.height}`);
+            console.log(`Icon ${icon.width}x${icon.height}; splash ${splash.width}x${splash.height}`);
+          }).catch(err => { console.error(err); process.exit(1); });
+          NODE
 
       - name: Generate Android project
         run: |
@@ -68,8 +90,8 @@ jobs:
       - name: Verify final native icon and splash assets
         run: |
           test -d android/app/src/main/res
-          find android/app/src/main/res -type f \( -name '*icon*' -o -name '*splash*' \) -print | sort
-          test -n "$(find android/app/src/main/res -type f \( -name '*icon*' -o -name '*splash*' \) -print -quit)"
+          test -n "$(find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print -quit)"
+          find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print | sort
 
       - name: Verify generated Android project
         run: |
