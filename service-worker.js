@@ -1,11 +1,10 @@
-const CACHE_NAME = "shrivi-v4";
+const CACHE_NAME = "shrivi-v5";
 
 const APP_FILES = [
   "/shop",
   "/app",
   "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
+  "/shrivi-logo.svg?v=3"
 ];
 
 self.addEventListener("install", event => {
@@ -32,8 +31,6 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
 
   const url = new URL(event.request.url);
-
-  // Never cache API responses: product/order/account data must stay fresh.
   if (url.pathname.startsWith("/api/")) return;
 
   event.respondWith(
@@ -41,37 +38,20 @@ self.addEventListener("fetch", event => {
       .then(async response => {
         if (!response || !response.ok) return response;
 
-        // Customer app: remove the Seller entry from the customer UI.
         if (url.origin === self.location.origin && url.pathname === "/shop") {
           const contentType = response.headers.get("content-type") || "";
           if (contentType.includes("text/html")) {
             let html = await response.text();
-
-            html = html.replace(
-              /<button[^>]*onclick=["']location\.href=['"]\/seller['"][^>]*>[\s\S]*?<\/button>/i,
-              ""
-            );
-
-            html = html.replace(
-              /<button[^>]*onclick=["'][^"']*\/seller[^"']*["'][^>]*>[\s\S]*?<\/button>/i,
-              ""
-            );
-
-            return new Response(html, {
-              status: response.status,
-              statusText: response.statusText,
-              headers: response.headers
-            });
+            html = html.replace(/<button[^>]*onclick=["']location\.href=['"]\/seller['"][^>]*>[\s\S]*?<\/button>/i, "");
+            html = html.replace(/<button[^>]*onclick=["'][^"']*\/seller[^"']*["'][^>]*>[\s\S]*?<\/button>/i, "");
+            return new Response(html, {status: response.status, statusText: response.statusText, headers: response.headers});
           }
         }
 
         if (url.origin === self.location.origin) {
           const copy = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, copy).catch(() => {});
-          });
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy)).catch(() => {});
         }
-
         return response;
       })
       .catch(() => caches.match(event.request))
