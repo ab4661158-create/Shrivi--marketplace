@@ -5,6 +5,14 @@
 */
 const path = require('path');
 
+// Security: never allow production to start with the weak session-secret
+// fallback that exists inside legacy server code. Render uses this launcher.
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret || sessionSecret.length < 32) {
+  console.error('[Shrivi] FATAL: SESSION_SECRET must be set and at least 32 characters long.');
+  process.exit(1);
+}
+
 const optional = [
   'shrivi-db-upgrades.js',
   'image-upload-bootstrap.js',
