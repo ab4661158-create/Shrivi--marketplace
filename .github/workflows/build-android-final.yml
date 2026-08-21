@@ -21,17 +21,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Android is generated later, so Gradle caching is intentionally disabled here.
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
+      # This repo has no lockfile, so setup-node npm caching must stay disabled.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Verify Node and npm
         run: |
@@ -41,37 +41,27 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Capacitor Android and asset tooling
-        run: |
-          npm install --no-save @capacitor/cli @capacitor/core @capacitor/android @capacitor/splash-screen @capacitor/assets sharp typescript
+      - name: Install Android and asset tooling
+        run: npm install --no-save @capacitor/cli @capacitor/core @capacitor/android @capacitor/splash-screen @capacitor/assets sharp typescript
 
-      - name: Prepare canonical SHRIVI PNG assets
-        run: |
-          node - <<'NODE'
-          const sharp = require('sharp');
-          Promise.all([
-            sharp('resources/icon-source.svg').resize(1024, 1024).png().toFile('resources/icon.png'),
-            sharp('resources/splash-source.svg').resize(1024, 1024).png().toFile('resources/splash.png')
-          ]).then(() => console.log('Canonical 1024x1024 SHRIVI icon and splash PNGs generated.'))
-            .catch(err => { console.error(err); process.exit(1); });
-          NODE
-
-      - name: Verify SHRIVI source assets
+      - name: Verify branding sources
         run: |
           test -s resources/icon-source.svg
-          test -s resources/icon.png
           test -s resources/splash-source.svg
-          test -s resources/splash.png
+
+      - name: Generate canonical PNG branding
+        run: |
           node - <<'NODE'
           const sharp = require('sharp');
-          Promise.all([
-            sharp('resources/icon.png').metadata(),
-            sharp('resources/splash.png').metadata()
-          ]).then(([icon, splash]) => {
-            if (icon.width !== 1024 || icon.height !== 1024) throw new Error(`Invalid icon dimensions: ${icon.width}x${icon.height}`);
-            if (splash.width !== 1024 || splash.height !== 1024) throw new Error(`Invalid splash dimensions: ${splash.width}x${splash.height}`);
-            console.log(`Icon ${icon.width}x${icon.height}; splash ${splash.width}x${splash.height}`);
-          }).catch(err => { console.error(err); process.exit(1); });
+          (async () => {
+            await sharp('resources/icon-source.svg').resize(1024, 1024).png().toFile('resources/icon.png');
+            await sharp('resources/splash-source.svg').resize(1024, 1024).png().toFile('resources/splash.png');
+            for (const file of ['resources/icon.png', 'resources/splash.png']) {
+              const m = await sharp(file).metadata();
+              if (m.width !== 1024 || m.height !== 1024) throw new Error(`${file}: ${m.width}x${m.height}`);
+            }
+            console.log('SHRIVI icon and splash PNGs ready.');
+          })().catch(e => { console.error(e); process.exit(1); });
           NODE
 
       - name: Generate Android project
@@ -79,24 +69,21 @@ jobs:
           rm -rf android
           npx cap add android
 
-      - name: Generate final Android icon and splash assets
-        run: |
-          npx capacitor-assets generate --android
+      - name: Generate native Android icon and splash
+        run: npx capacitor-assets generate --android
 
-      - name: Sync Capacitor with generated native assets
-        run: |
-          npx cap sync android
+      - name: Sync Capacitor
+        run: npx cap sync android
 
-      - name: Verify final native icon and splash assets
+      - name: Verify native branding
         run: |
           test -d android/app/src/main/res
+          find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print
           test -n "$(find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print -quit)"
-          find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print | sort
 
-      - name: Verify generated Android project
+      - name: Verify Gradle project
         run: |
           test -s android/gradlew
-          test -f android/settings.gradle || test -f android/settings.gradle.kts
           test -d android/app
           chmod +x android/gradlew
 
@@ -107,7 +94,7 @@ jobs:
       - name: Verify APK
         run: test -s android/app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload SHRIVI debug APK
+      - name: Upload SHRIVI APK
         uses: actions/upload-artifact@v4
         with:
           name: SHRIVI-debug-apk
