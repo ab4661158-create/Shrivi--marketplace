@@ -1,33 +1,30 @@
 /* SHRIVI ROBUST PRODUCTION START
-   Loads optional upgrade layers safely so one broken enhancement cannot
-   take the entire Render service down with a 502. The core server remains
-   the final required startup.
+   Canonical startup: database upgrades + one seller API + automatic verification.
+   Legacy image repair layers are intentionally not loaded here so multiple
+   competing upload routes cannot override the canonical seller image flow.
 */
 const path = require('path');
 
-// Security: never allow production to start with the weak session-secret
-// fallback that exists inside legacy server code. Render uses this launcher.
 const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret || sessionSecret.length < 32) {
   console.error('[Shrivi] FATAL: SESSION_SECRET must be set and at least 32 characters long.');
   process.exit(1);
 }
 
-const optional = [
+const required = [
   'shrivi-db-upgrades.js',
-  'image-upload-bootstrap.js',
-  'seller-images-upgrade.js',
-  'seller-save-repair.js',
-  'seller-center-api-fix.js'
+  'seller-canonical-api.js',
+  'seller-image-system-verification.js'
 ];
 
-for (const file of optional) {
+for (const file of required) {
   try {
     require(path.join(__dirname, file));
     console.log(`[Shrivi] loaded ${file}`);
   } catch (err) {
-    console.error(`[Shrivi] optional startup layer failed: ${file}`);
+    console.error(`[Shrivi] required startup layer failed: ${file}`);
     console.error(err && err.stack ? err.stack : err);
+    process.exit(1);
   }
 }
 
