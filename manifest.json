@@ -2,8 +2,8 @@
   "background_color": "#ffffff",
   "dir": "ltr",
   "display": "standalone",
-  "name": "Shrivi — Marketplace",
-  "short_name": "Shrivi",
+  "name": "SHRIVI",
+  "short_name": "SHRIVI",
   "orientation": "any",
   "scope": "/",
   "start_url": "/app",
@@ -12,10 +12,16 @@
   "description": "Shrivi Marketplace — shop products from trusted sellers.",
   "icons": [
     {
-      "src": "/resources/icon.png?v=6",
-      "sizes": "192x192",
+      "src": "/resources/icon.png?v=7",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/resources/icon-source.svg?v=1",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     }
   ]
 }
