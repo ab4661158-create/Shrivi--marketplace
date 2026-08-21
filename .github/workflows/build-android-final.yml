@@ -78,6 +78,7 @@ jobs:
                   <item name="android:navigationBarColor">#FFFFFF</item>
                   <item name="android:statusBarColor">#FFFFFF</item>
                   <item name="android:windowLightStatusBar">true</item>
+                  <item name="android:windowLightNavigationBar">true</item>
               </style>
               <style name="AppTheme.NoActionBarLaunch" parent="AppTheme">
                   <item name="android:windowNoTitle">true</item>
@@ -90,9 +91,14 @@ jobs:
           <resources>
               <style name="AppTheme.NoActionBarLaunch" parent="AppTheme">
                   <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowBackground">#FFFFFF</item>
                   <item name="android:windowSplashScreenBackground">#FFFFFF</item>
                   <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash</item>
                   <item name="android:windowSplashScreenAnimationDuration">3000</item>
+                  <item name="android:windowLightStatusBar">true</item>
+                  <item name="android:statusBarColor">#FFFFFF</item>
+                  <item name="android:navigationBarColor">#FFFFFF</item>
+                  <item name="android:windowLightNavigationBar">true</item>
               </style>
           </resources>
           EOF
@@ -100,7 +106,7 @@ jobs:
           test -s android/app/src/main/res/values-v31/styles.xml
       - name: Sync Capacitor and SplashScreen plugin
         run: npx cap sync android
-      - name: Verify native splash branding
+      - name: Verify native splash branding and no black startup background
         run: |
           test -s android/app/src/main/res/values/styles.xml
           test -s android/app/src/main/res/values-v31/styles.xml
@@ -109,8 +115,8 @@ jobs:
       - name: Configure Android version for fresh SHRIVI build
         working-directory: android
         run: |
-          sed -i "s/versionCode [0-9]*/versionCode 5/" app/build.gradle
-          sed -i "s/versionName \"[^\"]*\"/versionName \"3.0.3\"/" app/build.gradle
+          sed -i "s/versionCode [0-9]*/versionCode 6/" app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"3.0.4\"/" app/build.gradle
           chmod +x gradlew
       - name: Verify Gradle project
         run: |
@@ -124,6 +130,6 @@ jobs:
       - name: Upload SHRIVI APK
         uses: actions/upload-artifact@v4
         with:
-          name: SHRIVI-debug-apk-v5
+          name: SHRIVI-debug-apk-v6
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
