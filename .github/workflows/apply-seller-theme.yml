@@ -2,7 +2,7 @@ name: Apply Seller Premium Theme
 
 on:
   push:
-    branches: [main]
+    branches: [main, safe-gallery-fix-v2]
   workflow_dispatch:
 
 permissions:
@@ -10,36 +10,27 @@ permissions:
 
 jobs:
   theme:
-    if: ${{ !contains(github.event.head_commit.message, '[seller-theme]') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-      - name: Upgrade seller center
+      - name: Upgrade seller center safely
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('seller.html')
+          if not p.exists():
+              raise SystemExit('seller.html is missing')
           s = p.read_text(encoding='utf-8')
 
           css_marker = '/* SHRIVI SELLER PREMIUM THEME V2 */'
           if css_marker not in s:
               css = r'''
 /* SHRIVI SELLER PREMIUM THEME V2 */
-:root{
-  --seller-bg:#f6f7fb;
-  --seller-card:#ffffff;
-  --seller-ink:#172033;
-  --seller-muted:#667085;
-  --seller-line:#e4e7ec;
-  --seller-blue:#1463ff;
-  --seller-blue2:#0b4dcc;
-  --seller-cyan:#00a8e1;
-  --seller-orange:#ff9900;
-  --seller-green:#07883f;
-  --seller-red:#c5221f;
-}
+:root{--seller-bg:#f6f7fb;--seller-card:#fff;--seller-ink:#172033;--seller-muted:#667085;--seller-line:#e4e7ec;--seller-blue:#1463ff;--seller-cyan:#00a8e1}
 body{background:var(--seller-bg);color:var(--seller-ink)}
 header{background:linear-gradient(135deg,#111827 0%,#172554 58%,#075985 100%);box-shadow:0 6px 24px rgba(15,23,42,.18)}
 .brand-icon{background:linear-gradient(135deg,#1463ff,#00a8e1);box-shadow:0 7px 18px rgba(20,99,255,.25)}
@@ -48,39 +39,16 @@ header{background:linear-gradient(135deg,#111827 0%,#172554 58%,#075985 100%);bo
 .card{padding:22px}
 input,textarea,select{border-color:#cfd4dc;border-radius:8px}
 input:focus,textarea:focus,select:focus{border-color:var(--seller-blue);box-shadow:0 0 0 3px rgba(20,99,255,.12)}
-.primary{background:linear-gradient(135deg,#ff9900,#ffb84d);color:#111827;box-shadow:0 5px 14px rgba(255,153,0,.20)}
-.success{background:linear-gradient(135deg,#067d62,#0a9f7a)}
-.warning{background:#f6b51b}
-.dark{background:#172033}
-.secondary{background:#f8fafc;color:#174ea6;border:1px solid #cfd4dc}
-.logout{background:#fff;color:#172033;border-radius:8px}
 .tabs{gap:6px;padding:6px;background:#eef2f7;border:0;border-radius:12px}
 .tab{background:transparent;border:0;border-radius:8px;padding:12px 17px;color:#475467}
 .tab.active{background:#172033;color:#fff;box-shadow:0 4px 12px rgba(15,23,42,.16)}
-.stat-card{border-top:0;position:relative;overflow:hidden}
-.stat-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:linear-gradient(#1463ff,#00a8e1)}
-.stat-label{color:#667085}
-.stat-value{color:#172033}
 .product-card{transition:transform .18s ease,box-shadow .18s ease}
 .product-card:hover{transform:translateY(-3px);box-shadow:0 14px 32px rgba(16,24,40,.11)}
 .product-image{background:#f2f4f7}
 .image-upload-box{border-color:#b7c4d8;background:#f8fafc;border-radius:10px}
-.image-upload-box:hover{border-color:#1463ff;background:#f1f6ff}
 .image-upload-label{background:linear-gradient(135deg,#1463ff,#00a8e1);color:#fff}
 .modal{background:rgba(15,23,42,.68)}
 .modal-box{border:1px solid #dfe4ea;border-radius:14px;box-shadow:0 24px 70px rgba(15,23,42,.28)}
-.close-btn{background:#eef2f6}
-.profile-item{background:#f8fafc;border:1px solid #e7ebf0;border-radius:10px}
-.seller-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:18px;padding:14px;background:#f8fafc;border:1px solid var(--seller-line);border-radius:10px}
-.seller-toolbar input{flex:1;min-width:190px;margin:0}
-.seller-filter{min-width:150px;width:auto}
-.listing-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:800;margin-top:8px}
-.listing-live{background:#e7f6ee;color:#087443}.listing-low{background:#fff5d6;color:#8a5b00}.listing-out{background:#fff0ed;color:#c5221f}
-.listing-quality{margin-top:10px;background:#f2f4f7;border-radius:999px;height:7px;overflow:hidden}.listing-quality span{display:block;height:100%;background:linear-gradient(90deg,#ff9900,#07883f);border-radius:999px}
-.listing-meta{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px;color:#667085;font-size:12px}
-.seller-insight{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
-.insight{background:#fff;border:1px solid var(--seller-line);border-radius:12px;padding:16px}.insight b{font-size:20px}.insight small{display:block;color:#667085;margin-top:4px}
-@media(max-width:700px){.seller-insight{grid-template-columns:1fr}.seller-toolbar{align-items:stretch}.seller-filter{width:100%}}
 '''
               s = s.replace('</style>', css + '\n</style>', 1)
 
@@ -91,94 +59,64 @@ input:focus,textarea:focus,select:focus{border-color:var(--seller-blue);box-shad
 /* SHRIVI SELLER LISTING TOOLS V2 */
 (function(){
   const esc = window.escapeHtml || (v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'));
-  function quality(p){
-    let score=0;
-    if(p.name)score+=25;
-    if(p.image)score+=25;
-    if(p.description && String(p.description).length>=30)score+=20;
-    if(p.category)score+=15;
-    if(Number(p.price)>0)score+=10;
-    if(Number(p.stock)>=0)score+=5;
-    return score;
-  }
+  function quality(p){let score=0;if(p.name)score+=25;if(p.image)score+=25;if(p.description&&String(p.description).length>=30)score+=20;if(p.category)score+=15;if(Number(p.price)>0)score+=10;if(Number(p.stock)>=0)score+=5;return score}
   function enhanceProducts(){
-    const tab=document.getElementById('productsTab');
-    if(!tab || document.getElementById('sellerListingToolbar')) return;
-    const grid=document.getElementById('productsGrid');
-    if(!grid) return;
-    const toolbar=document.createElement('div');
-    toolbar.className='seller-toolbar';
-    toolbar.id='sellerListingToolbar';
-    toolbar.innerHTML=`<input id="sellerProductSearch" placeholder="🔎 Search your listings..."><select id="sellerStockFilter" class="seller-filter"><option value="all">All stock</option><option value="live">In stock</option><option value="low">Low stock</option><option value="out">Out of stock</option></select><select id="sellerSort" class="seller-filter"><option value="new">Newest</option><option value="name">Name A–Z</option><option value="priceHigh">Price high–low</option><option value="stockLow">Stock low–high</option></select>`;
-    const firstCard=tab.querySelector('.card');
-    firstCard && firstCard.appendChild(toolbar);
+    const tab=document.getElementById('productsTab'),grid=document.getElementById('productsGrid');
+    if(!tab||!grid||document.getElementById('sellerListingToolbar'))return;
+    const toolbar=document.createElement('div');toolbar.className='seller-toolbar';toolbar.id='sellerListingToolbar';
+    toolbar.innerHTML='<input id="sellerProductSearch" placeholder="🔎 Search your listings..."><select id="sellerStockFilter" class="seller-filter"><option value="all">All stock</option><option value="live">In stock</option><option value="low">Low stock</option><option value="out">Out of stock</option></select><select id="sellerSort" class="seller-filter"><option value="new">Newest</option><option value="name">Name A–Z</option><option value="priceHigh">Price high–low</option><option value="stockLow">Stock low–high</option></select>';
+    const firstCard=tab.querySelector('.card');if(firstCard)firstCard.appendChild(toolbar);
     ['sellerProductSearch','sellerStockFilter','sellerSort'].forEach(id=>document.getElementById(id)?.addEventListener('input',filterListings));
   }
   function filterListings(){
-    const q=(document.getElementById('sellerProductSearch')?.value||'').toLowerCase().trim();
-    const sf=document.getElementById('sellerStockFilter')?.value||'all';
-    const sort=document.getElementById('sellerSort')?.value||'new';
-    let arr=[...(window.currentProducts||[])].filter(p=>{
-      const stock=Number(p.stock||0), text=`${p.name||''} ${p.category||''} ${p.description||''}`.toLowerCase();
-      const stockOk=sf==='all'||(sf==='live'&&stock>5)||(sf==='low'&&stock>0&&stock<=5)||(sf==='out'&&stock<=0);
-      return text.includes(q)&&stockOk;
-    });
-    arr.sort((a,b)=>{
-      if(sort==='name')return String(a.name||'').localeCompare(String(b.name||''));
-      if(sort==='priceHigh')return Number(b.price||0)-Number(a.price||0);
-      if(sort==='stockLow')return Number(a.stock||0)-Number(b.stock||0);
-      return Number(b.id||0)-Number(a.id||0);
-    });
+    const q=(document.getElementById('sellerProductSearch')?.value||'').toLowerCase().trim(),sf=document.getElementById('sellerStockFilter')?.value||'all',sort=document.getElementById('sellerSort')?.value||'new';
+    let arr=[...(window.currentProducts||[])].filter(p=>{const stock=Number(p.stock||0),text=`${p.name||''} ${p.category||''} ${p.description||''}`.toLowerCase();return text.includes(q)&&(sf==='all'||(sf==='live'&&stock>5)||(sf==='low'&&stock>0&&stock<=5)||(sf==='out'&&stock<=0))});
+    arr.sort((a,b)=>sort==='name'?String(a.name||'').localeCompare(String(b.name||'')):sort==='priceHigh'?Number(b.price||0)-Number(a.price||0):sort==='stockLow'?Number(a.stock||0)-Number(b.stock||0):Number(b.id||0)-Number(a.id||0));
     renderEnhancedProducts(arr);
   }
   function renderEnhancedProducts(arr){
-    const grid=document.getElementById('productsGrid');
-    if(!grid)return;
-    if(!arr.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><h3>No matching listings</h3><p>Try another search or stock filter.</p></div>';return;}
-    grid.innerHTML=arr.map(p=>{
-      const image=p.image||'https://via.placeholder.com/600x400?text=Shrivi';
-      const price=Number(p.price||0),sale=Number(p.sale_price??(price-price*Number(p.discount_percent||0)/100));
-      const stock=Number(p.stock||0),q=quality(p);
-      const cls=stock<=0?'listing-out':stock<=5?'listing-low':'listing-live';
-      const label=stock<=0?'● Out of stock':stock<=5?'● Low stock':'● Active listing';
-      const discount=Number(p.discount_percent||0);
-      return `<article class="product-card"><img class="product-image" src="${esc(image)}" alt="${esc(p.name||'Product')}" onerror="this.src='https://via.placeholder.com/600x400?text=Shrivi'"><div class="product-content"><div class="product-title">${esc(p.name||'-')}</div><div class="product-category">${esc(p.category||'Uncategorized')}</div><div class="listing-badge ${cls}">${label}</div><div class="product-price">₹${Number(sale).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>${discount>0?`<div class="old-price">₹${Number(price).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="discount">${discount}% OFF</div>`:''}<div class="listing-meta"><span>Stock: <b>${stock}</b></span><span>•</span><span>Listing quality: <b>${q}%</b></span></div><div class="listing-quality"><span style="width:${q}%"></span></div><div class="product-actions"><button class="btn warning" onclick="editProduct(${Number(p.id)})">Edit</button><button class="btn danger" onclick="deleteProduct(${Number(p.id)})">Delete</button></div></div></article>`;
-    }).join('');
+    const grid=document.getElementById('productsGrid');if(!grid)return;
+    if(!arr.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1"><h3>No matching listings</h3><p>Try another search or stock filter.</p></div>';return}
+    grid.innerHTML=arr.map(p=>{const image=p.image||'https://via.placeholder.com/600x400?text=Shrivi',price=Number(p.price||0),sale=Number(p.sale_price??(price-price*Number(p.discount_percent||0)/100)),stock=Number(p.stock||0),q=quality(p),cls=stock<=0?'listing-out':stock<=5?'listing-low':'listing-live',label=stock<=0?'● Out of stock':stock<=5?'● Low stock':'● Active listing',discount=Number(p.discount_percent||0);return `<article class="product-card"><img class="product-image" src="${esc(image)}" alt="${esc(p.name||'Product')}" onerror="this.src='https://via.placeholder.com/600x400?text=Shrivi'"><div class="product-content"><div class="product-title">${esc(p.name||'-')}</div><div class="product-category">${esc(p.category||'Uncategorized')}</div><div class="listing-badge ${cls}">${label}</div><div class="product-price">₹${sale.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>${discount>0?`<div class="old-price">₹${price.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}</div><div class="discount">${discount}% OFF</div>`:''}<div class="listing-meta"><span>Stock: <b>${stock}</b></span><span>•</span><span>Listing quality: <b>${q}%</b></span></div><div class="listing-quality"><span style="width:${q}%"></span></div><div class="product-actions"><button class="btn warning" onclick="editProduct(${Number(p.id)})">Edit</button><button class="btn danger" onclick="deleteProduct(${Number(p.id)})">Delete</button></div></div></article>`}).join('')
   }
-  function addInsights(){
-    const d=document.getElementById('dashboardTab');
-    if(!d || document.getElementById('sellerInsights'))return;
-    const box=document.createElement('div');box.id='sellerInsights';box.className='seller-insight';
-    box.innerHTML='<div class="insight"><b id="activeListingCount">0</b><small>Active listings</small></div><div class="insight"><b id="lowStockCount">0</b><small>Low-stock products</small></div><div class="insight"><b id="listingQualityAvg">0%</b><small>Average listing quality</small></div>';
-    const stats=d.querySelector('.stats');stats?.parentNode.insertBefore(box,stats);
-  }
-  function refreshInsights(){
-    const ps=window.currentProducts||[];let active=0,low=0,total=0;
-    ps.forEach(p=>{const s=Number(p.stock||0);if(s>0)active++;if(s>0&&s<=5)low++;total+=quality(p)});
-    document.getElementById('activeListingCount')?.replaceChildren(String(active));
-    document.getElementById('lowStockCount')?.replaceChildren(String(low));
-    document.getElementById('listingQualityAvg')?.replaceChildren(ps.length?Math.round(total/ps.length)+'%':'0%');
-  }
-  const originalRender=window.renderProducts;
-  window.renderProducts=function(){
-    if(typeof originalRender==='function')originalRender.apply(this,arguments);
-    enhanceProducts();
-    setTimeout(()=>{filterListings();refreshInsights()},0);
-  };
-  const originalShowTab=window.showTab;
-  window.showTab=function(tab){
-    originalShowTab(tab);
-    if(tab==='products')setTimeout(enhanceProducts,20);
-  };
-  const originalRefresh=window.refreshAll;
-  window.refreshAll=async function(){const r=await originalRefresh.apply(this,arguments);refreshInsights();return r};
+  function addInsights(){const d=document.getElementById('dashboardTab');if(!d||document.getElementById('sellerInsights'))return;const box=document.createElement('div');box.id='sellerInsights';box.className='seller-insight';box.innerHTML='<div class="insight"><b id="activeListingCount">0</b><small>Active listings</small></div><div class="insight"><b id="lowStockCount">0</b><small>Low-stock products</small></div><div class="insight"><b id="listingQualityAvg">0%</b><small>Average listing quality</small></div>';const stats=d.querySelector('.stats');if(stats&&stats.parentNode)stats.parentNode.insertBefore(box,stats)}
+  function refreshInsights(){const ps=window.currentProducts||[];let active=0,low=0,total=0;ps.forEach(p=>{const s=Number(p.stock||0);if(s>0)active++;if(s>0&&s<=5)low++;total+=quality(p)});document.getElementById('activeListingCount')?.replaceChildren(String(active));document.getElementById('lowStockCount')?.replaceChildren(String(low));document.getElementById('listingQualityAvg')?.replaceChildren(ps.length?Math.round(total/ps.length)+'%':'0%')}
+  const originalRender=window.renderProducts;if(typeof originalRender==='function')window.renderProducts=function(){originalRender.apply(this,arguments);enhanceProducts();setTimeout(()=>{filterListings();refreshInsights()},0)};
+  const originalShowTab=window.showTab;if(typeof originalShowTab==='function')window.showTab=function(tab){originalShowTab.apply(this,arguments);if(tab==='products')setTimeout(enhanceProducts,20)};
+  const originalRefresh=window.refreshAll;if(typeof originalRefresh==='function')window.refreshAll=async function(){const r=await originalRefresh.apply(this,arguments);refreshInsights();return r};
   document.addEventListener('DOMContentLoaded',()=>setTimeout(()=>{enhanceProducts();addInsights()},300));
 })();
 </script>
 '''
               s = s.replace('</body>', js + '\n</body>', 1)
-
           p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Verify seller theme before commit
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          s = Path('seller.html').read_text(encoding='utf-8')
+          required = [
+            'SHRIVI SELLER PREMIUM THEME V2',
+            'SHRIVI SELLER LISTING TOOLS V2',
+            'sellerListingToolbar',
+            'productsGrid',
+            'dashboardTab',
+          ]
+          missing = [x for x in required if x not in s]
+          if missing:
+              raise SystemExit('Verification failed; missing: ' + ', '.join(missing))
+          if '</style>' not in s or '</body>' not in s:
+              raise SystemExit('Verification failed; seller.html structure is incomplete')
+          if s.count('SHRIVI SELLER PREMIUM THEME V2') != 1:
+              raise SystemExit('Verification failed; duplicate theme marker')
+          if s.count('SHRIVI SELLER LISTING TOOLS V2') != 1:
+              raise SystemExit('Verification failed; duplicate listing marker')
+          print('SELLER THEME VERIFICATION: PASS')
+          print('Required markers: PASS')
+          print('HTML structure markers: PASS')
+          print('Duplicate-marker check: PASS')
           PY
 
       - name: Commit seller upgrade
@@ -191,4 +129,4 @@ input:focus,textarea:focus,select:focus{border-color:var(--seller-blue);box-shad
             exit 0
           fi
           git commit -m "Upgrade seller listing tools [seller-theme]"
-          git push
+          git push origin "HEAD:${GITHUB_REF_NAME}"
