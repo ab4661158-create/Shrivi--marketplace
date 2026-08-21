@@ -7,6 +7,7 @@ on:
       - 'capacitor.config.ts'
       - 'resources/**'
       - 'manifest.json'
+      - 'package.json'
       - '.github/workflows/build-android-final.yml'
   workflow_dispatch:
 
@@ -20,19 +21,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Do not enable Gradle caching here: the Android project is generated
-      # later by Capacitor, so setup-java cannot find Gradle files at this point.
+      # The Android project is generated later, so do not use Gradle caching here.
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
+      # This repository currently has no package-lock.json/yarn.lock, so npm cache
+      # in setup-node cannot be used. npm itself will still cache normally.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
           node-version: '20'
-          cache: npm
+
+      - name: Verify Node and npm
+        run: |
+          node --version
+          npm --version
 
       - name: Install dependencies
         run: npm install
