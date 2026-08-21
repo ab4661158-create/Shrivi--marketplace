@@ -133,3 +133,5 @@ jobs:
           name: SHRIVI-debug-apk-v6
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+# V6 release build trigger: keep the existing verified Android pipeline unchanged.
