@@ -1,38 +1,24 @@
-const CACHE_NAME = "shrivi-v1";
+const CACHE_NAME = "shrivi-v2";
 
 const APP_FILES = [
   "/shop",
-  "/manifest.json"
+  "/manifest.json",
+  "/shrivi-logo.svg?v=3"
 ];
 
 self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(APP_FILES);
-    })
-  );
-
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
   self.skipWaiting();
 });
 
 self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(
-        keys
-          .filter(key => key !== CACHE_NAME)
-          .map(key => caches.delete(key))
-      )
-    )
+    caches.keys().then(keys => Promise.all(
+      keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+    )).then(() => self.clients.claim())
   );
-
-  self.clients.claim();
 });
 
 self.addEventListener("fetch", event => {
-  event.respondWith(
-    fetch(event.request).catch(() =>
-      caches.match(event.request)
-    )
-  );
+  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
 });
