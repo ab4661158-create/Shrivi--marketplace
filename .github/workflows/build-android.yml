@@ -34,14 +34,39 @@ jobs:
       - name: Create final SHRIVI 1024x1024 app icon
         run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
 
-      - name: Generate SHRIVI Android icon assets
-        run: npx capacitor-assets generate --android
-
       - name: Generate Android project
         run: npx cap add android
 
+      - name: Force SHRIVI launcher icons into Android project
+        run: |
+          node <<'NODE'
+          const sharp = require('sharp');
+          const fs = require('fs');
+          const path = require('path');
+          const src = 'resources/icon-source.svg';
+          const base = 'android/app/src/main/res';
+          const sizes = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
+          (async () => {
+            for (const [density, size] of Object.entries(sizes)) {
+              const dir = path.join(base, `mipmap-${density}`);
+              fs.mkdirSync(dir, { recursive: true });
+              await sharp(src).resize(size, size).png().toFile(path.join(dir, 'ic_launcher.png'));
+              await sharp(src).resize(size, size).png().toFile(path.join(dir, 'ic_launcher_round.png'));
+            }
+            fs.rmSync(path.join(base, 'mipmap-anydpi-v26'), { recursive: true, force: true });
+            console.log('Forced SHRIVI PNG launcher icons and removed old adaptive icon overrides.');
+          })().catch(err => { console.error(err); process.exit(1); });
+          NODE
+
       - name: Sync Capacitor
         run: npx cap sync android
+
+      - name: Verify launcher icon assets
+        run: |
+          test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+          test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+          if find android/app/src/main/res/mipmap-anydpi-v26 -type f 2>/dev/null | grep -q .; then exit 1; fi
+          echo 'SHRIVI launcher icon assets verified.'
 
       - name: Build debug APK
         working-directory: android
