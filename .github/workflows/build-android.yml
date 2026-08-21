@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'capacitor.config.ts'
+      - 'resources/**'
       - 'www/**'
       - '.github/workflows/build-android.yml'
 
@@ -27,8 +28,11 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Install Capacitor and TypeScript
-        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android typescript
+      - name: Install Capacitor, Assets and TypeScript
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets typescript
+
+      - name: Generate SHRIVI Android icon assets
+        run: npx capacitor-assets generate --android
 
       - name: Generate Android project
         run: npx cap add android
