@@ -2,7 +2,7 @@ name: Fix Seller Image Upload
 
 on:
   push:
-    branches: [main]
+    branches: [safe-seller-image-fix]
   workflow_dispatch:
 
 permissions:
@@ -16,12 +16,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Patch seller image upload V4
+      - name: Patch seller image selection and upload V4
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('seller.html')
           s = p.read_text(encoding='utf-8')
+          old = '<input\nid="productImageFiles"\nclass="image-upload-input"\ntype="file"\naccept="image/jpeg,image/png,image/webp,image/gif"\nmultiple\n>'
+          new = '<input\nid="productImageFiles"\nclass="image-upload-input"\ntype="file"\naccept="image/jpeg,image/png,image/webp,image/gif"\nmultiple\nonchange="handleMultipleImageSelect(event)"\n>'
+          if old in s and 'onchange="handleMultipleImageSelect(event)"' not in s:
+              s = s.replace(old, new, 1)
           marker = '/* SHRIVI SELLER IMAGE UPLOAD FIX V4 */'
           if marker not in s:
               js = r'''
@@ -89,7 +93,7 @@ jobs:
 </script>
 '''
               s = s.replace('</body>', js + '\n</body>', 1)
-              p.write_text(s, encoding='utf-8')
+          p.write_text(s, encoding='utf-8')
           PY
 
       - name: Commit seller image fix
@@ -101,7 +105,5 @@ jobs:
             echo "No seller image changes needed"
             exit 0
           fi
-          git commit -m "Fix seller 1-8 image upload and save [seller-image-fix]"
+          git commit -m "Fix seller 1-8 image selection and upload [seller-image-fix]"
           git push
-
-# V4 uses the actual FormData sent by seller.html, so it does not depend on lexical window variables.
