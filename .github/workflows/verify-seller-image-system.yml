@@ -1,0 +1,27 @@
+name: Verify Seller Image System
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'seller.html'
+      - 'seller-canonical-api.js'
+      - 'seller-image-system-verification.js'
+      - 'seller-save-repair.js'
+      - 'seller-images-upgrade.js'
+      - 'seller-gallery-api-v2.js'
+      - 'seller-gallery-runtime-fix.js'
+      - 'shrivi-production-start.js'
+      - 'feature-proxy.js'
+      - 'scripts/verify-seller-image-system.js'
+      - '.github/workflows/verify-seller-image-system.yml'
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Verify canonical seller image flow
+        run: node scripts/verify-seller-image-system.js
