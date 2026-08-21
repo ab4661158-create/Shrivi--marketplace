@@ -8,6 +8,14 @@ const config: CapacitorConfig = {
     url: 'https://shrivi-marketplace.onrender.com/shop',
     cleartext: false,
     androidScheme: 'https'
+  },
+  plugins: {
+    SplashScreen: {
+      launchAutoHide: true,
+      launchShowDuration: 1200,
+      backgroundColor: '#FFFFFF',
+      showSpinner: false
+    }
   }
 };
 
