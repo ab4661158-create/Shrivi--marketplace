@@ -29,7 +29,7 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Install Capacitor, icon tooling and TypeScript
-        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/assets typescript sharp
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/splash-screen @capacitor/assets typescript sharp
 
       - name: Create final SHRIVI 1024x1024 app icon
         run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
@@ -58,7 +58,7 @@ jobs:
           })().catch(err => { console.error(err); process.exit(1); });
           NODE
 
-      - name: Sync Capacitor
+      - name: Sync Capacitor and native splash screen
         run: npx cap sync android
 
       - name: Verify launcher icon assets
@@ -67,6 +67,12 @@ jobs:
           test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
           if find android/app/src/main/res/mipmap-anydpi-v26 -type f 2>/dev/null | grep -q .; then exit 1; fi
           echo 'SHRIVI launcher icon assets verified.'
+
+      - name: Verify Capacitor SplashScreen plugin
+        run: |
+          test -d node_modules/@capacitor/splash-screen
+          grep -q 'SplashScreen' capacitor.config.ts
+          echo 'SHRIVI native splash screen configured.'
 
       - name: Build debug APK
         working-directory: android
