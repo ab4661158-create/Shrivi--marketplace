@@ -1,0 +1,47 @@
+name: Prepare SHRIVI iOS App
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'capacitor.config.ts'
+      - 'resources/**'
+      - 'www/**'
+      - '.github/workflows/prepare-ios.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  prepare-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Capacitor, iOS and icon tooling
+        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/ios @capacitor/assets typescript sharp
+
+      - name: Create final SHRIVI 1024x1024 app icon
+        run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
+
+      - name: Generate SHRIVI iOS icon assets
+        run: npx capacitor-assets generate --ios
+
+      - name: Generate iOS project
+        run: npx cap add ios
+
+      - name: Sync Capacitor
+        run: npx cap sync ios
+
+      - name: Upload unsigned iOS project
+        uses: actions/upload-artifact@v4
+        with:
+          name: SHRIVI-ios-project
+          path: ios
+          if-no-files-found: error
