@@ -33,91 +33,57 @@ jobs:
   const MAX_BYTES = 1200 * 1024;
   const MAX_SIDE = 1800;
   const QUALITY = 0.82;
-
   function status(text, error){
     const el = document.getElementById('imageUploadStatus');
     if(!el) return;
     el.textContent = text || '';
     el.style.color = error ? '#c40000' : '#067d62';
   }
-
   function compress(file){
     return new Promise((resolve, reject) => {
-      if(!file || !file.type || !file.type.startsWith('image/')){
-        reject(new Error('Only image files are allowed.'));
-        return;
-      }
-      if(file.size <= MAX_BYTES && file.type === 'image/jpeg'){
-        resolve(file);
-        return;
-      }
+      if(!file || !file.type || !file.type.startsWith('image/')) return reject(new Error('Only image files are allowed.'));
+      if(file.size <= MAX_BYTES && file.type === 'image/jpeg') return resolve(file);
       const url = URL.createObjectURL(file);
       const img = new Image();
       img.onload = () => {
         try{
-          let w = img.naturalWidth || img.width;
-          let h = img.naturalHeight || img.height;
+          let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
           const scale = Math.min(1, MAX_SIDE / Math.max(w, h));
-          w = Math.max(1, Math.round(w * scale));
-          h = Math.max(1, Math.round(h * scale));
-          const canvas = document.createElement('canvas');
-          canvas.width = w;
-          canvas.height = h;
+          w = Math.max(1, Math.round(w * scale)); h = Math.max(1, Math.round(h * scale));
+          const canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
           const ctx = canvas.getContext('2d', {alpha:false});
           if(!ctx) throw new Error('Browser image processor unavailable.');
           ctx.drawImage(img, 0, 0, w, h);
           canvas.toBlob(blob => {
             URL.revokeObjectURL(url);
-            if(!blob){ reject(new Error('Image compression failed.')); return; }
+            if(!blob) return reject(new Error('Image compression failed.'));
             resolve(new File([blob], (file.name || 'product-image').replace(/\.[^.]+$/, '') + '.jpg', {type:'image/jpeg', lastModified:Date.now()}));
           }, 'image/jpeg', QUALITY);
-        }catch(e){
-          URL.revokeObjectURL(url);
-          reject(e);
-        }
+        }catch(e){ URL.revokeObjectURL(url); reject(e); }
       };
       img.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Could not read selected image.')); };
       img.src = url;
     });
   }
-
   const originalFetch = window.fetch.bind(window);
   window.fetch = async function(input, init){
     const url = typeof input === 'string' ? input : (input && input.url) || '';
-    if(!String(url).includes('/api/seller/upload/images') || !init || !(init.body instanceof FormData)){
-      return originalFetch(input, init);
-    }
-
+    if(!String(url).includes('/api/seller/upload/images') || !init || !(init.body instanceof FormData)) return originalFetch(input, init);
     const source = init.body;
     const files = source.getAll('images').filter(v => v instanceof File).slice(0, MAX_IMAGES);
     if(!files.length) return originalFetch(input, init);
-
     try{
       status('Preparing ' + files.length + ' photo' + (files.length > 1 ? 's' : '') + '...');
       const prepared = [];
-      for(let i = 0; i < files.length; i++){
-        status('Preparing photo ' + (i + 1) + ' of ' + files.length + '...');
-        prepared.push(await compress(files[i]));
-      }
-
+      for(let i=0;i<files.length;i++){ status('Preparing photo ' + (i+1) + ' of ' + files.length + '...'); prepared.push(await compress(files[i])); }
       const body = new FormData();
-      for(const [key, value] of source.entries()){
-        if(key !== 'images') body.append(key, value);
-      }
+      for(const [key, value] of source.entries()) if(key !== 'images') body.append(key, value);
       prepared.forEach(file => body.append('images', file, file.name));
-
       const response = await originalFetch(input, {...init, body});
-      if(!response.ok){
-        let detail = '';
-        try{ detail = (await response.clone().json()).error || ''; }catch(_e){}
-        throw new Error(detail || 'Image upload failed (' + response.status + ').');
-      }
+      if(!response.ok){ let detail=''; try{ detail=(await response.clone().json()).error||''; }catch(_e){} throw new Error(detail || 'Image upload failed ('+response.status+').'); }
       status('Photos uploaded successfully.');
       return response;
-    }catch(e){
-      status(e.message || 'Image upload failed. Please try again.', true);
-      throw e;
-    }
+    }catch(e){ status(e.message || 'Image upload failed. Please try again.', true); throw e; }
   };
 })();
 </script>
@@ -137,3 +103,5 @@ jobs:
           fi
           git commit -m "Fix seller 1-8 image upload and save [seller-image-fix]"
           git push
+
+# V4 uses the actual FormData sent by seller.html, so it does not depend on lexical window variables.
