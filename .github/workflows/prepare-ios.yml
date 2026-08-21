@@ -30,11 +30,27 @@ jobs:
       - name: Create final SHRIVI 1024x1024 app icon
         run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
 
-      - name: Generate SHRIVI iOS icon assets
-        run: npx capacitor-assets generate --ios
+      - name: Prepare JSON Capacitor config for macOS runner
+        run: |
+          mv capacitor.config.ts capacitor.config.ts.bak
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.shrivi.marketplace",
+            "appName": "SHRIVI",
+            "webDir": "www",
+            "server": {
+              "url": "https://shrivi-marketplace.onrender.com/shop",
+              "cleartext": false,
+              "androidScheme": "https"
+            }
+          }
+          EOF
 
       - name: Generate iOS project
         run: npx cap add ios
+
+      - name: Generate SHRIVI iOS icon assets
+        run: npx capacitor-assets generate --ios
 
       - name: Sync Capacitor
         run: npx cap sync ios
