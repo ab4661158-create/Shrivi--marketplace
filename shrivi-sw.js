@@ -1,5 +1,5 @@
-const CACHE_NAME = 'shrivi-app-v1';
-const APP_SHELL = ['/shop', '/manifest.json'];
+const CACHE_NAME = 'shrivi-app-v2';
+const APP_SHELL = ['/shop', '/manifest.json', '/shrivi-logo.svg?v=3'];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -20,11 +20,8 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const request = event.request;
   if (request.method !== 'GET') return;
-
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
-
-  // Never cache API calls: login, cart/order state and marketplace data must stay live.
   if (url.pathname.startsWith('/api/')) return;
 
   event.respondWith(
