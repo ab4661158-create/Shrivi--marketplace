@@ -1,9 +1,10 @@
-const CACHE_NAME = "shrivi-v5";
+const CACHE_NAME = "shrivi-v6";
 
 const APP_FILES = [
   "/shop",
   "/app",
-  "/manifest.json",
+  "/manifest.json?v=6",
+  "/resources/icon.png?v=6",
   "/shrivi-logo.svg?v=3"
 ];
 
