@@ -72,8 +72,31 @@ jobs:
 
       - name: Generate fresh native icon and splash
         run: |
-          rm -rf android/app/src/main/res/drawable* android/app/src/main/res/mipmap* android/app/src/main/res/values/colors.xml android/app/src/main/res/values/styles.xml android/app/src/main/res/values-v31/styles.xml
+          rm -rf android/app/src/main/res/drawable* android/app/src/main/res/mipmap*
+          rm -f android/app/src/main/res/values/colors.xml android/app/src/main/res/values/styles.xml android/app/src/main/res/values-v31/styles.xml
           npx capacitor-assets generate --android
+
+      - name: Restore required Capacitor Android theme resources
+        run: |
+          mkdir -p android/app/src/main/res/values
+          cat > android/app/src/main/res/values/styles.xml <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+                  <item name="android:fontFamily">sans</item>
+                  <item name="android:windowActionModeOverlay">true</item>
+                  <item name="android:colorAccent">#7B1FA2</item>
+                  <item name="android:navigationBarColor">#FFFFFF</item>
+                  <item name="android:statusBarColor">#FFFFFF</item>
+                  <item name="android:windowLightStatusBar">true</item>
+              </style>
+              <style name="AppTheme.NoActionBarLaunch" parent="AppTheme">
+                  <item name="android:windowNoTitle">true</item>
+                  <item name="android:windowBackground">@drawable/splash</item>
+              </style>
+          </resources>
+          EOF
+          test -s android/app/src/main/res/values/styles.xml
 
       - name: Sync Capacitor and SplashScreen plugin
         run: npx cap sync android
@@ -81,10 +104,11 @@ jobs:
       - name: Verify native splash branding
         run: |
           test -d android/app/src/main/res
+          test -s android/app/src/main/res/values/styles.xml
           echo '--- Native splash/icon files ---'
           find android/app/src/main/res -type f \( -name 'ic_launcher*' -o -name 'ic_launcher_foreground*' -o -name 'ic_launcher_background*' -o -name '*splash*' \) -print
-          echo '--- Splash references ---'
-          grep -R -n -E 'splash|SplashScreen|launch_screen|windowSplashScreen' android/app/src/main/res android/app/src/main/AndroidManifest.xml || true
+          echo '--- Splash/theme references ---'
+          grep -R -n -E 'splash|SplashScreen|AppTheme|windowSplashScreen' android/app/src/main/res android/app/src/main/AndroidManifest.xml || true
           test -n "$(find android/app/src/main/res -type f \( -name '*splash*' -o -name 'ic_launcher*' \) -print -quit)"
 
       - name: Configure Android version for fresh SHRIVI build
