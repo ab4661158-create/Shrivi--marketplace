@@ -2,14 +2,14 @@ name: Remove Seller UI from Customer App
 
 on:
   push:
-    branches: [main]
+    branches: [main, safe-gallery-fix-v2]
     paths:
       - 'customer.html'
       - '.github/workflows/remove-customer-sell.yml'
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   remove-seller-ui:
