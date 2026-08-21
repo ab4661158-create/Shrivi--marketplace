@@ -2,9 +2,11 @@ name: Remove Seller UI from Customer App
 
 on:
   push:
+    branches: [main]
     paths:
       - 'customer.html'
       - '.github/workflows/remove-customer-sell.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -16,47 +18,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Remove exact customer Sell button
+      - name: Verify customer page does not expose Seller navigation
         run: |
-          python - <<'PY'
-          from pathlib import Path
-
-          p = Path('customer.html')
-          s = p.read_text(encoding='utf-8')
-
-          sell_button = '''      <button
-        class="btn light"
-        onclick="location.href='/seller'"
-      >
-        Sell
-      </button>
-'''
-
-          before = s
-          s = s.replace(sell_button, '')
-
-          # Safety fallback: remove any remaining header button that links to /seller.
-          import re
-          s = re.sub(
-              r'\s*<button[^>]*onclick=["\']location\.href=["\']?/seller["\']?["\'][^>]*>[\s\S]*?</button>\s*',
-              '\n', s, flags=re.I
-          )
-
-          p.write_text(s, encoding='utf-8')
-          print('Sell button removed:', before != s)
-          if "location.href='/seller'" in s or 'location.href="/seller"' in s:
-              raise SystemExit('ERROR: customer.html still contains a /seller navigation button')
-          PY
-
-      - name: Verify customer page has no Sell navigation
-        run: |
-          ! grep -nE "location\.href=['\"]?/seller|href=['\"]/seller" customer.html
-
-      - name: Commit customer app update
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add customer.html
-          git diff --cached --quiet && exit 0
-          git commit -m 'Remove Sell option from customer app [skip ci]'
-          git push
+          test -f customer.html
+          if grep -nE "location\.href=['\"]?/seller|href=['\"]/seller" customer.html; then
+            echo "Customer page still exposes Seller navigation"
+            exit 1
+          fi
+          echo "Customer Seller navigation verified absent"
