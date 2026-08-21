@@ -34,6 +34,9 @@ jobs:
       - name: Create final SHRIVI 1024x1024 app icon
         run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
 
+      - name: Create final SHRIVI splash image
+        run: node -e "require('sharp')('resources/splash-source.svg').resize(1024,1024).png().toFile('resources/splash.png').then(()=>console.log('SHRIVI splash generated'))"
+
       - name: Generate Android project
         run: npx cap add android
 
@@ -61,12 +64,20 @@ jobs:
       - name: Sync Capacitor and native splash screen
         run: npx cap sync android
 
-      - name: Verify launcher icon assets
+      - name: Install final SHRIVI native splash asset
+        run: |
+          mkdir -p android/app/src/main/res/drawable
+          cp resources/splash.png android/app/src/main/res/drawable/splash.png
+          test -s android/app/src/main/res/drawable/splash.png
+          echo 'Final SHRIVI native splash asset installed.'
+
+      - name: Verify launcher icon and splash assets
         run: |
           test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
           test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
+          test -s android/app/src/main/res/drawable/splash.png
           if find android/app/src/main/res/mipmap-anydpi-v26 -type f 2>/dev/null | grep -q .; then exit 1; fi
-          echo 'SHRIVI launcher icon assets verified.'
+          echo 'SHRIVI launcher and splash assets verified.'
 
       - name: Verify Capacitor SplashScreen plugin
         run: |
