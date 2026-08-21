@@ -21,15 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # The Android project is generated later, so do not use Gradle caching here.
+      # Android is generated later, so Gradle caching is intentionally disabled here.
       - name: Setup Java
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
-      # This repository currently has no package-lock.json/yarn.lock, so npm cache
-      # in setup-node cannot be used. npm itself will still cache normally.
       - name: Setup Node
         uses: actions/setup-node@v5
         with:
@@ -43,20 +41,35 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Capacitor Android tooling
-        run: npm install --no-save @capacitor/cli @capacitor/core @capacitor/android sharp typescript
+      - name: Install Capacitor Android and asset tooling
+        run: |
+          npm install --no-save @capacitor/cli @capacitor/core @capacitor/android @capacitor/splash-screen @capacitor/assets sharp typescript
 
-      - name: Verify SHRIVI icon and splash sources
+      - name: Verify SHRIVI source assets
         run: |
           test -s resources/icon-source.svg
           test -s resources/icon.png
           test -s resources/splash-source.svg
+          echo "SHRIVI icon and splash source assets found."
 
       - name: Generate Android project
         run: |
           rm -rf android
           npx cap add android
+
+      - name: Generate final Android icon and splash assets
+        run: |
+          npx capacitor-assets generate --android
+
+      - name: Sync Capacitor with generated native assets
+        run: |
           npx cap sync android
+
+      - name: Verify final native icon and splash assets
+        run: |
+          test -d android/app/src/main/res
+          find android/app/src/main/res -type f \( -name '*icon*' -o -name '*splash*' \) -print | sort
+          test -n "$(find android/app/src/main/res -type f \( -name '*icon*' -o -name '*splash*' \) -print -quit)"
 
       - name: Verify generated Android project
         run: |
