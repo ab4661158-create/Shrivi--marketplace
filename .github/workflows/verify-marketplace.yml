@@ -1,0 +1,77 @@
+name: Verify SHRIVI Marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Verify required marketplace files
+        run: |
+          test -s server.js
+          test -s shrivi-production-start.js
+          test -s seller-canonical-api.js
+          test -s seller-image-system-verification.js
+          test -s customer.html
+          test -s capacitor.config.ts
+          test -s .github/workflows/build-android-final.yml
+
+      - name: Verify JavaScript syntax
+        run: |
+          node --check server.js
+          node --check shrivi-production-start.js
+          node --check seller-canonical-api.js
+          node --check seller-image-system-verification.js
+
+      - name: Verify production startup wiring
+        run: |
+          grep -q "shrivi-db-upgrades.js" shrivi-production-start.js
+          grep -q "seller-canonical-api.js" shrivi-production-start.js
+          grep -q "seller-image-system-verification.js" shrivi-production-start.js
+          grep -q 'launchAutoHide: false' capacitor.config.ts
+          grep -q 'shrivi-marketplace.onrender.com/shop' capacitor.config.ts
+
+      - name: Verify customer startup splash handoff
+        run: |
+          grep -q 'SplashScreen' customer.html
+          grep -q 'hideShriviSplash' customer.html
+          grep -q 'window.addEventListener.*load' customer.html
+
+      - name: Verify canonical seller image flow
+        run: |
+          grep -q '/api/seller/upload/image' seller-canonical-api.js
+          grep -q '/api/seller/upload/images' seller-canonical-api.js
+          grep -q 'product_images' seller-canonical-api.js
+          grep -q 'CLOUDINARY_CLOUD_NAME' seller-canonical-api.js
+          grep -q 'image-system-health' seller-image-system-verification.js
+
+      - name: Verify Android build workflow contains startup safeguards
+        run: |
+          grep -q 'windowSplashScreenBackground' .github/workflows/build-android-final.yml
+          grep -q 'windowSplashScreenAnimatedIcon' .github/workflows/build-android-final.yml
+          grep -q 'assembleDebug' .github/workflows/build-android-final.yml
+          grep -q 'test -s android/app/build/outputs/apk/debug/app-debug.apk' .github/workflows/build-android-final.yml
+
+      - name: Verify live marketplace
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 --max-time 30 https://shrivi-marketplace.onrender.com/shop | grep -q 'SHRIVI'
+          curl --fail --silent --show-error --retry 5 --retry-delay 5 --max-time 30 https://shrivi-marketplace.onrender.com/api/products | grep -q '\['

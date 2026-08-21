@@ -11,12 +11,10 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      // Keep the branded native splash visible while the remote SHRIVI shop loads.
-      // Auto-hide is intentionally enabled with a safe delay so the WebView is not
-      // exposed as a blank white screen during startup.
-      launchAutoHide: true,
-      launchShowDuration: 3000,
-      launchFadeOutDuration: 220,
+      // Keep the native splash until the remote SHRIVI shop has actually loaded.
+      // The customer page calls SplashScreen.hide() on window load, preventing the
+      // native splash from being replaced by a black/white WebView transition.
+      launchAutoHide: false,
       backgroundColor: '#FFFFFF',
       androidScaleType: 'CENTER',
       showSpinner: false
