@@ -12,10 +12,10 @@
   "description": "Shrivi Marketplace — shop products from trusted sellers.",
   "icons": [
     {
-      "src": "/shrivi-logo.svg",
+      "src": "/shrivi-logo.svg?v=3",
       "sizes": "512x512",
       "type": "image/svg+xml",
-      "purpose": "any"
+      "purpose": "any maskable"
     }
   ]
 }
