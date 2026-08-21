@@ -13,11 +13,14 @@ if (!sessionSecret || sessionSecret.length < 32) {
   process.exit(1);
 }
 
+// seller-images-upgrade.js is the canonical Seller 1-8 image implementation.
+// Do not load the older seller-save-repair layer as well: both register the
+// same /api/seller/upload/images endpoint and duplicate route handlers can
+// make routing order-dependent.
 const optional = [
   'shrivi-db-upgrades.js',
   'image-upload-bootstrap.js',
   'seller-images-upgrade.js',
-  'seller-save-repair.js',
   'seller-center-api-fix.js'
 ];
 
