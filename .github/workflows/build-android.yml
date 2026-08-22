@@ -1,97 +1,16 @@
-name: Build SHRIVI Android APK
+# ARCHIVED: the authoritative Android pipeline is build-android-final.yml.
+# This legacy workflow is manual-only to prevent duplicate/conflicting APK builds.
+name: Build SHRIVI Android APK (Legacy - Manual Only)
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'capacitor.config.ts'
-      - 'resources/**'
-      - 'www/**'
-      - '.github/workflows/build-android.yml'
 
 permissions:
   contents: read
 
 jobs:
-  build-android:
+  notice:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Capacitor, icon tooling and TypeScript
-        run: npm install --no-save @capacitor/core @capacitor/cli @capacitor/android @capacitor/splash-screen @capacitor/assets typescript sharp
-
-      - name: Create final SHRIVI 1024x1024 app icon
-        run: node -e "require('sharp')('resources/icon-source.svg').resize(1024,1024).png().toFile('resources/icon.png').then(()=>console.log('SHRIVI icon generated'))"
-
-      - name: Create final SHRIVI splash image
-        run: node -e "require('sharp')('resources/splash-source.svg').resize(1024,1024).png().toFile('resources/splash.png').then(()=>console.log('SHRIVI splash generated'))"
-
-      - name: Generate Android project
-        run: npx cap add android
-
-      - name: Force SHRIVI launcher icons into Android project
-        run: |
-          node <<'NODE'
-          const sharp = require('sharp');
-          const fs = require('fs');
-          const path = require('path');
-          const src = 'resources/icon-source.svg';
-          const base = 'android/app/src/main/res';
-          const sizes = { mdpi: 48, hdpi: 72, xhdpi: 96, xxhdpi: 144, xxxhdpi: 192 };
-          (async () => {
-            for (const [density, size] of Object.entries(sizes)) {
-              const dir = path.join(base, `mipmap-${density}`);
-              fs.mkdirSync(dir, { recursive: true });
-              await sharp(src).resize(size, size).png().toFile(path.join(dir, 'ic_launcher.png'));
-              await sharp(src).resize(size, size).png().toFile(path.join(dir, 'ic_launcher_round.png'));
-            }
-            fs.rmSync(path.join(base, 'mipmap-anydpi-v26'), { recursive: true, force: true });
-            console.log('Forced SHRIVI PNG launcher icons and removed old adaptive icon overrides.');
-          })().catch(err => { console.error(err); process.exit(1); });
-          NODE
-
-      - name: Sync Capacitor and native splash screen
-        run: npx cap sync android
-
-      - name: Install final SHRIVI native splash asset
-        run: |
-          mkdir -p android/app/src/main/res/drawable
-          cp resources/splash.png android/app/src/main/res/drawable/splash.png
-          test -s android/app/src/main/res/drawable/splash.png
-          echo 'Final SHRIVI native splash asset installed.'
-
-      - name: Verify launcher icon and splash assets
-        run: |
-          test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-          test -s android/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.png
-          test -s android/app/src/main/res/drawable/splash.png
-          if find android/app/src/main/res/mipmap-anydpi-v26 -type f 2>/dev/null | grep -q .; then exit 1; fi
-          echo 'SHRIVI launcher and splash assets verified.'
-
-      - name: Verify Capacitor SplashScreen plugin
-        run: |
-          test -d node_modules/@capacitor/splash-screen
-          grep -q 'SplashScreen' capacitor.config.ts
-          echo 'SHRIVI native splash screen configured.'
-
-      - name: Build debug APK
-        working-directory: android
-        run: ./gradlew assembleDebug --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: SHRIVI-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+      - name: Explain archived pipeline
+        run: echo 'Legacy Android workflow disabled. Use build-android-final.yml.'
