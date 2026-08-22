@@ -47,8 +47,8 @@ jobs:
           grep -q "shrivi-db-upgrades.js" shrivi-production-start.js
           grep -q "seller-canonical-api.js" shrivi-production-start.js
           grep -q "seller-image-system-verification.js" shrivi-production-start.js
-          grep -q 'launchAutoHide: false' capacitor.config.ts
-          grep -q 'shrivi-marketplace.onrender.com/shop' capacitor.config.ts
+          grep -q 'launchAutoHide: true' capacitor.config.ts
+          grep -q 'shrivi-marketplace.onrender.com/app' capacitor.config.ts
 
       - name: Verify customer startup splash handoff
         run: |
