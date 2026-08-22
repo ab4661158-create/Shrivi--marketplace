@@ -1,15 +1,13 @@
 /* SHRIVI ROBUST PRODUCTION START
-   Canonical startup: database upgrades + one seller API + automatic verification.
+   Canonical startup: security hardening → database upgrades → one seller API 
+   → automatic verification → marketplace server.
    Legacy image repair layers are intentionally not loaded here so multiple
    competing upload routes cannot override the canonical seller image flow.
 */
 const path = require('path');
 
-const sessionSecret = process.env.SESSION_SECRET;
-if (!sessionSecret || sessionSecret.length < 32) {
-  console.error('[Shrivi] FATAL: SESSION_SECRET must be set and at least 32 characters long.');
-  process.exit(1);
-}
+// First: Security hardening (validates environment before anything else)
+require(path.join(__dirname, 'shrivi-security-hardening.js'));
 
 const required = [
   'shrivi-db-upgrades.js',
